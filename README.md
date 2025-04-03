@@ -38,19 +38,7 @@
   <img alt="Static Badge" src="https://img.shields.io/badge/Apache-Kafka-red"/>
   <img alt="Static Badge" src="https://img.shields.io/badge/ELK-Elastic--Search-green"/>
 </p>
- 
 
-## Connect with me:
-
-<p align="left">
-  <a href="https://www.linkedin.com/in/mmd-rehan/" target="_new"> 
-    <img alt="Static Badge" src="https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"/> 
-  </a>
-  
-  <a href="https://mr-muhammad-rehan.github.io/" target="_new"> 
-    <img alt="Static Badge" src="https://img.shields.io/badge/my_personal_web_site-1DA1F2?style=for-the-badge&logo=ko-fi&logoColor=white"/>
-  </a>
-</p>
 
 ## 🐍 Snake
 
