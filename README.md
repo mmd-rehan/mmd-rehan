@@ -7,7 +7,7 @@
 
   <!-- Quick Links & Status Badges -->
   <a href="https://linkedin.com/in/mmd-rehan"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
-  <a href="mailto:mrmuhammadrehan65@gmail.com"><img src="https://img.shields.io/badge/Email-mrmuhammadrehan65%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" /></a>
+  <a href="mailto:hi@mmd-rehan.com"><img src="https://img.shields.io/badge/Email-hi%40mmd--rehan.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" /></a>
   <a href="https://medium.com/@mrrehan"><img src="https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white" alt="Medium" /></a>
   <a href="https://fixcors.com"><img src="https://img.shields.io/badge/MicroSaaS-FixCors.com-38BDF8?style=for-the-badge&logo=cloudflare&logoColor=white" alt="FixCors" /></a>
   <a href="https://noboxtv.com"><img src="https://img.shields.io/badge/Streaming-NoBoxTV.com-34D399?style=for-the-badge&logo=youtube&logoColor=white" alt="NoBoxTV" /></a>
@@ -179,7 +179,7 @@ I write about cloud security, infrastructure hardening, and high-scale DevOps on
   ### 📬 Connect & Collaborate
 
   **Location:** Dubai, United Arab Emirates  
-  **Email:** [mrmuhammadrehan65@gmail.com](mailto:mrmuhammadrehan65@gmail.com)  
+  **Email:** [hi@mmd-rehan.com](mailto:hi@mmd-rehan.com)  
   **LinkedIn:** [linkedin.com/in/mmd-rehan](https://linkedin.com/in/mmd-rehan)  
   **Website:** [Particle Portrait WebGL Experience](https://github.com/mmd-rehan/website)
 
