@@ -21,7 +21,7 @@
 
 <br />
 
-## 🪐 Executive Summary
+## 🪐 About Me
 
 > **"Building reliable web and backend software across core industries."**
 
@@ -29,47 +29,7 @@ I am a **Software Engineer** based in **Dubai, UAE**, with **7+ years** of exper
 
 My experience includes building miner monitoring dashboards, developing booking flows for airlines at Amadeus, integrating **HL7 EMR standards**, and building interactive **WebGL frontend applications**.
  
-
-## ⚡ Core Industry Work
-
-<div align="center">
-  <img src="public/particle-divider.svg" alt="Particle Line Divider" width="100%" />
-</div>
-
-| Industry | Domain / Organization | Key Engineering Work & Scope | Core Tech Stack |
-| :--- | :--- | :--- | :--- |
-| **⚡ Crypto Infrastructure** | **Phoenix Group** *(Dubai)* | • Built real-time monitoring dashboard for mining hardware.<br />• Reduced miner update downtime and maintained stable operations.<br />• Worked with **AWS Kubernetes clusters** & automated CI/CD cycles.<br />• Integrated **RabbitMQ & Kafka** event streams. | Kubernetes, Docker, AWS Lambda, Kafka, RabbitMQ, React, Strapi, React Native |
-| **✈️ Aviation Systems** | **Amadeus** *(Dubai)* | • Built booking & servicing pipelines for airline clients including **Saudia, Etihad Airways, Royal Air Morocco, & Kuwait Airways**.<br />• Handled high-concurrency booking workflows. | Angular, Spring Boot, Java, TypeScript, Azure DevOps, Microservices |
-| **🩺 Healthcare Interoperability** | **Winsoft Solutions** *(Dubai)* | • Developed the **Unified Medical File EMR** exporting patient records to **HL7 (7.2+)** standards.<br />• Contributed to monolith-to-microservices API development.<br />• Built doctor mobile apps & PBM insurance submission pipelines. | Node.js, NestJS, Angular, Flutter, .NET, PostgreSQL, MongoDB, HL7 |
-| **🚢 Global Logistics** | **Gulf Agency Company (GAC)** *(Dubai)* | • Developed front-end components for GAC's enterprise shipping platform.<br />• Built modular UI component libraries & microservices integrations.<br />• Configured CI/CD releases on Bitbucket & Azure DevOps. | React, Angular, TypeScript, Docker, Azure DevOps, Microservices |
-
----
-
-## 🛠️ Technical Ecosystem Matrix
-
-<div align="center">
-  <img src="public/particle-divider.svg" alt="Particle Line Divider" width="100%" />
-</div>
-
-```
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│  FRONTEND & MOBILE                                                               │
-│  React.js · Angular (NgRx/Material) · TypeScript · HTML5/SCSS · Tailwind CSS     │
-│  React Native · Flutter · Three.js / WebGL (@react-three/fiber)                  │
-├──────────────────────────────────────────────────────────────────────────────────┤
-│  BACKEND & MICROSERVICES                                                         │
-│  Node.js (NestJS, Express) · .NET Core / MVC · Spring Boot · C++ · C#            │
-│  RESTful APIs · GraphQL · Microservices Architecture · HL7 Standard              │
-├──────────────────────────────────────────────────────────────────────────────────┤
-│  DEVOPS, CLOUD & MESSAGING                                                       │
-│  Kubernetes · Docker · AWS (EC2, Lambda) · Azure DevOps · Nginx                  │
-│  RabbitMQ · Apache Kafka · MediaMTX · CI/CD Pipelines · Git / Bitbucket          │
-├──────────────────────────────────────────────────────────────────────────────────┤
-│  DATA & ANALYTICS                                                                │
-│  PostgreSQL · MongoDB (2dsphere Geospatial) · MySQL · SQL Server · Tableau       │
-└──────────────────────────────────────────────────────────────────────────────────┘
-```
-
+  
 ---
 
 ## 🏆 Honors, Awards & Certifications
@@ -79,17 +39,6 @@ My experience includes building miner monitoring dashboards, developing booking 
 - 📜 **MongoDB Certified Professional** - MongoDB CRUD Operations & Aggregation Framework in Node.js (2025).
 - 📜 **Angular Master Certification** - Deep dive in state management, NgRx Store & Effects (2025).
 - 🏆 **Certificate of Excellence** - On-Spot Programming, Visio Spark (2015).
-
----
-
-## 📝 Technical Writing & Community
-
-I write about cloud security, infrastructure hardening, and high-scale DevOps on **[Medium (@mrrehan)](https://medium.com/@mrrehan)**:
-
-- 🛡️ *Server Hardening & Security Testing with DirBuster*
-- ⚡ *Zero-Downtime Kubernetes Deployment Pipelines*
-- 🌐 *DNS Configuration & CDN Architecture for HLS Media Streaming*
-- 🤖 *AI-Assisted Workflows & LLM Integration Patterns*
 
 ---
 
@@ -124,5 +73,5 @@ I write about cloud security, infrastructure hardening, and high-scale DevOps on
 
   <br />
 
-  <sub>Crafted with passion, particles, and precision by <strong>Muhammad Rehan</strong>.</sub>
+  <sub>Build with passion, particles, and precision by <strong>Muhammad Rehan</strong>.</sub>
 </div>
