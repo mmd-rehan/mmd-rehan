@@ -3,21 +3,24 @@ import { mulberry32 } from '../../lib/rng'
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
 
 /**
- * Portrait target: sample the headshot into a COLORED point cloud.
+ * Portrait target: sample the headshot into a COLOURED point cloud that sits on
+ * a real 3D head, not a flat billboard.
  *
- * The source photo has a clean white background, so the subject is every
- * non-white pixel. We sample those pixels roughly uniformly by area (so the
- * whole face, beard, hair and shirt all get proportional coverage — not just
- * the dark bits), and carry each particle's real RGB color so the cloud reads
- * as a recognizable, full-color likeness rather than grey dust. A gentle
- * left-right bulge fakes facial volume so it has depth when it rotates.
+ * The source illustration has a clean white background, so the subject is every
+ * non-white pixel. We sample those pixels roughly uniformly by area, carry each
+ * particle's RGB, and then *project* the 2D sample onto a head model — an
+ * ellipsoid for the skull/face/beard and a shallow forward-curved slab for the
+ * shoulders — so the cloud has genuine depth and reads as a bust when the group
+ * pitches and yaws on scroll (mirroring the reference's "head flips back").
  *
- * Returns both positions and per-particle colors. Runs at load time in the
- * browser. Falls back to a synthetic head if the image can't be loaded.
+ * Runs at load time in the browser. Falls back to a synthetic head if the image
+ * can't be loaded.
  */
 
-const IMAGE_SRC = '/portrait.jpg'
-const SAMPLE_W = 300 // downscaled sampling resolution (detail vs. speed)
+// The real photo (not the AI-illustrated one) — real skin/beard detail samples
+// far better than a smoothed illustration, which read as "plastic".
+const IMAGE_SRC = '/portrait-real.jpg'
+const SAMPLE_W = 340 // downscaled sampling resolution (detail vs. speed)
 
 export interface PortraitBuffers {
   positions: Float32Array
@@ -46,6 +49,15 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
+interface Sample {
+  x: number
+  y: number
+  r: number
+  g: number
+  b: number
+  w: number
+}
+
 function sampleFromImage(
   img: HTMLImageElement,
   count: number,
@@ -63,16 +75,12 @@ function sampleFromImage(
   ctx.drawImage(img, 0, 0, w, h)
   const data = ctx.getImageData(0, 0, w, h).data
 
-  // Collect subject pixels: everything that isn't the near-white, near-neutral
-  // background. (A bright-but-blue shirt pixel is kept; a bright grey/white
-  // background pixel is dropped.)
-  const xs: number[] = []
-  const ys: number[] = []
-  const rs: number[] = []
-  const gs: number[] = []
-  const bs: number[] = []
-  const weights: number[] = []
-  let totalWeight = 0
+  // Collect subject pixels: everything that isn't the near-white background.
+  const samples: Sample[] = []
+  let minX = w
+  let maxX = 0
+  let minY = h
+  let maxY = 0
 
   for (let py = 0; py < h; py++) {
     for (let px = 0; px < w; px++) {
@@ -80,47 +88,63 @@ function sampleFromImage(
       const r = data[idx]
       const g = data[idx + 1]
       const b = data[idx + 2]
+      const a = data[idx + 3]
+      if (a < 8) continue
       const rn = r / 255
       const gn = g / 255
       const bn = b / 255
       const lum = 0.299 * rn + 0.587 * gn + 0.114 * bn
       const sat = Math.max(rn, gn, bn) - Math.min(rn, gn, bn)
-      // Background = bright AND colorless.
-      if (lum > 0.86 && sat < 0.06) continue
-      // Near-uniform-by-area sampling with a mild boost for darker detail
-      // (eyes, brows, beard edges) so features stay crisp.
-      const weight = 0.75 + (1 - lum) * 0.5
-      xs.push(px)
-      ys.push(py)
-      rs.push(rn)
-      gs.push(gn)
-      bs.push(bn)
-      weights.push(weight)
-      totalWeight += weight
+      // Background = bright AND colourless.
+      if (lum > 0.9 && sat < 0.05) continue
+      // Near-uniform-by-area sampling, mild boost for darker detail (eyes,
+      // brows, beard edges, hair strands) so features stay crisp. The lower
+      // third (shoulders / collar) is down-weighted so the head dominates and
+      // there's less lingering body cloud once it disperses.
+      let weight = 0.7 + (1 - lum) * 0.6
+      if (py > h * 0.66) weight *= 0.5
+      samples.push({ x: px, y: py, r: rn, g: gn, b: bn, w: weight })
+      if (px < minX) minX = px
+      if (px > maxX) maxX = px
+      if (py < minY) minY = py
+      if (py > maxY) maxY = py
     }
   }
 
-  if (xs.length === 0) throw new Error('empty silhouette')
+  if (samples.length === 0) throw new Error('empty silhouette')
 
-  const cdf = new Float32Array(weights.length)
-  let acc = 0
-  for (let i = 0; i < weights.length; i++) {
-    acc += weights[i]
-    cdf[i] = acc
+  // Weighted CDF for area sampling.
+  let totalWeight = 0
+  const cdf = new Float32Array(samples.length)
+  for (let i = 0; i < samples.length; i++) {
+    totalWeight += samples[i].w
+    cdf[i] = totalWeight
   }
 
   const rng = mulberry32(seed)
   const positions = new Float32Array(count * 3)
   const colors = new Float32Array(count * 3)
 
-  // Fit the portrait into a ~2.6-tall region, centered.
-  const scale = 2.6 / h
-  const cx = w / 2
-  const cy = h / 2
-  const halfW = w / 2
-  const halfH = h / 2
+  // --- Subject geometry in image space ---
+  const bboxW = maxX - minX || 1
+  const bboxH = maxY - minY || 1
+  // The head (skull top -> chin) is roughly the top 68% of the subject bbox;
+  // the rest is shoulders. Tuned to this specific framing.
+  const headTopY = minY
+  const chinY = minY + bboxH * 0.68
+  const headMidX = (minX + maxX) / 2
+  // Head is narrower than the shoulders; estimate its half-width from the bbox.
+  const headHalfW = bboxW * 0.34
+  const headHalfH = (chinY - headTopY) / 2
+  const headCenterY = (headTopY + chinY) / 2
+
+  // World scale: put the head at ~2.4 units tall, centred on origin.
+  const worldPerPx = 2.4 / (headHalfH * 2)
+  // Head depth (world units) — a touch shallower than its half-height.
+  const RZ = headHalfH * worldPerPx * 0.92
 
   for (let i = 0; i < count; i++) {
+    // Pick a weighted-random subject pixel.
     const target = rng() * totalWeight
     let lo = 0
     let hi = cdf.length - 1
@@ -129,31 +153,48 @@ function sampleFromImage(
       if (cdf[mid] < target) lo = mid + 1
       else hi = mid
     }
-    const jx = xs[lo] + (rng() - 0.5)
-    const jy = ys[lo] + (rng() - 0.5)
+    const s = samples[lo]
+    const jx = s.x + (rng() - 0.5)
+    const jy = s.y + (rng() - 0.5)
 
-    const x = (jx - cx) * scale
-    const y = -(jy - cy) * scale // flip: image y-down -> world y-up
+    // Image space -> centred world X/Y (Y up).
+    const wx = (jx - headMidX) * worldPerPx
+    const wy = -(jy - headCenterY) * worldPerPx
 
-    // Fake facial volume: center bulges toward the viewer, sides recede.
-    const nx = (jx - cx) / halfW // -1..1 across width
-    const ny = (jy - cy) / halfH // -1..1 across height
-    const bulge = Math.max(0, 1 - nx * nx * 0.85 - ny * ny * 0.35)
-    const z = bulge * 0.32 + (rng() - 0.5) * 0.12
+    let z: number
+    if (jy <= chinY) {
+      // HEAD: project onto the front hemisphere of an ellipsoid.
+      const nx = (jx - headMidX) / headHalfW
+      const ny = (jy - headCenterY) / headHalfH
+      const k = 1 - nx * nx * 0.9 - ny * ny * 0.55
+      const front = k > 0 ? Math.sqrt(k) : 0
+      z = front * RZ
+      // Hair / skull sides sit a touch further back; the nose/beard bulge
+      // forward slightly. Use luminance as a cheap proxy (dark = hair/beard).
+      const lum = 0.299 * s.r + 0.587 * s.g + 0.114 * s.b
+      if (lum < 0.32) z *= 0.82 // hair/beard/brows recede a little
+      z += (rng() - 0.5) * 0.06 * RZ
+    } else {
+      // SHOULDERS / COLLAR: shallow forward curve, further from the viewer than
+      // the face, tapering at the edges.
+      const shoulderSpan = (maxX - minX) / 2
+      const nx = (jx - headMidX) / shoulderSpan
+      z = (0.35 - nx * nx * 0.55) * RZ - RZ * 0.15
+      z += (rng() - 0.5) * 0.05 * RZ
+    }
 
-    positions[i * 3] = x
-    positions[i * 3 + 1] = y
+    positions[i * 3] = wx
+    positions[i * 3 + 1] = wy
     positions[i * 3 + 2] = z
 
-    // Real color, nudged: a touch more saturation + slightly deeper, so skin
-    // and the blue shirt hold their own against the cream background.
-    let cr = rs[lo]
-    let cg = gs[lo]
-    let cb = bs[lo]
+    // Real colour, gently deepened + warmed so it holds on charcoal.
+    let cr = s.r
+    let cg = s.g
+    let cb = s.b
     const l = 0.299 * cr + 0.587 * cg + 0.114 * cb
-    const satBoost = 1.28
-    cr = clamp01((l + (cr - l) * satBoost) * 0.96)
-    cg = clamp01((l + (cg - l) * satBoost) * 0.96)
+    const satBoost = 1.18
+    cr = clamp01((l + (cr - l) * satBoost) * 1.02)
+    cg = clamp01((l + (cg - l) * satBoost) * 0.99)
     cb = clamp01((l + (cb - l) * satBoost) * 0.96)
     colors[i * 3] = cr
     colors[i * 3 + 1] = cg
@@ -169,33 +210,32 @@ function fallbackHead(count: number, seed: number): PortraitBuffers {
   const positions = new Float32Array(count * 3)
   const colors = new Float32Array(count * 3)
   for (let i = 0; i < count; i++) {
-    const head = rng() < 0.55
+    const head = rng() < 0.6
     let skin = true
     if (head) {
       const theta = Math.acos(2 * rng() - 1)
       const phi = rng() * Math.PI * 2
-      const rr = 0.55 * Math.cbrt(rng())
-      positions[i * 3] = rr * Math.sin(theta) * Math.cos(phi) * 0.85
-      positions[i * 3 + 1] = 0.55 + rr * Math.cos(theta)
-      positions[i * 3 + 2] = rr * Math.sin(theta) * Math.sin(phi) * 0.7
+      const rr = 0.9 * Math.cbrt(rng())
+      positions[i * 3] = rr * Math.sin(theta) * Math.cos(phi) * 0.82
+      positions[i * 3 + 1] = 0.35 + rr * Math.cos(theta) * 1.1
+      positions[i * 3 + 2] = rr * Math.sin(theta) * Math.sin(phi) * 0.85
     } else {
       skin = false
-      const sx = (rng() - 0.5) * 1.7
-      const sy = -0.2 - rng() * 0.9
-      const taper = 1 - Math.abs(sx) * 0.3
+      const sx = (rng() - 0.5) * 2.6
+      const sy = -1.3 - rng() * 0.8
+      const taper = 1 - Math.abs(sx) * 0.28
       positions[i * 3] = sx
       positions[i * 3 + 1] = sy * taper
-      positions[i * 3 + 2] = (rng() - 0.5) * 0.5
+      positions[i * 3 + 2] = (rng() - 0.5) * 0.5 - 0.2
     }
-    // Warm skin tone for the head, light-blue shirt for the body.
     if (skin) {
-      colors[i * 3] = 0.82
-      colors[i * 3 + 1] = 0.62
-      colors[i * 3 + 2] = 0.5
+      colors[i * 3] = 0.85
+      colors[i * 3 + 1] = 0.64
+      colors[i * 3 + 2] = 0.52
     } else {
-      colors[i * 3] = 0.74
-      colors[i * 3 + 1] = 0.82
-      colors[i * 3 + 2] = 0.9
+      colors[i * 3] = 0.6
+      colors[i * 3 + 1] = 0.72
+      colors[i * 3 + 2] = 0.85
     }
   }
   return { positions, colors }

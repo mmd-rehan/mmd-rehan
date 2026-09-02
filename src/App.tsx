@@ -12,8 +12,9 @@ import { FallbackView } from './ui/FallbackView'
 import { Loader } from './ui/Loader'
 import { CHAPTERS } from './content/chapters'
 
-/** Total scroll room, in viewport heights, that the timeline is mapped across. */
-const SCROLL_VH = CHAPTERS.length * 1.6
+/** Total scroll room, in viewport heights, that the timeline is mapped across.
+ *  Slice 1: enough to scrub the flip smoothly without an endless page. */
+const SCROLL_VH = Math.max(5, CHAPTERS.length * 2.2)
 
 export default function App() {
   const [tier] = useState<DeviceTier>(() => detectDeviceTier())

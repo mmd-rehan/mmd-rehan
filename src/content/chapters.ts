@@ -5,7 +5,9 @@
  * owns a slice of that timeline. The particle field morphs between the target
  * shape of one chapter and the next as `t` crosses the boundary between them.
  *
- * Editing copy? This is the only file you need to touch.
+ * SLICE 1 (current): portrait → flip → neurons only. The domain chapters
+ * (healthcare / aviation / crypto / logistics) and the finale come next once
+ * this centrepiece moment is signed off.
  */
 
 /** The shapes the single particle buffer can take. */
@@ -19,16 +21,12 @@ export type TargetKey =
 
 export interface Chapter {
   id: string
-  /** Start of this chapter's slice of the timeline (inclusive). */
   start: number
-  /** End of this chapter's slice of the timeline (exclusive, except the last). */
   end: number
-  /** Which particle shape represents this chapter. */
   target: TargetKey
   eyebrow: string
   headline: string
   proof: string
-  /** Short label used by the right-edge index. Omit to hide from the index. */
   indexLabel?: string
 }
 
@@ -36,78 +34,24 @@ export const CHAPTERS: Chapter[] = [
   {
     id: 'intro',
     start: 0.0,
-    end: 0.1,
+    end: 0.58,
     target: 'portrait',
-    eyebrow: 'Software Engineer · Dubai',
-    headline: 'Building reliable web and backend software.',
+    eyebrow: 'Muhammad Rehan · Dubai',
+    headline: 'The same hands, every system.',
     proof:
-      'Software engineer with 7+ years of experience across healthcare, aviation, crypto infrastructure, and logistics.',
+      'Software engineer, seven years — healthcare, aviation, crypto infrastructure, logistics. Frontend to DevOps.',
     indexLabel: 'Intro',
   },
   {
-    id: 'nervous',
-    start: 0.1,
-    end: 0.26,
+    id: 'nerves',
+    start: 0.58,
+    end: 1.0001,
     target: 'nerves',
-    eyebrow: 'Background',
-    headline: 'Full-stack engineering for production systems.',
+    eyebrow: 'The craft',
+    headline: 'Every system starts as a nervous system.',
     proof:
-      'Developing responsive frontends, backend APIs, and microservices for core operations.',
-    indexLabel: 'Overview',
-  },
-  {
-    id: 'health',
-    start: 0.26,
-    end: 0.42,
-    target: 'signal',
-    eyebrow: 'Healthcare',
-    headline: 'Healthcare Systems',
-    proof:
-      'Developed the Unified Medical File EMR, supporting HL7 standards for patient record export.',
-    indexLabel: 'Health',
-  },
-  {
-    id: 'aviation',
-    start: 0.42,
-    end: 0.56,
-    target: 'flightArc',
-    eyebrow: 'Aviation',
-    headline: 'Airline Booking Platforms',
-    proof:
-      'Worked on booking and reservation flows at Amadeus for international airlines including Saudia and Etihad.',
-    indexLabel: 'Aviation',
-  },
-  {
-    id: 'crypto',
-    start: 0.56,
-    end: 0.7,
-    target: 'hashGrid',
-    eyebrow: 'Crypto Infrastructure',
-    headline: 'Mining Operations & Monitoring',
-    proof:
-      'Built miner monitoring tools from scratch to track equipment status and reduce downtime.',
-    indexLabel: 'Crypto',
-  },
-  {
-    id: 'logistics',
-    start: 0.7,
-    end: 0.85,
-    target: 'torus',
-    eyebrow: 'Logistics & Shipping',
-    headline: 'Logistics & Supply Chain Applications',
-    proof:
-      "Developing frontend components and interfaces for enterprise logistics platforms.",
-    indexLabel: 'Logistics',
-  },
-  {
-    id: 'contact',
-    start: 0.85,
-    end: 1.0001, // inclusive of t = 1
-    target: 'portrait',
-    eyebrow: "Let's build",
-    headline: 'The same hands can build yours.',
-    proof: 'Frontend · backend · mobile · DevOps - end to end.',
-    indexLabel: 'Contact',
+      'Frontend, backend, mobile, DevOps — the whole signal path, not a slice of it.',
+    indexLabel: 'The craft',
   },
 ]
 
@@ -123,10 +67,9 @@ export const CONTACT = {
 
 /** Nav items in the header pill. Each scrolls to its chapter's position. */
 export const NAV_ITEMS = [
-  { label: 'Domains', chapterId: 'health' },
-  { label: 'Work', chapterId: 'crypto' },
+  { label: 'The craft', chapterId: 'nerves' },
   { label: 'About', chapterId: 'intro' },
-  { label: 'Contact', chapterId: 'contact' },
+  { label: 'Contact', chapterId: 'nerves' },
 ] as const
 
 export interface ProjectLink {
@@ -151,4 +94,3 @@ export interface ProjectDetail {
   technologies: string[]
   links?: ProjectLink[]
 }
-
