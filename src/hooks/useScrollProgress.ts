@@ -27,7 +27,7 @@ export function useScrollProgress(
   const target = useRef(0)
   const raf = useRef<number>()
   const lastEmitted = useRef(-1)
-  const ease = opts.ease ?? 0.09
+  const ease = opts.ease ?? 0.12
 
   useEffect(() => {
     const computeTarget = () => {
