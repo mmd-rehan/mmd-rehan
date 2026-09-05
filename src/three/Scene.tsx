@@ -4,6 +4,8 @@ import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { ParticleField } from './ParticleField'
 import { Filaments } from './Filaments'
+// HeadMeshSlot from './HeadMesh' is kept for a follow-up — see the note atop
+// that file for why it isn't mounted yet.
 import type { TargetSet } from './targets'
 import type { DeviceTier } from '../lib/deviceTier'
 import { slicePhasesAt } from '../lib/slicePhases'
@@ -24,11 +26,6 @@ const STRANDS_BY_LABEL: Record<DeviceTier['label'], number> = {
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
-/**
- * The head rig: a group holding the particle field + filaments that pitches
- * back and yaws as the portrait flips into the nerves form, mirroring the
- * reference. A tiny idle sway keeps the resting portrait alive.
- */
 function HeadRig({
   progress,
   children,
@@ -46,14 +43,11 @@ function HeadRig({
     const { tilt, settle } = slicePhasesAt(progress.current)
     const idle = clock.current
 
-    // Rest: barely-there sway. Tilt: chin lifts hard (−X), yaws, a little roll.
     const restX = Math.sin(idle * 0.35) * 0.022
     const restY = Math.sin(idle * 0.26) * 0.04
     g.rotation.x = lerp(restX, -0.82, tilt)
     g.rotation.y = lerp(restY, 0.3, tilt)
     g.rotation.z = lerp(0, -0.07, tilt)
-    // Keep it roughly centred — a small lift as it tilts, no big drift so the
-    // crown doesn't clip off the top of the frame.
     g.position.y = lerp(0, 0.12, tilt) - lerp(0, 0.1, settle)
     g.position.z = lerp(0, -0.25, tilt)
   })
@@ -61,7 +55,6 @@ function HeadRig({
   return <group ref={group}>{children}</group>
 }
 
-/** Pull the camera back through the flip so the strands have room to sweep. */
 function CameraRig({ progress }: { progress: MutableRefObject<number> }) {
   useFrame(({ camera }) => {
     const { filament } = slicePhasesAt(progress.current)
@@ -72,11 +65,6 @@ function CameraRig({ progress }: { progress: MutableRefObject<number> }) {
   return null
 }
 
-/**
- * The WebGL layer: fixed full-viewport canvas with the head rig (particles +
- * filaments) and post-processing — a restrained UnrealBloom for the ember tips
- * and a vignette to seat the form against the dark edges.
- */
 export function Scene({ targets, tier, progress }: SceneProps) {
   const bloomIntensity = tier.label === 'low' ? 0.5 : 0.7
   const strandCount = STRANDS_BY_LABEL[tier.label] || 150
@@ -94,6 +82,9 @@ export function Scene({ targets, tier, progress }: SceneProps) {
     >
       <color attach="background" args={[THEME.background]} />
       <fog attach="fog" args={[THEME.background, 6, 13]} />
+      <hemisphereLight args={[0xfff3e6, 0x0a0908, 0.55]} />
+      <directionalLight color={0xfff3e0} intensity={1.15} position={[1.1, 1.3, 2.2]} />
+      <directionalLight color={0xff7a3d} intensity={0.9} position={[-1.6, 0.2, -1.0]} />
       <Suspense fallback={null}>
         <HeadRig progress={progress}>
           <ParticleField
