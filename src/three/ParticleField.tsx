@@ -100,6 +100,7 @@ export function ParticleField({
       uContour: { value: 0 },
       uPortrait: { value: PORTRAITNESS.portrait },
       uSettle: { value: 0 },
+      uPortraitReveal: { value: 0 },
       uColorLight: {
         value: new THREE.Vector3(
           PARTICLE_LIGHT_RGB.r,
@@ -149,6 +150,7 @@ export function ParticleField({
     mat.uniforms.uScale.value = size.height * 0.5
     mat.uniforms.uContour.value = phases.contour
     mat.uniforms.uSettle.value = phases.settle
+    mat.uniforms.uPortraitReveal.value = phases.portraitReveal
     mat.uniforms.uTipGlow.value = lerp(TIP_GLOW.portrait, TIP_GLOW.nerves, phases.filament)
     mat.uniforms.uPortrait.value = lerp(
       PORTRAITNESS.portrait,
