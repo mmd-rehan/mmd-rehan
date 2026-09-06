@@ -1,119 +1,93 @@
 import { useEffect, useMemo, useRef, type MutableRefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { mulberry32 } from '../lib/rng'
 import { filamentVertexShader, filamentFragmentShader } from './filamentShaders'
 import { slicePhasesAt } from '../lib/slicePhases'
-import { STRAND_RGB, EMBER_RGB, EMBER_HOT_RGB } from '../theme'
+import { STRAND_RGB, YELLOW_RGB, AMBER_RGB, HOT_CORE_RGB, COOL_ENERGY_RGB } from '../theme'
 
-/** Head model the filament roots grow from — matches the fit in head.ts. */
-const HEAD_CENTER = new THREE.Vector3(0, 0.15, 0)
-const HEAD_RADII = new THREE.Vector3(0.78, 1.05, 0.9)
+/** Head model the strand roots grow from — matches the fit in head.ts. */
+const HEAD_CENTER = new THREE.Vector3(0, 0.1, 0)
+const HEAD_RADII = new THREE.Vector3(0.82, 1.12, 0.92)
+const SWEEP = new THREE.Vector3(0.92, 0.16, 0.1).normalize()
 
-/** Shared sweep: strongly rightward, barely up — the strands flow across the
- *  frame like the reference rather than spraying upward. */
-const SWEEP = new THREE.Vector3(0.94, 0.12, 0.08).normalize()
-
-const TUBULAR_SEG = 26
-const RADIAL_SEG = 5
+const SEG = 30
 
 /**
- * Build every filament as a thin tube swept along a Catmull-Rom spline, merged
- * into one geometry. Per-vertex aU / aStrand / aRoot let the shader grow each
- * strand from its root. Roots sit over the front of the head; strands curve out
- * and sweep rightward across the frame like the reference.
+ * Build one flat ribbon strip per strand. Positions are placeholders — the
+ * vertex shader computes the centre-line (strandPoint) and offsets each edge.
+ * Per-vertex: aStrand, aU, aSide, and the head-phase endpoints aRoot / aTipHead.
  */
-function buildFilaments(strandCount: number, seed = 4242): THREE.BufferGeometry {
+function buildRibbons(strandCount: number, seed = 4242): THREE.BufferGeometry {
   const rng = mulberry32(seed)
-  const geos: THREE.BufferGeometry[] = []
+  const perStrand = (SEG + 1) * 2
+  const total = strandCount * perStrand
 
-  const p0 = new THREE.Vector3()
-  const p3 = new THREE.Vector3()
+  const position = new Float32Array(total * 3)
+  const aStrand = new Float32Array(total)
+  const aU = new Float32Array(total)
+  const aSide = new Float32Array(total)
+  const aRoot = new Float32Array(total * 3)
+  const aTipHead = new Float32Array(total * 3)
+  const index: number[] = []
+
   const dir = new THREE.Vector3()
-  const perpA = new THREE.Vector3()
-  const perpB = new THREE.Vector3()
-  const up = new THREE.Vector3(0, 1, 0)
 
   for (let s = 0; s < strandCount; s++) {
-    // Roots spread across the whole front of the head.
     const phi = rng() * Math.PI * 2
-    const cy = Math.max(-0.85, Math.min(0.98, -0.75 + rng() * 1.7))
+    const cy = Math.max(-0.85, Math.min(0.96, -0.7 + rng() * 1.7))
     const sinT = Math.sqrt(Math.max(0, 1 - cy * cy))
-    let dx = sinT * Math.cos(phi)
-    let dz = sinT * Math.sin(phi)
-    dz = Math.abs(dz) * 0.9 + 0.1
-    dx = dx * 0.95
+    const dx = sinT * Math.cos(phi) * 0.95
+    const dz = Math.abs(sinT * Math.sin(phi)) * 0.9 + 0.1
 
-    p0.set(
-      HEAD_CENTER.x + dx * HEAD_RADII.x,
-      HEAD_CENTER.y + cy * HEAD_RADII.y,
-      HEAD_CENTER.z + dz * HEAD_RADII.z,
-    )
+    const rx = HEAD_CENTER.x + dx * HEAD_RADII.x
+    const ry = HEAD_CENTER.y + cy * HEAD_RADII.y
+    const rz = HEAD_CENTER.z + dz * HEAD_RADII.z
 
-    // Combed flow: dominated by the rightward sweep. A wide horizontal fan, a
-    // narrow vertical one, so they spread across the frame without spraying up.
     dir.copy(SWEEP)
-    dir.x += (rng() - 0.5) * 0.12
-    dir.y += (rng() - 0.5) * 0.5 + (cy - 0.1) * 0.35 // higher roots aim higher
+    dir.x += (rng() - 0.5) * 0.16
+    dir.y += (rng() - 0.5) * 0.5 + (cy - 0.1) * 0.32
     dir.z += (rng() - 0.5) * 0.3
     dir.normalize()
+    const len = 3.4 + rng() * 2.6
+    const tx = rx + dir.x * len
+    const ty = ry + dir.y * len
+    const tz = rz + dir.z * len
 
-    const len = 3.6 + rng() * 2.8
-    p3.copy(p0).addScaledVector(dir, len)
-
-    perpA.crossVectors(dir, up).normalize()
-    perpB.crossVectors(dir, perpA).normalize()
-    // One long lazy bow per strand so neighbours arc together, not tangle.
-    const bow = (0.4 + rng() * 0.9) * (rng() < 0.5 ? -1 : 1)
-    const droop = (rng() - 0.6) * 0.6
-
-    const c1 = new THREE.Vector3()
-      .lerpVectors(p0, p3, 0.34)
-      .addScaledVector(perpA, bow * 0.55)
-      .addScaledVector(perpB, droop * 0.4)
-    const c2 = new THREE.Vector3()
-      .lerpVectors(p0, p3, 0.7)
-      .addScaledVector(perpA, bow)
-      .addScaledVector(perpB, droop)
-
-    const curve = new THREE.CatmullRomCurve3(
-      [p0.clone(), c1, c2, p3.clone()],
-      false,
-      'catmullrom',
-      0.5,
-    )
-
-    const radius = 0.006 + rng() * 0.005
-    const tube = new THREE.TubeGeometry(curve, TUBULAR_SEG, radius, RADIAL_SEG, false)
-
-    // Per-vertex attributes. TubeGeometry lays vertices out as
-    // (TUBULAR_SEG + 1) rings of (RADIAL_SEG + 1) verts; uv.x runs 0..1 along.
-    const count = tube.attributes.position.count
-    const uv = tube.attributes.uv as THREE.BufferAttribute
-    const aU = new Float32Array(count)
-    const aStrand = new Float32Array(count)
-    const aRoot = new Float32Array(count * 3)
     const strandId = strandCount > 1 ? s / (strandCount - 1) : 0
-    for (let i = 0; i < count; i++) {
-      aU[i] = uv.getX(i)
-      aStrand[i] = strandId
-      aRoot[i * 3] = p0.x
-      aRoot[i * 3 + 1] = p0.y
-      aRoot[i * 3 + 2] = p0.z
+    const strandBase = s * (SEG + 1) * 2
+
+    for (let i = 0; i <= SEG; i++) {
+      const u = i / SEG
+      for (let sd = 0; sd < 2; sd++) {
+        const v = strandBase + i * 2 + sd
+        aStrand[v] = strandId
+        aU[v] = u
+        aSide[v] = sd === 0 ? -1 : 1
+        aRoot[v * 3] = rx
+        aRoot[v * 3 + 1] = ry
+        aRoot[v * 3 + 2] = rz
+        aTipHead[v * 3] = tx
+        aTipHead[v * 3 + 1] = ty
+        aTipHead[v * 3 + 2] = tz
+      }
+      if (i < SEG) {
+        const b = strandBase + i * 2
+        index.push(b, b + 1, b + 2, b + 1, b + 3, b + 2)
+      }
     }
-    tube.setAttribute('aU', new THREE.BufferAttribute(aU, 1))
-    tube.setAttribute('aStrand', new THREE.BufferAttribute(aStrand, 1))
-    tube.setAttribute('aRoot', new THREE.BufferAttribute(aRoot, 3))
-    tube.deleteAttribute('normal')
-    tube.deleteAttribute('uv')
-    geos.push(tube)
   }
 
-  const merged = mergeGeometries(geos, false)
-  geos.forEach((g) => g.dispose())
-  merged.boundingSphere = new THREE.Sphere(new THREE.Vector3(1.5, 0.5, 0), 9)
-  return merged
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.BufferAttribute(position, 3))
+  geo.setAttribute('aStrand', new THREE.BufferAttribute(aStrand, 1))
+  geo.setAttribute('aU', new THREE.BufferAttribute(aU, 1))
+  geo.setAttribute('aSide', new THREE.BufferAttribute(aSide, 1))
+  geo.setAttribute('aRoot', new THREE.BufferAttribute(aRoot, 3))
+  geo.setAttribute('aTipHead', new THREE.BufferAttribute(aTipHead, 3))
+  geo.setIndex(index)
+  geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), 14)
+  return geo
 }
 
 interface FilamentsProps {
@@ -121,22 +95,26 @@ interface FilamentsProps {
   progress: MutableRefObject<number>
 }
 
+const vec = (c: { r: number; g: number; b: number }) => new THREE.Vector3(c.r, c.g, c.b)
+
 export function Filaments({ strandCount, progress }: FilamentsProps) {
   const matRef = useRef<THREE.ShaderMaterial>(null)
 
-  const geometry = useMemo(() => buildFilaments(strandCount), [strandCount])
+  const geometry = useMemo(() => buildRibbons(strandCount), [strandCount])
   useEffect(() => () => geometry.dispose(), [geometry])
 
   const uniforms = useMemo(
     () => ({
       uGrow: { value: 0 },
+      uT: { value: 0 },
       uTime: { value: 0 },
       uReveal: { value: 0 },
-      uWhite: { value: new THREE.Vector3(STRAND_RGB.r, STRAND_RGB.g, STRAND_RGB.b) },
-      uEmber: { value: new THREE.Vector3(EMBER_RGB.r, EMBER_RGB.g, EMBER_RGB.b) },
-      uHot: {
-        value: new THREE.Vector3(EMBER_HOT_RGB.r, EMBER_HOT_RGB.g, EMBER_HOT_RGB.b),
-      },
+      uWidth: { value: 0.013 },
+      uStrand: { value: vec(STRAND_RGB) },
+      uYellow: { value: vec(YELLOW_RGB) },
+      uAmber: { value: vec(AMBER_RGB) },
+      uHot: { value: vec(HOT_CORE_RGB) },
+      uCool: { value: vec(COOL_ENERGY_RGB) },
     }),
     [],
   )
@@ -148,8 +126,9 @@ export function Filaments({ strandCount, progress }: FilamentsProps) {
     const { filament } = slicePhasesAt(t)
     mat.uniforms.uTime.value += delta
     mat.uniforms.uGrow.value = filament
+    mat.uniforms.uT.value = t
     mat.uniforms.uReveal.value =
-      Math.min(1, filament * 5) * (1 - Math.max(0, (t - 0.95) / 0.05))
+      Math.min(1, filament * 4) * (1 - Math.max(0, (t - 0.97) / 0.03))
   })
 
   return (
@@ -162,6 +141,7 @@ export function Filaments({ strandCount, progress }: FilamentsProps) {
         transparent
         depthWrite={false}
         depthTest
+        side={THREE.DoubleSide}
         blending={THREE.NormalBlending}
       />
     </mesh>

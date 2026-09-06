@@ -40,10 +40,10 @@ export default function App() {
 
   const { current: progressRef } = useScrollProgress(immersive ? onScroll : undefined)
 
-  // The hero's transforming beats are done well before t=1 (settle finishes at
-  // ~0.86). Past that we fade the fixed hero layer out to reveal the readable
-  // site sitting behind it, and park the render loop.
-  const pastHero = progressPct >= 0.9
+  // The vortex finale forms right up to t≈0.9, so only fade the fixed hero
+  // layer out at the very end to reveal the readable site behind it (and park
+  // the render loop).
+  const pastHero = progressPct >= 0.985
 
   // Build particle targets once, only if we'll actually render them.
   useEffect(() => {

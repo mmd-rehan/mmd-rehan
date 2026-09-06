@@ -91,7 +91,7 @@ function Backdrop({ progress }: { progress: MutableRefObject<number> }) {
   }, [scene])
 
   useFrame(() => {
-    const develop = slicePhasesAt(progress.current).filament
+    const { develop } = slicePhasesAt(progress.current)
     col.current.copy(WARM).lerp(COOL, develop)
     if (scene.fog) (scene.fog as THREE.Fog).color.copy(col.current)
   })
@@ -140,8 +140,10 @@ export function Scene({ targets, tier, progress, active = true }: SceneProps) {
             progress={progress}
             baseSize={tier.label === 'low' ? 0.04 : 0.03}
           />
-          <Filaments strandCount={strandCount} progress={progress} />
         </HeadRig>
+        {/* Strands live in the identity frame — the cable / sphere / vortex
+            forms are composed there, not in the pitched-back head frame. */}
+        <Filaments strandCount={strandCount} progress={progress} />
         <CameraRig progress={progress} />
         <EffectComposer>
           <Bloom
