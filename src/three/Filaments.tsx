@@ -125,7 +125,7 @@ export function Filaments({ strandCount, progress, headMatrix }: FilamentsProps)
       uT: { value: 0 },
       uTime: { value: 0 },
       uReveal: { value: 0 },
-      uWidth: { value: 0.013 },
+      uWidth: { value: 0.05 },
       uHeadMat: { value: new THREE.Matrix4() },
       uStrand: { value: vec(STRAND_RGB) },
       uYellow: { value: vec(YELLOW_RGB) },
@@ -145,25 +145,26 @@ export function Filaments({ strandCount, progress, headMatrix }: FilamentsProps)
     mat.uniforms.uGrow.value = filament
     mat.uniforms.uT.value = t
     mat.uniforms.uHeadMat.value.copy(headMatrix.current)
-    // Thicker fibres while they're erupting from the scalp (reference reads as
-    // cables, not hairs), thinning as they spread into the wide field.
-    mat.uniforms.uWidth.value = lerp(0.017, 0.012, Math.min(1, Math.max(0, (t - 0.42) / 0.2)))
+    // Chunky cord throughout — the reference is macramé rope, not hair. A touch
+    // thinner once they spread into the wide field so it doesn't turn to soup.
+    mat.uniforms.uWidth.value = lerp(0.052, 0.034, Math.min(1, Math.max(0, (t - 0.42) / 0.22)))
     mat.uniforms.uReveal.value =
       Math.min(1, filament * 5) * (1 - Math.max(0, (t - 0.97) / 0.03))
   })
 
   return (
-    <mesh geometry={geometry} frustumCulled={false} renderOrder={3}>
+    // Opaque, depth-written: cords must occlude each other to read as solid
+    // rope. Transparent blending is what turned them into haze.
+    <mesh geometry={geometry} frustumCulled={false} renderOrder={2}>
       <shaderMaterial
         ref={matRef}
         uniforms={uniforms}
         vertexShader={filamentVertexShader}
         fragmentShader={filamentFragmentShader}
-        transparent
-        depthWrite={false}
+        transparent={false}
+        depthWrite
         depthTest
         side={THREE.DoubleSide}
-        blending={THREE.NormalBlending}
       />
     </mesh>
   )

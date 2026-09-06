@@ -25,10 +25,11 @@ interface SceneProps {
   active?: boolean
 }
 
+/** Cords are thick and opaque now — far fewer read as far more. */
 const STRANDS_BY_LABEL: Record<DeviceTier['label'], number> = {
-  high: 700,
-  mid: 380,
-  low: 160,
+  high: 260,
+  mid: 160,
+  low: 80,
   none: 0,
 }
 
