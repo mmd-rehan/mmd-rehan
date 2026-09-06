@@ -26,9 +26,9 @@ interface SceneProps {
 }
 
 const STRANDS_BY_LABEL: Record<DeviceTier['label'], number> = {
-  high: 190,
-  mid: 120,
-  low: 60,
+  high: 700,
+  mid: 380,
+  low: 160,
   none: 0,
 }
 
@@ -36,9 +36,13 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 function HeadRig({
   progress,
+  headMatrix,
   children,
 }: {
   progress: MutableRefObject<number>
+  /** The rig's world matrix, published each frame so the strands can root
+   *  themselves to the back of the head while it turns. */
+  headMatrix: MutableRefObject<THREE.Matrix4>
   children: ReactNode
 }) {
   const group = useRef<THREE.Group>(null)
@@ -48,16 +52,22 @@ function HeadRig({
     const g = group.current
     if (!g) return
     clock.current += delta
-    const { tilt, settle } = slicePhasesAt(progress.current)
+    const { tilt, turn, settle } = slicePhasesAt(progress.current)
     const idle = clock.current
 
     const restX = Math.sin(idle * 0.35) * 0.022
     const restY = Math.sin(idle * 0.26) * 0.04
-    g.rotation.x = lerp(restX, -0.98, tilt)
-    g.rotation.y = lerp(restY, 0.26, tilt)
-    g.rotation.z = lerp(0, -0.06, tilt)
+
+    // Pitch back (chin up), then rotate away so the face turns from the camera
+    // and you end up looking at the back of his head — the fibres erupt there.
+    g.rotation.x = lerp(restX, -0.72, tilt) + lerp(0, 0.38, turn)
+    g.rotation.y = lerp(restY, 0.22, tilt) + lerp(0, 2.55, turn)
+    g.rotation.z = lerp(0, -0.06, tilt) + lerp(0, 0.14, turn)
     g.position.y = lerp(0, 0.16, tilt) - lerp(0, 0.1, settle)
     g.position.z = lerp(0, -0.2, tilt)
+
+    g.updateMatrixWorld()
+    headMatrix.current.copy(g.matrixWorld)
   })
 
   return <group ref={group}>{children}</group>
@@ -102,6 +112,7 @@ function Backdrop({ progress }: { progress: MutableRefObject<number> }) {
 export function Scene({ targets, tier, progress, active = true }: SceneProps) {
   const bloomIntensity = tier.label === 'low' ? 0.35 : 0.5
   const strandCount = STRANDS_BY_LABEL[tier.label] || 150
+  const headMatrix = useRef(new THREE.Matrix4())
 
   // R3F sizes the canvas from a ResizeObserver on its container. Mounted inside
   // the fixed .hero-stage the initial observation can be missed, leaving the
@@ -133,7 +144,7 @@ export function Scene({ targets, tier, progress, active = true }: SceneProps) {
       {/* No scene lights: every material is an unlit ShaderMaterial. The head's
           key + rim are in headMeshShaders / particleShaders. */}
       <Suspense fallback={null}>
-        <HeadRig progress={progress}>
+        <HeadRig progress={progress} headMatrix={headMatrix}>
           <HeadMesh progress={progress} />
           <ParticleField
             targets={targets}
@@ -142,9 +153,14 @@ export function Scene({ targets, tier, progress, active = true }: SceneProps) {
             baseSize={tier.label === 'low' ? 0.04 : 0.03}
           />
         </HeadRig>
-        {/* Strands live in the identity frame — the cable / sphere / vortex
-            forms are composed there, not in the pitched-back head frame. */}
-        <Filaments strandCount={strandCount} progress={progress} />
+        {/* Strands live in the identity frame so the cable / sphere / vortex
+            are composed there; their head-phase roots are transformed by
+            headMatrix so they stay attached to the turning head. */}
+        <Filaments
+          strandCount={strandCount}
+          progress={progress}
+          headMatrix={headMatrix}
+        />
         <CoreGlow progress={progress} />
         <CameraRig progress={progress} />
         <EffectComposer>

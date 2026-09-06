@@ -22,6 +22,8 @@ const smoothstep = (e0: number, e1: number, x: number) => {
 export interface SlicePhases {
   /** 0 = facing forward, 1 = pitched fully back. */
   tilt: number
+  /** 0 = face to camera, 1 = turned around, showing the back of the head. */
+  turn: number
   /** 0 = photo skin, 1 = warm-white contour lines (then fades as it dissolves). */
   contour: number
   /** 0 = intact mesh, 1 = the sweep front has crossed the whole head. */
@@ -35,16 +37,24 @@ export interface SlicePhases {
 }
 
 export function slicePhasesAt(t: number): SlicePhases {
-  const tilt = smoothstep(0.05, 0.26, t)
+  const tilt = smoothstep(0.04, 0.2, t)
+  // The head turns away early, so you are already looking at the back of his
+  // head when the fibres erupt out of it — the moment the reference is built on.
+  const turn = smoothstep(0.1, 0.34, t)
 
-  const contourIn = smoothstep(0.14, 0.32, t)
-  const contourOut = smoothstep(0.42, 0.6, t)
+  // Contour lines are a face beat — they read while you can still see the face,
+  // and are gone by the time the head has turned its back to you.
+  const contourIn = smoothstep(0.1, 0.2, t)
+  const contourOut = smoothstep(0.26, 0.4, t)
   const contour = contourIn * (1 - contourOut)
 
-  const dissolve = smoothstep(0.12, 0.52, t)
-  const filament = smoothstep(0.28, 0.62, t)
-  const settle = smoothstep(0.5, 0.72, t)
+  // Fibres start growing out of the back BEFORE the head breaks up, and the
+  // dissolve trails them — so you see white erupting from a head that's still
+  // there, not an empty screen.
+  const filament = smoothstep(0.26, 0.6, t)
+  const dissolve = smoothstep(0.34, 0.66, t)
+  const settle = smoothstep(0.58, 0.76, t)
   const develop = smoothstep(0.16, 0.78, t)
 
-  return { tilt, contour, dissolve, filament, settle, develop }
+  return { tilt, turn, contour, dissolve, filament, settle, develop }
 }

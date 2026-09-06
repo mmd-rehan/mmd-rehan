@@ -28,11 +28,13 @@ export const filamentVertexShader = /* glsl */ `
   uniform float uTime;
   uniform float uReveal;
   uniform float uWidth;
+  uniform mat4 uHeadMat;
 
   varying float vU;
   varying float vTip;
   varying float vAlpha;
   varying float vEnergy;
+  varying float vFront;
 
   ${STRAND_FORMS_GLSL}
 
@@ -41,11 +43,17 @@ export const filamentVertexShader = /* glsl */ `
     g = g * g * (3.0 - 2.0 * g);
     float revealed = smoothstep(aU - 0.14, aU - 0.01, g);
 
+    // The growing end of each fibre is incandescent — the reference's orange
+    // fibre tips. Dies away once the strand has finished extending.
+    vFront = smoothstep(0.045, 0.0, abs(aU - g)) * (1.0 - smoothstep(0.85, 1.0, g));
+
     float eps = 0.014;
-    vec3 c0 = strandPoint(aRoot, aTipHead, max(aU - eps, 0.0), aStrand, uTime, uT);
-    vec3 c1 = strandPoint(aRoot, aTipHead, min(aU + eps, 1.0), aStrand, uTime, uT);
+    vec3 c0 = strandPoint(aRoot, aTipHead, max(aU - eps, 0.0), aStrand, uTime, uT, uHeadMat);
+    vec3 c1 = strandPoint(aRoot, aTipHead, min(aU + eps, 1.0), aStrand, uTime, uT, uHeadMat);
     vec3 c = mix(c0, c1, 0.5);
-    c = mix(aRoot, c, revealed);
+    // unrevealed length collapses onto the root, in the head's current frame
+    vec3 rootW = (uHeadMat * vec4(aRoot, 1.0)).xyz;
+    c = mix(rootW, c, revealed);
 
     vec4 mv0 = modelViewMatrix * vec4(c0, 1.0);
     vec4 mv1 = modelViewMatrix * vec4(c1, 1.0);
@@ -53,7 +61,16 @@ export const filamentVertexShader = /* glsl */ `
 
     vec3 tang = normalize(mv1.xyz - mv0.xyz + vec3(0.0001));
     vec3 viewDir = normalize(-mv.xyz);
-    vec3 side = normalize(cross(tang, viewDir));
+
+    // Camera-facing ribbon. When a strand points straight at the camera the
+    // cross product collapses and the quad explodes into a flat sheet — guard
+    // it with a stable fallback and fade the strand out as it degenerates.
+    vec3 sideRaw = cross(tang, viewDir);
+    float sideLen = length(sideRaw);
+    vec3 side = sideLen > 1e-3
+      ? sideRaw / sideLen
+      : normalize(cross(tang, vec3(0.0, 1.0, 0.0)) + vec3(0.001));
+    float facing = smoothstep(0.12, 0.42, sideLen);
 
     float width = uWidth * (0.35 + 0.65 * (1.0 - aU));
     mv.xyz += side * aSide * width;
@@ -62,7 +79,7 @@ export const filamentVertexShader = /* glsl */ `
 
     vU = aU;
     vTip = smoothstep(0.7, 1.0, aU);
-    vAlpha = revealed * uReveal;
+    vAlpha = revealed * uReveal * facing;
     vEnergy = uT;
   }
 `
@@ -80,6 +97,7 @@ export const filamentFragmentShader = /* glsl */ `
   varying float vTip;
   varying float vAlpha;
   varying float vEnergy;
+  varying float vFront;
 
   void main() {
     if (vAlpha < 0.02) discard;
@@ -101,11 +119,20 @@ export const filamentFragmentShader = /* glsl */ `
     float coreGlow = (1.0 - smoothstep(0.0, 0.16, vU)) * smoothstep(0.82, 0.94, vEnergy);
     col = mix(col, uHot, coreGlow * 0.8);
 
-    // denser bodies once the strands are packed into the sphere / vortex
+    // Dense while erupting from the head (this is the hero moment and has to
+    // read clearly on the pale ground), then lighter once they're a wide field,
+    // denser again when packed into the sphere / vortex.
+    float erupt = 1.0 - smoothstep(0.42, 0.62, vEnergy);
     float density = mix(0.15, 0.26, smoothstep(0.60, 0.80, vEnergy));
-    float bodyA = density * smoothstep(0.03, 0.26, vU) * (1.0 - smoothstep(0.85, 1.0, vU) * 0.4);
-    float a = mix(bodyA, 0.55, vTip) + coreGlow * 0.4;
-    float over = 1.0 + vTip * 0.4 + coreGlow * 1.8;
+    density = mix(density, 0.72, erupt);
+    // Incandescent growing end — a small amber point at each fibre tip, not a
+    // wall of light.
+    col = mix(col, uYellow, vFront * 0.55);
+    col = mix(col, uAmber, vFront * vFront * 0.45);
+
+    float bodyA = density * smoothstep(0.02, 0.18, vU) * (1.0 - smoothstep(0.85, 1.0, vU) * 0.4);
+    float a = mix(bodyA, mix(0.55, 0.95, erupt), vTip) + coreGlow * 0.4 + vFront * 0.28;
+    float over = 1.0 + vTip * 0.4 + coreGlow * 1.8 + vFront * 0.5;
 
     gl_FragColor = vec4(col * over, clamp(a, 0.0, 1.0) * vAlpha);
   }

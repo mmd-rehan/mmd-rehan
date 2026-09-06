@@ -6,17 +6,22 @@ import { filamentVertexShader, filamentFragmentShader } from './filamentShaders'
 import { slicePhasesAt } from '../lib/slicePhases'
 import { STRAND_RGB, YELLOW_RGB, AMBER_RGB, HOT_CORE_RGB, COOL_ENERGY_RGB } from '../theme'
 
-/** Head model the strand roots grow from — matches the fit in head.ts. */
+/** Head model the strand roots grow from — matches the fit in head.ts.
+ *  Local space: +Z is the face, so −Z is the back of the skull. */
 const HEAD_CENTER = new THREE.Vector3(0, 0.1, 0)
 const HEAD_RADII = new THREE.Vector3(0.82, 1.12, 0.92)
-const SWEEP = new THREE.Vector3(0.92, 0.16, 0.1).normalize()
 
 const SEG = 30
 
 /**
  * Build one flat ribbon strip per strand. Positions are placeholders — the
  * vertex shader computes the centre-line (strandPoint) and offsets each edge.
- * Per-vertex: aStrand, aU, aSide, and the head-phase endpoints aRoot / aTipHead.
+ * Per-vertex: aStrand, aU, aSide, and the head-phase endpoints aRoot / aTipHead,
+ * both in HEAD-LOCAL space (the shader transforms them by the head matrix).
+ *
+ * Roots sit on the BACK of the skull and the fibres grow straight out behind
+ * it, so once the head turns away they erupt from the back of his head — the
+ * moment the reference is built around.
  */
 function buildRibbons(strandCount: number, seed = 4242): THREE.BufferGeometry {
   const rng = mulberry32(seed)
@@ -34,22 +39,30 @@ function buildRibbons(strandCount: number, seed = 4242): THREE.BufferGeometry {
   const dir = new THREE.Vector3()
 
   for (let s = 0; s < strandCount; s++) {
-    const phi = rng() * Math.PI * 2
-    const cy = Math.max(-0.85, Math.min(0.96, -0.7 + rng() * 1.7))
+    // A patch on the back of the skull — crown to occiput — so the fibres
+    // burst out of one region like the reference, not as a halo round the head.
+    const cy = Math.max(-0.55, Math.min(0.9, -0.35 + rng() * 1.3))
     const sinT = Math.sqrt(Math.max(0, 1 - cy * cy))
-    const dx = sinT * Math.cos(phi) * 0.95
-    const dz = Math.abs(sinT * Math.sin(phi)) * 0.9 + 0.1
+    // azimuth kept to the rear ±55° so nothing sprouts out of his face
+    const az = Math.PI + (rng() - 0.5) * 1.9
+    const dx = sinT * Math.sin(az)
+    const dz = sinT * Math.cos(az)
 
     const rx = HEAD_CENTER.x + dx * HEAD_RADII.x
     const ry = HEAD_CENTER.y + cy * HEAD_RADII.y
     const rz = HEAD_CENTER.z + dz * HEAD_RADII.z
 
-    dir.copy(SWEEP)
-    dir.x += (rng() - 0.5) * 0.16
-    dir.y += (rng() - 0.5) * 0.5 + (cy - 0.1) * 0.32
-    dir.z += (rng() - 0.5) * 0.3
+    // Grow outward along the scalp normal, fanning wide across the frame
+    // rather than straight out of the back (which would just point at the
+    // camera once the head has turned, and read as nothing).
+    dir.set(dx * 1.7, cy * 0.5 + 0.5, dz * 0.55)
+    dir.x += (rng() - 0.5) * 0.9
+    dir.y += (rng() - 0.5) * 0.7
+    dir.z += (rng() - 0.5) * 0.5
     dir.normalize()
-    const len = 3.4 + rng() * 2.6
+    // Short enough that the growing fibres read as a dense spiky brush bursting
+    // out of the skull (the reference's white tuft), not long thin streamers.
+    const len = 1.5 + rng() * 1.5
     const tx = rx + dir.x * len
     const ty = ry + dir.y * len
     const tz = rz + dir.z * len
@@ -93,11 +106,14 @@ function buildRibbons(strandCount: number, seed = 4242): THREE.BufferGeometry {
 interface FilamentsProps {
   strandCount: number
   progress: MutableRefObject<number>
+  /** The head rig's world matrix — roots ride the head as it turns. */
+  headMatrix: MutableRefObject<THREE.Matrix4>
 }
 
 const vec = (c: { r: number; g: number; b: number }) => new THREE.Vector3(c.r, c.g, c.b)
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
-export function Filaments({ strandCount, progress }: FilamentsProps) {
+export function Filaments({ strandCount, progress, headMatrix }: FilamentsProps) {
   const matRef = useRef<THREE.ShaderMaterial>(null)
 
   const geometry = useMemo(() => buildRibbons(strandCount), [strandCount])
@@ -110,6 +126,7 @@ export function Filaments({ strandCount, progress }: FilamentsProps) {
       uTime: { value: 0 },
       uReveal: { value: 0 },
       uWidth: { value: 0.013 },
+      uHeadMat: { value: new THREE.Matrix4() },
       uStrand: { value: vec(STRAND_RGB) },
       uYellow: { value: vec(YELLOW_RGB) },
       uAmber: { value: vec(AMBER_RGB) },
@@ -127,8 +144,12 @@ export function Filaments({ strandCount, progress }: FilamentsProps) {
     mat.uniforms.uTime.value += delta
     mat.uniforms.uGrow.value = filament
     mat.uniforms.uT.value = t
+    mat.uniforms.uHeadMat.value.copy(headMatrix.current)
+    // Thicker fibres while they're erupting from the scalp (reference reads as
+    // cables, not hairs), thinning as they spread into the wide field.
+    mat.uniforms.uWidth.value = lerp(0.017, 0.012, Math.min(1, Math.max(0, (t - 0.42) / 0.2)))
     mat.uniforms.uReveal.value =
-      Math.min(1, filament * 4) * (1 - Math.max(0, (t - 0.97) / 0.03))
+      Math.min(1, filament * 5) * (1 - Math.max(0, (t - 0.97) / 0.03))
   })
 
   return (
