@@ -3,22 +3,10 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { TargetSet } from './targets'
 import { particleVertexShader, particleFragmentShader } from './particleShaders'
-import { morphStateAt } from '../lib/timeline'
 import { slicePhasesAt } from '../lib/slicePhases'
+import { DISSOLVE_MAX } from './dissolve'
 import { mulberry32 } from '../lib/rng'
-import {
-  EMBER_RGB,
-  EMBER_HOT_RGB,
-  PARTICLE_LIGHT_RGB,
-  STRAND_RGB,
-} from '../theme'
-import type { TargetKey } from '../content/chapters'
-
-/** How strongly each shape lights its outer particles at rest. */
-const TIP_GLOW: Record<TargetKey, number> = { portrait: 0.08, nerves: 0.7 }
-
-/** How "portrait" a shape is: 1 shows the real head colour + lighting, 0 ember. */
-const PORTRAITNESS: Record<TargetKey, number> = { portrait: 1, nerves: 0.4 }
+import { EMBER_RGB, EMBER_HOT_RGB, PARTICLE_LIGHT_RGB, STRAND_RGB } from '../theme'
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
@@ -30,60 +18,47 @@ interface ParticleFieldProps {
 }
 
 /**
- * The single particle system. Owns one BufferGeometry whose aFrom/aTo
- * attributes are rewritten each frame to the two shapes being morphed, plus a
- * static aNormal (the head surface normal, for real lighting), and a
- * ShaderMaterial whose uniforms carry blend / contour / settle / time. Knows
- * nothing about the DOM. Rotation is owned by the parent group in Scene.
+ * The debris field. One BufferGeometry seeded from the head surface (position +
+ * normal + albedo per point); the shader keeps every point invisible behind the
+ * solid mesh until the dissolve front reaches it, then detaches it. Knows
+ * nothing about the DOM; rotation is owned by the parent HeadRig.
  */
 export function ParticleField({
   targets,
   count,
   progress,
-  baseSize = 0.036,
+  baseSize = 0.03,
 }: ParticleFieldProps) {
   const pointsRef = useRef<THREE.Points>(null)
   const materialRef = useRef<THREE.ShaderMaterial>(null)
   const { gl, size } = useThree()
 
-  const loaded = useRef<{ from: TargetKey | null; to: TargetKey | null }>({
-    from: null,
-    to: null,
-  })
-
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry()
-    const from = new Float32Array(count * 3)
-    const to = new Float32Array(count * 3)
     const seeds = new Float32Array(count)
     const rng = mulberry32(9090)
     for (let i = 0; i < count; i++) seeds[i] = rng()
 
-    from.set(targets.positions.portrait)
-    to.set(targets.positions.portrait)
-
     geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(count * 3), 3))
-    geo.setAttribute('aFrom', new THREE.BufferAttribute(from, 3))
-    geo.setAttribute('aTo', new THREE.BufferAttribute(to, 3))
+    geo.setAttribute('aFrom', new THREE.BufferAttribute(targets.positions.portrait, 3))
+    geo.setAttribute('aTo', new THREE.BufferAttribute(targets.positions.nerves, 3))
     geo.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1))
     geo.setAttribute('aColor', new THREE.BufferAttribute(targets.colors, 3))
     geo.setAttribute('aNormal', new THREE.BufferAttribute(targets.normals, 3))
     geo.setDrawRange(0, count)
-    geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), 8)
+    geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), 12)
     return geo
   }, [count, targets])
 
   const uniforms = useMemo(
     () => ({
-      uBlend: { value: 0 },
+      uDissolve: { value: 0 },
       uTime: { value: 0 },
       uSize: { value: baseSize },
       uPixelRatio: { value: Math.min(gl.getPixelRatio(), 2) },
       uScale: { value: size.height * 0.5 },
-      uTipGlow: { value: TIP_GLOW.portrait },
-      uContour: { value: 0 },
-      uPortrait: { value: PORTRAITNESS.portrait },
       uSettle: { value: 0 },
+      uTipGlow: { value: 0.6 },
       uColorLight: {
         value: new THREE.Vector3(
           PARTICLE_LIGHT_RGB.r,
@@ -109,36 +84,13 @@ export function ParticleField({
 
   useFrame((_, delta) => {
     const mat = materialRef.current
-    const pts = pointsRef.current
-    if (!mat || !pts) return
-
-    const t = progress.current
-    const state = morphStateAt(t)
-    const phases = slicePhasesAt(t)
-
-    if (loaded.current.from !== state.from || loaded.current.to !== state.to) {
-      const aFrom = geometry.getAttribute('aFrom') as THREE.BufferAttribute
-      const aTo = geometry.getAttribute('aTo') as THREE.BufferAttribute
-      ;(aFrom.array as Float32Array).set(targets.positions[state.from])
-      ;(aTo.array as Float32Array).set(targets.positions[state.to])
-      aFrom.needsUpdate = true
-      aTo.needsUpdate = true
-      loaded.current = { from: state.from, to: state.to }
-    }
-
-    // Position morph is driven by the dissolve beat (not the raw chapter blend)
-    // so the face holds its shape while the head tilts back.
-    mat.uniforms.uBlend.value = phases.dissolve
+    if (!mat) return
+    const phases = slicePhasesAt(progress.current)
+    mat.uniforms.uDissolve.value = phases.dissolve * DISSOLVE_MAX
     mat.uniforms.uTime.value += delta
     mat.uniforms.uScale.value = size.height * 0.5
-    mat.uniforms.uContour.value = phases.contour
     mat.uniforms.uSettle.value = phases.settle
-    mat.uniforms.uTipGlow.value = lerp(TIP_GLOW.portrait, TIP_GLOW.nerves, phases.filament)
-    mat.uniforms.uPortrait.value = lerp(
-      PORTRAITNESS.portrait,
-      PORTRAITNESS.nerves,
-      phases.dissolve,
-    )
+    mat.uniforms.uTipGlow.value = lerp(0.2, 0.8, phases.filament)
   })
 
   return (
