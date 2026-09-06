@@ -1,5 +1,5 @@
 import type { TargetKey } from '../../content/chapters'
-import { sampleHeadCloud, type HeadBuffers } from './headCloud'
+import { loadHead, type HeadBuffers } from '../head'
 import { nervesTarget } from './nerves'
 import { mulberry32 } from '../../lib/rng'
 
@@ -24,7 +24,8 @@ export interface TargetSet {
 export async function buildTargets(count: number): Promise<TargetSet> {
   let head: HeadBuffers
   try {
-    head = await sampleHeadCloud(count)
+    const asset = await loadHead()
+    head = asset.sampleCloud(count)
   } catch (err) {
     console.warn('[targets] head GLB sample failed, using synthetic fallback:', err)
     head = syntheticHead(count)
@@ -64,4 +65,4 @@ function syntheticHead(count: number, seed = 5005): HeadBuffers {
   return { positions, normals, colors }
 }
 
-export { sampleHeadCloud, nervesTarget }
+export { nervesTarget }

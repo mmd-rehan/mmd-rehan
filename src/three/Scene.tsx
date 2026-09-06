@@ -10,6 +10,7 @@ import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { ParticleField } from './ParticleField'
 import { Filaments } from './Filaments'
+import { HeadMesh } from './HeadMesh'
 import type { TargetSet } from './targets'
 import type { DeviceTier } from '../lib/deviceTier'
 import { slicePhasesAt } from '../lib/slicePhases'
@@ -51,11 +52,11 @@ function HeadRig({
 
     const restX = Math.sin(idle * 0.35) * 0.022
     const restY = Math.sin(idle * 0.26) * 0.04
-    g.rotation.x = lerp(restX, -0.82, tilt)
-    g.rotation.y = lerp(restY, 0.3, tilt)
-    g.rotation.z = lerp(0, -0.07, tilt)
-    g.position.y = lerp(0, 0.12, tilt) - lerp(0, 0.1, settle)
-    g.position.z = lerp(0, -0.25, tilt)
+    g.rotation.x = lerp(restX, -0.98, tilt)
+    g.rotation.y = lerp(restY, 0.26, tilt)
+    g.rotation.z = lerp(0, -0.06, tilt)
+    g.position.y = lerp(0, 0.16, tilt) - lerp(0, 0.1, settle)
+    g.position.z = lerp(0, -0.2, tilt)
   })
 
   return <group ref={group}>{children}</group>
@@ -80,8 +81,12 @@ export function Scene({ targets, tier, progress, active = true }: SceneProps) {
   // canvas at its 300×150 default until something triggers a resize. Nudge it
   // once after first paint so the first size is always correct.
   useEffect(() => {
-    const id = requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
-    return () => cancelAnimationFrame(id)
+    const raf = requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
+    const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 120)
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(t)
+    }
   }, [])
 
   return (
@@ -98,15 +103,16 @@ export function Scene({ targets, tier, progress, active = true }: SceneProps) {
     >
       <color attach="background" args={[THEME.background]} />
       <fog attach="fog" args={[THEME.background, 6, 13]} />
-      {/* No scene lights: both materials are unlit ShaderMaterials. The head's
-          key + ember rim are baked into particleShaders via the surface normal. */}
+      {/* No scene lights: every material is an unlit ShaderMaterial. The head's
+          key + ember rim are in headMeshShaders / particleShaders. */}
       <Suspense fallback={null}>
         <HeadRig progress={progress}>
+          <HeadMesh progress={progress} />
           <ParticleField
             targets={targets}
             count={tier.particleCount}
             progress={progress}
-            baseSize={tier.label === 'low' ? 0.044 : 0.036}
+            baseSize={tier.label === 'low' ? 0.04 : 0.03}
           />
           <Filaments strandCount={strandCount} progress={progress} />
         </HeadRig>

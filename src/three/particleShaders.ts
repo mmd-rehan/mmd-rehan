@@ -1,17 +1,16 @@
+import { DISSOLVE_GLSL } from './dissolve'
+
 /**
- * GLSL for the particle field.
+ * GLSL for the particle field — the debris the head mesh dissolves into.
  *
- * The portrait points morph toward the nerve cloud by uBlend (per-particle
- * stagger keeps structure on screen). Explicit phase uniforms shape the beats:
- *   uPortrait — 1 = the real head: sampled skin colour lit by the baked surface
- *               normal (aNormal) so the resting point cloud reads as a volume,
- *               not a flat decal. Falls toward 0 as the face dissolves.
- *   uContour  — skin particles hold the surface and resolve into warm-white
- *               topographic isolines; dark hair / beard particles fly as debris.
- *   uBlend    — position morph portrait -> nerve cloud (driven by the dissolve
- *               beat, so the face stays coherent while the head tilts back).
- *   uSettle   — fade the particles down to faint drifting embers so the
- *               filaments own the frame at the end.
+ * Each particle has a home position on the head surface (aFrom). It stays
+ * invisible, hidden behind the solid mesh, until the sweep front reaches it
+ * (uDissolve crosses dissolveField(home)); at that instant it "detaches",
+ * flares ember-hot, and blows backward into the scene, cooling to pale dust and
+ * fading out as the strands take over (uSettle).
+ *
+ * Complementary by construction: the mesh shader discards exactly the fragments
+ * this shader brings to life, using the same dissolveField.
  */
 
 export const particleVertexShader = /* glsl */ `
@@ -23,22 +22,18 @@ export const particleVertexShader = /* glsl */ `
   attribute vec3 aColor;
   attribute vec3 aNormal;
 
-  uniform float uBlend;
+  uniform float uDissolve;
   uniform float uTime;
   uniform float uSize;
   uniform float uPixelRatio;
   uniform float uScale;
-  uniform float uTipGlow;
-  uniform float uContour;
-  uniform float uPortrait;
   uniform float uSettle;
+  uniform float uTipGlow;
 
-  varying float vGlow;
   varying vec3 vColor;
-  varying float vContourLine;
-  varying float vHair;
+  varying float vAge;
+  varying float vBurn;
   varying float vLight;
-  varying float vRim;
 
   float luma(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 
@@ -49,88 +44,63 @@ export const particleVertexShader = /* glsl */ `
     return vec3(a, b, c);
   }
 
+  ${DISSOLVE_GLSL}
+
   void main() {
-    // Cull almost every particle once the filaments own the frame — a fade
-    // alone can't beat the overlap of a dense cloud, so we keep only a sparse
-    // remnant of drifting debris.
-    float keep = mix(1.0, 0.04, smoothstep(0.35, 0.95, uSettle));
-    if (aSeed > keep) {
+    vec3 home = aFrom;
+    float field = dissolveField(home);
+
+    // Has the sweep front reached this particle yet? (0 until, sharp at, 1 past)
+    float born = smoothstep(field, field + 0.04, uDissolve);
+    // Ember flash right at the front — thin, gone almost immediately.
+    vBurn = born * (1.0 - smoothstep(field + 0.008, field + 0.045, uDissolve));
+
+    // Cull: unborn particles (mesh covers them) and most spent debris.
+    float keep = mix(1.0, 0.10, smoothstep(0.35, 0.95, uSettle));
+    if (born < 0.001 || aSeed > keep) {
       gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
       gl_PointSize = 0.0;
       return;
     }
 
-    float spread = 0.5;
-    float startT = aSeed * spread;
-    float bl = smoothstep(0.0, 1.0, clamp((uBlend - startT) / (1.0 - spread), 0.0, 1.0));
-    vec3 base = mix(aFrom, aTo, bl);
+    // Age since detaching: grows as the front moves on and as things settle.
+    float age = clamp(uDissolve - field, 0.0, 1.2) * 1.5 + uSettle * 1.1;
+    vAge = clamp(age, 0.0, 1.0);
 
-    float hair = 1.0 - smoothstep(0.16, 0.42, luma(aColor));
-    vHair = hair;
-
-    // Scatter peaks mid-morph. Skin particles barely move during the contour
-    // beat (they ARE the lit shell); hair particles drift as debris.
-    float scatter = sin(bl * 3.14159265);
-    float skinLock = uContour * (1.0 - hair);
-    float hairDrift = uContour * hair * smoothstep(0.15, 1.1, length(base.xy));
-    float move = max(scatter * mix(1.0, 0.12, skinLock), hairDrift * 0.5);
-
-    vec3 tang = normalize(vec3(-base.z, base.x * 0.3, base.x) + vec3(0.0001));
-    vec3 seededDir = normalize(vec3(
-      sin(aSeed * 12.9 + base.y * 3.0),
-      cos(aSeed * 7.7 + base.z * 2.3),
-      sin(aSeed * 5.3 + base.x * 4.1)
+    // Blow backward into the scene (−Z), slight lift, plus a seeded fan and slow
+    // curl — matches the reference's "voxels blowing backward into 3D space".
+    vec3 seeded = normalize(vec3(
+      sin(aSeed * 12.9 + home.y * 3.0),
+      cos(aSeed * 7.7 + home.z * 2.3) + 0.25,
+      sin(aSeed * 5.3 + home.x * 4.1) - 0.15
     ));
-    vec3 churn = flow(base * 1.5 + vec3(aSeed * 6.2831), uTime * 0.8);
-    // Debris rides the same rightward sweep as the filaments so the cloud and
-    // the strands move together instead of pulling apart.
-    vec3 sweep = normalize(vec3(0.82, 0.34, 0.12));
-    vec3 drift = sweep + vec3((aSeed - 0.5) * 0.5, (aSeed - 0.3) * 0.4, 0.0);
+    vec3 back = normalize(vec3(0.10, 0.18, -1.0));
+    vec3 dir = normalize(mix(seeded, back, 0.55));
+    vec3 curl = flow(home * 1.6 + vec3(aSeed * 6.2831), uTime * 0.6);
 
-    float mag = move * (0.4 + aSeed * 0.6);
-    vec3 pos = base
-      + drift * mag * 0.55
-      + tang * mag * 0.22
-      + seededDir * mag * 0.18
-      + churn * move * 0.24;
-
-    pos += flow(base * 1.15 + vec3(aSeed * 6.2831), uTime * 0.22) * 0.016;
+    float travel = age * (0.5 + aSeed * 0.9) * 2.4;
+    vec3 pos = home + dir * travel + curl * age * 0.22;
+    // gentle constant shimmer before it really moves
+    pos += flow(home * 1.15 + vec3(aSeed * 6.2831), uTime * 0.25) * 0.012 * (1.0 - vAge);
 
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mv;
 
-    float sizeVar = (0.7 + aSeed * 0.6) * (1.0 + scatter * 0.7);
-    sizeVar *= mix(1.0, 0.55, uContour * (1.0 - hair));
-    sizeVar *= mix(1.0, 0.4, uSettle);
+    float sizeVar = (0.75 + aSeed * 0.7);
+    sizeVar *= mix(0.7, 1.25, vBurn);          // briefly bigger as it flares
+    sizeVar *= mix(1.0, 0.35, vAge);           // shrinks as it cools
     float px = uSize * sizeVar * uPixelRatio * (uScale / max(-mv.z, 0.001));
-    gl_PointSize = clamp(px, 1.0, 90.0);
+    gl_PointSize = clamp(px, 1.0, 80.0);
 
-    // Diffuse shading from the baked head normal so the resting portrait reads
-    // as a lit volume, not a flat sheet of points. Warm key from front-upper-
-    // right; a softer ember rim from lower-left behind. normalMatrix carries the
-    // head-group tilt + camera, so the shading tracks the pitch-back. Relaxes to
-    // flat as the face dissolves into the nerve cloud (uPortrait -> ~0).
+    // A little residual lighting from the surface it just left, fading with age.
     vec3 nrm = normalize(normalMatrix * aNormal);
     float key = max(dot(nrm, normalize(vec3(0.5, 0.42, 0.78))), 0.0);
-    float rimT = pow(max(dot(nrm, normalize(vec3(-0.72, -0.05, -0.32))), 0.0), 1.6);
-    float shade = 0.34 + 0.92 * key;
-    vLight = mix(1.0, shade, uPortrait);
-    vRim = mix(0.0, rimT * 0.5, uPortrait);
+    vLight = mix(0.34 + 0.92 * key, 1.0, vAge);
 
-    // Topographic isolines: a smooth height-ish field (mostly Y, undulating
-    // with X and Z) sliced into contours, so the lines wrap the face like a
-    // relief map instead of flat venetian blinds. Drifts slowly = "scanning".
-    float field = base.y * 6.5 + sin(base.x * 3.4) * 0.6 + base.z * 2.2 - uTime * 0.05;
-    float iso = abs(fract(field) - 0.5) * 2.0;
-    vContourLine = smoothstep(0.62, 0.98, iso) * uContour * (1.0 - hair);
-
-    float radial = length(base);
-    float tip = smoothstep(1.05, 1.9, radial) * uTipGlow;
-    float glowE = scatter * (0.5 + aSeed * 0.7) * (1.0 - skinLock);
-    float twinkle = 0.85 + 0.15 * sin(uTime * 1.8 + aSeed * 30.0);
-    vGlow = clamp(max(glowE, tip * (0.55 + aSeed * 0.45)) * twinkle, 0.0, 1.0);
-    vGlow *= (1.0 - uSettle * 0.85); // the remnant debris shouldn't glow hot
-    vColor = aColor;
+    float twinkle = 0.8 + 0.2 * sin(uTime * 2.0 + aSeed * 30.0);
+    vColor = aColor * twinkle;
+    // keep uTipGlow referenced (tuning hook for tip brightness)
+    vLight += uTipGlow * 0.0;
   }
 `
 
@@ -141,49 +111,33 @@ export const particleFragmentShader = /* glsl */ `
   uniform vec3 uColorEmber;
   uniform vec3 uColorHot;
   uniform vec3 uStrand;
-  uniform float uPortrait;
-  uniform float uContour;
   uniform float uSettle;
 
-  varying float vGlow;
   varying vec3 vColor;
-  varying float vContourLine;
-  varying float vHair;
+  varying float vAge;
+  varying float vBurn;
   varying float vLight;
-  varying float vRim;
 
   void main() {
     vec2 uv = gl_PointCoord - 0.5;
     float d = length(uv);
     if (d > 0.5) discard;
-    float alpha = smoothstep(0.5, 0.1, d);
+    float alpha = smoothstep(0.5, 0.12, d);
 
-    vec3 structural = mix(uColorLight, uColorEmber, smoothstep(0.06, 0.6, vGlow));
-    structural = mix(structural, uColorHot, smoothstep(0.6, 1.0, vGlow));
+    // Skin colour when fresh -> pale dust as it cools.
+    vec3 skin = vColor * vLight;
+    vec3 dust = mix(uColorLight, uStrand, 0.6);
+    vec3 col = mix(skin, dust, clamp(vAge * 1.4, 0.0, 1.0));
 
-    // Photo scheme: the sampled skin colour, lit by the baked surface normal
-    // (vLight diffuse + vRim ember edge) so the resting cloud has real volume,
-    // then pushed to a hot ember where the burn front is passing.
-    vec3 lit = vColor * vLight + uColorEmber * vRim;
-    vec3 photo = mix(lit, uColorHot, smoothstep(0.45, 1.0, vGlow));
+    // Ember flash at the moment it detaches — tight, at the front only.
+    col = mix(col, uColorHot, vBurn * 0.6);
+    col += uColorEmber * vBurn * 0.22;
 
-    // Contour scheme: the face reads as a dim topographic shell with bright
-    // warm-white isolines — not mostly-invisible. Between-line particles stay
-    // at ~40% so the head keeps its form through the flip.
-    vec3 shell = mix(vColor * 0.5, uStrand, 0.35);
-    vec3 lineCol = uStrand;
-    vec3 contourCol = mix(shell, lineCol, vContourLine);
-    float skinContour = uContour * (1.0 - vHair);
-    photo = mix(photo, contourCol, skinContour);
-    alpha *= mix(1.0, mix(0.4, 1.0, vContourLine), skinContour);
+    // Fade: a touch as it ages, hard once the strands lead.
+    alpha *= mix(1.0, 0.28, vAge);
+    alpha *= mix(1.0, 0.05, uSettle);
 
-    vec3 col = mix(structural, photo, uPortrait);
-    float boost = 1.0 + vGlow * mix(1.5, 0.8, uPortrait) + vContourLine * 1.6;
-    col *= boost;
-
-    // Fade hard to a whisper of drifting embers so the filaments own the frame.
-    alpha *= mix(1.0, 0.04, uSettle);
-
-    gl_FragColor = vec4(col, alpha);
+    float boost = 1.0 + vBurn * 1.6;
+    gl_FragColor = vec4(col * boost, alpha);
   }
 `
