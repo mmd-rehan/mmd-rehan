@@ -51,6 +51,7 @@ export function HeadMesh({ progress }: { progress: MutableRefObject<number> }) {
           uFlat: { value: new THREE.Vector3(0.72, 0.55, 0.44) },
           uDissolve: { value: 0 },
           uContour: { value: 0 },
+          uTurn: { value: 0 },
           uTime: { value: 0 },
           uAmber: { value: new THREE.Vector3(AMBER_RGB.r, AMBER_RGB.g, AMBER_RGB.b) },
           uYellow: { value: new THREE.Vector3(YELLOW_RGB.r, YELLOW_RGB.g, YELLOW_RGB.b) },
@@ -79,10 +80,11 @@ export function HeadMesh({ progress }: { progress: MutableRefObject<number> }) {
   useFrame((_, delta) => {
     const mats = matsRef.current
     if (mats.length === 0) return
-    const { dissolve, contour } = slicePhasesAt(progress.current)
+    const { dissolve, contour, turn } = slicePhasesAt(progress.current)
     for (const m of mats) {
       m.uniforms.uDissolve.value = dissolve * DISSOLVE_MAX
       m.uniforms.uContour.value = contour
+      m.uniforms.uTurn.value = turn
       m.uniforms.uTime.value += delta
     }
   })
