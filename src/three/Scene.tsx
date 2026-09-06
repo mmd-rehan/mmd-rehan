@@ -11,6 +11,7 @@ import * as THREE from 'three'
 import { ParticleField } from './ParticleField'
 import { Filaments } from './Filaments'
 import { HeadMesh } from './HeadMesh'
+import { CoreGlow } from './CoreGlow'
 import type { TargetSet } from './targets'
 import type { DeviceTier } from '../lib/deviceTier'
 import { slicePhasesAt } from '../lib/slicePhases'
@@ -144,6 +145,7 @@ export function Scene({ targets, tier, progress, active = true }: SceneProps) {
         {/* Strands live in the identity frame — the cable / sphere / vortex
             forms are composed there, not in the pitched-back head frame. */}
         <Filaments strandCount={strandCount} progress={progress} />
+        <CoreGlow progress={progress} />
         <CameraRig progress={progress} />
         <EffectComposer>
           <Bloom
