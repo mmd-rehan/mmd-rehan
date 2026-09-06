@@ -75,7 +75,7 @@ export function CoreGlow({ progress }: { progress: MutableRefObject<number> }) {
   return (
     // Compact — a small blazing centre, not a bloom that swallows the disc.
     <mesh ref={meshRef} position={FINALE_CENTER} renderOrder={4} frustumCulled={false}>
-      <planeGeometry args={[1.15, 1.15]} />
+      <planeGeometry args={[0.46, 0.46]} />
       <shaderMaterial
         ref={matRef}
         uniforms={uniforms}
