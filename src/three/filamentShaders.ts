@@ -149,15 +149,21 @@ export const filamentFragmentShader = /* glsl */ `
     float coolBeat = smoothstep(0.48, 0.58, vEnergy) * (1.0 - smoothstep(0.58, 0.68, vEnergy));
     col = mix(col, uCool, coolBeat * 0.12);
 
-    // hot bleed on the innermost vortex cords (CoreGlow does the blazing centre)
-    float coreGlow = (1.0 - smoothstep(0.0, 0.16, vU)) * smoothstep(0.82, 0.94, vEnergy);
-    col = mix(col, uHot, coreGlow * 0.8);
+    // Radial heat: the cords are incandescent where they meet the core and cool
+    // to white toward the rim — the reference's red-orange centre bleeding out
+    // along the inner third of each cord.
+    float inCore = smoothstep(0.72, 0.86, vEnergy);
+    float heat = (1.0 - smoothstep(0.03, 0.40, vU)) * inCore;
+    col = mix(col, uAmber * (0.75 + 0.45 * diff), heat * 0.9);
+    col = mix(col, uYellow, pow(heat, 2.0) * 0.85);
+    float coreGlow = pow(heat, 3.0);
+    col = mix(col, uHot, coreGlow * 0.9);
 
     // Incandescent growing end — lights the cord from inside.
     col = mix(col, uYellow, vFront * 0.6);
     col = mix(col, uAmber, vFront * vFront * 0.5);
 
-    float over = 1.0 + coreGlow * 1.8 + vFront * 0.6;
+    float over = 1.0 + heat * 0.9 + coreGlow * 2.2 + vFront * 0.6;
     gl_FragColor = vec4(col * over, 1.0);
   }
 `

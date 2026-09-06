@@ -34,10 +34,10 @@ const fragment = /* glsl */ `
   void main() {
     float d = length(vUv - 0.5) * 2.0;
     if (d > 1.0) discard;
-    float core = pow(1.0 - clamp(d / 0.28, 0.0, 1.0), 2.0);
-    float halo = pow(1.0 - d, 2.2);
-    vec3 col = uHot * core + uWarm * halo * 0.7 + uRim * pow(halo, 3.0) * 0.4;
-    float a = (core * 1.3 + halo * 0.5) * uOpacity;
+    float core = pow(1.0 - clamp(d / 0.22, 0.0, 1.0), 2.0);
+    float halo = pow(1.0 - d, 3.0);
+    vec3 col = uHot * core + uWarm * halo * 0.8 + uRim * pow(halo, 2.0) * 0.6;
+    float a = (core * 1.4 + halo * 0.35) * uOpacity;
     gl_FragColor = vec4(col, a);
   }
 `
@@ -60,16 +60,17 @@ export function CoreGlow({ progress }: { progress: MutableRefObject<number> }) {
 
   useFrame(({ camera }) => {
     const t = progress.current
-    const appear = smoothstep(0.6, 0.72, t)
-    const bloom = 0.45 + 0.55 * smoothstep(0.75, 0.92, t)
+    const appear = smoothstep(0.62, 0.74, t)
+    const bloom = 0.4 + 0.6 * smoothstep(0.76, 0.92, t)
     const fadeOut = 1 - smoothstep(0.985, 1, t)
     if (matRef.current) matRef.current.uniforms.uOpacity.value = appear * bloom * fadeOut
     if (meshRef.current) meshRef.current.quaternion.copy(camera.quaternion)
   })
 
   return (
+    // Compact — a small blazing centre, not a bloom that swallows the disc.
     <mesh ref={meshRef} position={FINALE_CENTER} renderOrder={4} frustumCulled={false}>
-      <planeGeometry args={[3.4, 3.4]} />
+      <planeGeometry args={[1.5, 1.5]} />
       <shaderMaterial
         ref={matRef}
         uniforms={uniforms}

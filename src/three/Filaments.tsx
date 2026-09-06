@@ -147,7 +147,7 @@ export function Filaments({ strandCount, progress, headMatrix }: FilamentsProps)
     mat.uniforms.uHeadMat.value.copy(headMatrix.current)
     // Chunky cord throughout — the reference is macramé rope, not hair. A touch
     // thinner once they spread into the wide field so it doesn't turn to soup.
-    mat.uniforms.uWidth.value = lerp(0.052, 0.034, Math.min(1, Math.max(0, (t - 0.42) / 0.22)))
+    mat.uniforms.uWidth.value = lerp(0.042, 0.028, Math.min(1, Math.max(0, (t - 0.42) / 0.22)))
     mat.uniforms.uReveal.value =
       Math.min(1, filament * 5) * (1 - Math.max(0, (t - 0.97) / 0.03))
   })
