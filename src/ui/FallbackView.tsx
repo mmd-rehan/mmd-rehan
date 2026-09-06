@@ -1,5 +1,6 @@
 import { CHAPTERS, CONTACT } from '../content/chapters'
 import { ChapterSection } from './ChapterText'
+import { SiteContent } from './SiteContent'
 
 interface FallbackViewProps {
   /** Show the portrait image if available (no-WebGL path). */
@@ -42,6 +43,8 @@ export function FallbackView({ showPortrait, reason }: FallbackViewProps) {
       {CHAPTERS.filter((c) => c.id !== 'intro').map((chapter) => (
         <ChapterSection key={chapter.id} chapter={chapter} />
       ))}
+
+      <SiteContent />
     </main>
   )
 }

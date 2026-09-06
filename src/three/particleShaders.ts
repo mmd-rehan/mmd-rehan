@@ -2,8 +2,10 @@
  * GLSL for the particle field.
  *
  * The portrait points morph toward the nerve cloud by uBlend (per-particle
- * stagger keeps structure on screen). Three explicit phase uniforms shape the
- * beats:
+ * stagger keeps structure on screen). Explicit phase uniforms shape the beats:
+ *   uPortrait — 1 = the real head: sampled skin colour lit by the baked surface
+ *               normal (aNormal) so the resting point cloud reads as a volume,
+ *               not a flat decal. Falls toward 0 as the face dissolves.
  *   uContour  — skin particles hold the surface and resolve into warm-white
  *               topographic isolines; dark hair / beard particles fly as debris.
  *   uBlend    — position morph portrait -> nerve cloud (driven by the dissolve
@@ -19,6 +21,7 @@ export const particleVertexShader = /* glsl */ `
   attribute vec3 aTo;
   attribute float aSeed;
   attribute vec3 aColor;
+  attribute vec3 aNormal;
 
   uniform float uBlend;
   uniform float uTime;
@@ -29,13 +32,13 @@ export const particleVertexShader = /* glsl */ `
   uniform float uContour;
   uniform float uPortrait;
   uniform float uSettle;
-  uniform float uPortraitReveal;
 
   varying float vGlow;
   varying vec3 vColor;
   varying float vContourLine;
   varying float vHair;
-  varying float vReveal;
+  varying float vLight;
+  varying float vRim;
 
   float luma(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 
@@ -102,6 +105,18 @@ export const particleVertexShader = /* glsl */ `
     float px = uSize * sizeVar * uPixelRatio * (uScale / max(-mv.z, 0.001));
     gl_PointSize = clamp(px, 1.0, 90.0);
 
+    // Diffuse shading from the baked head normal so the resting portrait reads
+    // as a lit volume, not a flat sheet of points. Warm key from front-upper-
+    // right; a softer ember rim from lower-left behind. normalMatrix carries the
+    // head-group tilt + camera, so the shading tracks the pitch-back. Relaxes to
+    // flat as the face dissolves into the nerve cloud (uPortrait -> ~0).
+    vec3 nrm = normalize(normalMatrix * aNormal);
+    float key = max(dot(nrm, normalize(vec3(0.5, 0.42, 0.78))), 0.0);
+    float rimT = pow(max(dot(nrm, normalize(vec3(-0.72, -0.05, -0.32))), 0.0), 1.6);
+    float shade = 0.34 + 0.92 * key;
+    vLight = mix(1.0, shade, uPortrait);
+    vRim = mix(0.0, rimT * 0.5, uPortrait);
+
     // Topographic isolines: a smooth height-ish field (mostly Y, undulating
     // with X and Z) sliced into contours, so the lines wrap the face like a
     // relief map instead of flat venetian blinds. Drifts slowly = "scanning".
@@ -116,7 +131,6 @@ export const particleVertexShader = /* glsl */ `
     vGlow = clamp(max(glowE, tip * (0.55 + aSeed * 0.45)) * twinkle, 0.0, 1.0);
     vGlow *= (1.0 - uSettle * 0.85); // the remnant debris shouldn't glow hot
     vColor = aColor;
-    vReveal = uPortraitReveal;
   }
 `
 
@@ -135,21 +149,23 @@ export const particleFragmentShader = /* glsl */ `
   varying vec3 vColor;
   varying float vContourLine;
   varying float vHair;
-  varying float vReveal;
+  varying float vLight;
+  varying float vRim;
 
   void main() {
     vec2 uv = gl_PointCoord - 0.5;
     float d = length(uv);
     if (d > 0.5) discard;
     float alpha = smoothstep(0.5, 0.1, d);
-    // vReveal (uPortraitReveal) is plumbed through for a future photoreal-mesh
-    // handoff (see HeadMesh.tsx's follow-up note) but not applied yet — the
-    // particle portrait is the only hero right now, so it stays fully visible.
 
     vec3 structural = mix(uColorLight, uColorEmber, smoothstep(0.06, 0.6, vGlow));
     structural = mix(structural, uColorHot, smoothstep(0.6, 1.0, vGlow));
 
-    vec3 photo = mix(vColor, uColorHot, smoothstep(0.45, 1.0, vGlow));
+    // Photo scheme: the sampled skin colour, lit by the baked surface normal
+    // (vLight diffuse + vRim ember edge) so the resting cloud has real volume,
+    // then pushed to a hot ember where the burn front is passing.
+    vec3 lit = vColor * vLight + uColorEmber * vRim;
+    vec3 photo = mix(lit, uColorHot, smoothstep(0.45, 1.0, vGlow));
 
     // Contour scheme: the face reads as a dim topographic shell with bright
     // warm-white isolines — not mostly-invisible. Between-line particles stay
