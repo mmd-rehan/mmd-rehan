@@ -1,13 +1,18 @@
 import { STRAND_FORMS_GLSL } from './strandForms'
 
 /**
- * GLSL for the filament strands — the "neurons".
+ * GLSL for the filament strands — the white cords.
+ *
+ * The reference reads as thick, OPAQUE macramé-style cord: each strand is a
+ * solid round rope with a lit top, shaded flanks and a soft twist, so a bundle
+ * of them shows every individual cord instead of blending into haze. That is
+ * what this shader draws — not translucent hairs.
  *
  * Geometry is a flat ribbon strip per strand (2 verts per lengthwise sample).
- * The centre-line is computed in the vertex shader by `strandPoint`, which
- * morphs each strand across head → cable → sphere → vortex by uT. We sample it
- * at u±eps for a tangent and offset each edge vert perpendicular to that
- * tangent in view space, so the ribbon always faces the camera.
+ * The centre-line is computed by `strandPoint`, which morphs each strand across
+ * head → cable → sphere → vortex by uT. We sample it at u±eps for a tangent and
+ * offset each edge vert perpendicular to it in view space, so the ribbon faces
+ * the camera; `vSide` then lets the fragment shader shade it as a cylinder.
  *
  * aStrand (0..1 id), aU (0 root .. 1 tip), aSide (-1 / +1 ribbon edge),
  * aRoot / aTipHead give the head-phase endpoints. uGrow reveals each strand
@@ -35,6 +40,8 @@ export const filamentVertexShader = /* glsl */ `
   varying float vAlpha;
   varying float vEnergy;
   varying float vFront;
+  varying float vSide;
+  varying float vTone;
 
   ${STRAND_FORMS_GLSL}
 
@@ -43,8 +50,8 @@ export const filamentVertexShader = /* glsl */ `
     g = g * g * (3.0 - 2.0 * g);
     float revealed = smoothstep(aU - 0.14, aU - 0.01, g);
 
-    // The growing end of each fibre is incandescent — the reference's orange
-    // fibre tips. Dies away once the strand has finished extending.
+    // The growing end of each cord is incandescent — the reference's glowing
+    // fibre ends. Dies away once the cord has finished extending.
     vFront = smoothstep(0.045, 0.0, abs(aU - g)) * (1.0 - smoothstep(0.85, 1.0, g));
 
     float eps = 0.014;
@@ -70,14 +77,17 @@ export const filamentVertexShader = /* glsl */ `
     vec3 side = sideLen > 1e-3
       ? sideRaw / sideLen
       : normalize(cross(tang, vec3(0.0, 1.0, 0.0)) + vec3(0.001));
-    float facing = smoothstep(0.12, 0.42, sideLen);
+    float facing = smoothstep(0.10, 0.34, sideLen);
 
-    float width = uWidth * (0.35 + 0.65 * (1.0 - aU));
+    // Cords keep most of their girth to the tip — they are rope, not hair.
+    float width = uWidth * (0.72 + 0.28 * (1.0 - aU));
     mv.xyz += side * aSide * width;
 
     gl_Position = projectionMatrix * mv;
 
     vU = aU;
+    vSide = aSide;
+    vTone = fract(sin(aStrand * 91.37) * 43758.5453);
     vTip = smoothstep(0.7, 1.0, aU);
     vAlpha = revealed * uReveal * facing;
     vEnergy = uT;
@@ -98,42 +108,56 @@ export const filamentFragmentShader = /* glsl */ `
   varying float vAlpha;
   varying float vEnergy;
   varying float vFront;
+  varying float vSide;
+  varying float vTone;
 
   void main() {
-    if (vAlpha < 0.02) discard;
+    if (vAlpha < 0.45) discard;
 
-    // A defined fibre — a muted stone-grey body so dense overlaps read as
-    // structure, not a white haze. Tips warm to yellow / amber — sparingly, so
-    // the sphere stays cream-white and only the vortex arms really glow.
-    vec3 col = mix(uStrand, vec3(0.66, 0.67, 0.64), 0.6);
+    // ---- Cylindrical cord ------------------------------------------------
+    // vSide runs -1..1 across the ribbon. Treating it as a cylinder cross
+    // section gives each cord a lit crown and shaded flanks — the single thing
+    // that makes a bundle read as separate ropes instead of a white smear.
+    float s = clamp(vSide, -1.0, 1.0);
+    float r = sqrt(max(0.0, 1.0 - s * s));
+    if (r < 0.12) discard;                       // clean round edge
+
+    // surface normal in the ribbon's frame, lit from the upper left
+    vec3 nrm = normalize(vec3(s, 0.0, r));
+    vec3 L = normalize(vec3(-0.45, 0.0, 0.89));
+    float diff = max(dot(nrm, L), 0.0);
+    float spec = pow(diff, 12.0);
+
+    // Twist: a soft helical banding along the cord, so it reads as spun yarn.
+    float twist = 0.5 + 0.5 * sin(vU * 210.0 + s * 2.0 + vTone * 6.28);
+    float shade = 0.30 + 0.62 * diff + 0.16 * spec;
+    shade *= 0.93 + 0.07 * twist;
+    // ambient occlusion into the flanks so neighbours separate
+    shade *= 0.62 + 0.38 * r;
+
+    vec3 cord = uStrand * (0.90 + 0.16 * vTone);
+    vec3 col = cord * shade;
+    // cool bounce in the shadowed flank keeps it sitting in the palette
+    col += uCool * (1.0 - diff) * 0.05;
+
+    // Warm ends, held back through the sphere so it stays cream-white there.
     float warmAmt = mix(1.0, 0.45, smoothstep(0.62, 0.72, vEnergy) * (1.0 - smoothstep(0.82, 0.9, vEnergy)));
-    col = mix(col, uYellow, smoothstep(0.60, 0.9, vTip) * warmAmt);
-    col = mix(col, uAmber, smoothstep(0.9, 1.0, vTip) * warmAmt);
+    col = mix(col, uYellow * (0.65 + 0.5 * diff), smoothstep(0.62, 0.92, vTip) * warmAmt);
+    col = mix(col, uAmber * (0.7 + 0.5 * diff), smoothstep(0.92, 1.0, vTip) * warmAmt);
 
     // a whisper of cool energy only while the cable is forming
     float coolBeat = smoothstep(0.48, 0.58, vEnergy) * (1.0 - smoothstep(0.58, 0.68, vEnergy));
-    col = mix(col, uCool, coolBeat * 0.16);
+    col = mix(col, uCool, coolBeat * 0.12);
 
-    // a little hot bleed on the innermost vortex strands (the CoreGlow sprite
-    // does most of the blazing-centre work)
+    // hot bleed on the innermost vortex cords (CoreGlow does the blazing centre)
     float coreGlow = (1.0 - smoothstep(0.0, 0.16, vU)) * smoothstep(0.82, 0.94, vEnergy);
     col = mix(col, uHot, coreGlow * 0.8);
 
-    // Dense while erupting from the head (this is the hero moment and has to
-    // read clearly on the pale ground), then lighter once they're a wide field,
-    // denser again when packed into the sphere / vortex.
-    float erupt = 1.0 - smoothstep(0.42, 0.62, vEnergy);
-    float density = mix(0.15, 0.26, smoothstep(0.60, 0.80, vEnergy));
-    density = mix(density, 0.72, erupt);
-    // Incandescent growing end — a small amber point at each fibre tip, not a
-    // wall of light.
-    col = mix(col, uYellow, vFront * 0.55);
-    col = mix(col, uAmber, vFront * vFront * 0.45);
+    // Incandescent growing end — lights the cord from inside.
+    col = mix(col, uYellow, vFront * 0.6);
+    col = mix(col, uAmber, vFront * vFront * 0.5);
 
-    float bodyA = density * smoothstep(0.02, 0.18, vU) * (1.0 - smoothstep(0.85, 1.0, vU) * 0.4);
-    float a = mix(bodyA, mix(0.55, 0.95, erupt), vTip) + coreGlow * 0.4 + vFront * 0.28;
-    float over = 1.0 + vTip * 0.4 + coreGlow * 1.8 + vFront * 0.5;
-
-    gl_FragColor = vec4(col * over, clamp(a, 0.0, 1.0) * vAlpha);
+    float over = 1.0 + coreGlow * 1.8 + vFront * 0.6;
+    gl_FragColor = vec4(col * over, 1.0);
   }
 `
