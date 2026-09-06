@@ -7,7 +7,7 @@ import { filamentVertexShader, filamentFragmentShader } from './filamentShaders'
 import { slicePhasesAt } from '../lib/slicePhases'
 import { STRAND_RGB, EMBER_RGB, EMBER_HOT_RGB } from '../theme'
 
-/** Head model the filament roots grow from — matches targets/portrait.ts. */
+/** Head model the filament roots grow from — matches targets/headCloud.ts. */
 const HEAD_CENTER = new THREE.Vector3(0, 0.15, 0)
 const HEAD_RADII = new THREE.Vector3(0.78, 1.05, 0.9)
 

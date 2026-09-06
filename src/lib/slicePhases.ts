@@ -1,17 +1,15 @@
 /**
- * Slice 1 choreography. The generic timeline (`morphStateAt`) drives which two
- * shapes blend; this maps global progress `t` to the *beats* of the portrait →
- * flip → neurons sequence, so each beat can start and end where it should
- * instead of all riding one blend value.
+ * Hero choreography. Maps global scroll progress `t` ∈ [0,1] to the beats of
+ * the portrait → flip → neurons sequence, so each beat starts and ends where it
+ * should instead of all riding one blend value.
  *
  * Beat order (deliberately overlapping):
- *   0.00–0.08  photoreal scanned head, still
- *   0.08–0.22  crossfade: mesh fades out as the particle portrait fades in
- *   0.06–0.32  head pitches back — face still coherent
- *   0.12–0.32  skin resolves into topographic contour lines
- *   0.42–0.70  face disintegrates; particles morph to the nerve cloud
- *   0.34–0.76  filaments grow out from the head
- *   0.58–0.86  everything settles: particles fade to faint debris, strands lead
+ *   0.00–0.06  the head, still — a portrait made of points
+ *   0.06–0.34  it pitches back, face still coherent
+ *   0.12–0.34  skin resolves into topographic contour lines
+ *   0.40–0.68  the face disintegrates; points morph to the nerve cloud
+ *   0.32–0.74  filaments grow outward from where the head was
+ *   0.58–0.86  everything settles: points fade to faint debris, strands lead
  */
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
@@ -29,23 +27,17 @@ export interface SlicePhases {
   dissolve: number
   /** 0 = no strands, 1 = strands fully grown. */
   filament: number
-  /** 0 = particles full, 1 = particles are faint drifting debris. */
+  /** 0 = points full, 1 = points are faint drifting debris. */
   settle: number
-  /** 1 = photoreal scanned head fully opaque, 0 = fully faded out. */
-  meshOpacity: number
-  /** 0 = particle portrait hidden (mesh is carrying the hero), 1 = fully shown. */
-  portraitReveal: number
 }
 
 export function slicePhasesAt(t: number): SlicePhases {
-  const tilt = smoothstep(0.06, 0.32, t)
-  const contourIn = smoothstep(0.12, 0.32, t)
-  const contourOut = smoothstep(0.64, 0.84, t)
+  const tilt = smoothstep(0.06, 0.34, t)
+  const contourIn = smoothstep(0.12, 0.34, t)
+  const contourOut = smoothstep(0.62, 0.82, t)
   const contour = contourIn * (1 - contourOut)
-  const dissolve = smoothstep(0.42, 0.7, t)
-  const filament = smoothstep(0.34, 0.76, t)
+  const dissolve = smoothstep(0.4, 0.68, t)
+  const filament = smoothstep(0.32, 0.74, t)
   const settle = smoothstep(0.58, 0.86, t)
-  const meshOpacity = 1 - smoothstep(0.08, 0.26, t)
-  const portraitReveal = smoothstep(0.04, 0.22, t)
-  return { tilt, contour, dissolve, filament, settle, meshOpacity, portraitReveal }
+  return { tilt, contour, dissolve, filament, settle }
 }

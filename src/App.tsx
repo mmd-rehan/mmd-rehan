@@ -3,17 +3,19 @@ import { detectDeviceTier, type DeviceTier } from './lib/deviceTier'
 import { buildTargets, type TargetSet } from './three/targets'
 import { morphStateAt } from './lib/timeline'
 import { useScrollProgress } from './hooks/useScrollProgress'
+import { HERO_SPACER_ID } from './lib/heroScroll'
 import { Scene } from './three/Scene'
 import { Header } from './ui/Header'
 import { ChapterText } from './ui/ChapterText'
 import { RightIndex } from './ui/RightIndex'
 import { ScrollHint } from './ui/ScrollHint'
 import { FallbackView } from './ui/FallbackView'
+import { SiteContent } from './ui/SiteContent'
 import { Loader } from './ui/Loader'
 import { CHAPTERS } from './content/chapters'
 
-/** Total scroll room, in viewport heights, that the timeline is mapped across.
- *  Slice 1: enough to scrub the flip smoothly without an endless page. */
+/** Total scroll room, in viewport heights, that the hero timeline is mapped
+ *  across — enough to scrub the flip smoothly without an endless page. */
 const SCROLL_VH = Math.max(5, CHAPTERS.length * 2.2)
 
 export default function App() {
@@ -38,6 +40,11 @@ export default function App() {
 
   const { current: progressRef } = useScrollProgress(immersive ? onScroll : undefined)
 
+  // The hero's transforming beats are done well before t=1 (settle finishes at
+  // ~0.86). Past that we fade the fixed hero layer out to reveal the readable
+  // site sitting behind it, and park the render loop.
+  const pastHero = progressPct >= 0.9
+
   // Build particle targets once, only if we'll actually render them.
   useEffect(() => {
     if (!immersive) return
@@ -50,10 +57,7 @@ export default function App() {
     }
   }, [immersive, tier.particleCount])
 
-  const scrollRoomStyle = useMemo(
-    () => ({ height: `${SCROLL_VH * 100}vh` }),
-    [],
-  )
+  const scrollRoomStyle = useMemo(() => ({ height: `${SCROLL_VH * 100}vh` }), [])
 
   if (!immersive) {
     return (
@@ -67,24 +71,41 @@ export default function App() {
   return (
     <>
       <a id="top" />
-      {/* Fixed WebGL layer */}
-      {targets ? (
-        <Scene targets={targets} tier={tier} progress={progressRef} />
-      ) : (
-        <Loader />
-      )}
 
-      {/* Atmospheric vignette so the lit form reads against deeper edges */}
-      <div className="vignette" aria-hidden="true" />
+      {/* Fixed cinematic hero: WebGL layer + its own 2D chrome. Fades and parks
+          its render loop once you scroll past it. */}
+      <div
+        className={`hero-stage ${pastHero ? 'hero-stage--hidden' : ''}`}
+        aria-hidden={pastHero || undefined}
+      >
+        {targets ? (
+          <Scene
+            targets={targets}
+            tier={tier}
+            progress={progressRef}
+            active={!pastHero}
+          />
+        ) : (
+          <Loader />
+        )}
+        <div className="vignette" aria-hidden="true" />
+        <ChapterText activeIndex={activeIndex} />
+        <RightIndex activeIndex={activeIndex} progress={progressPct} />
+        <ScrollHint visible={hintVisible && !!targets} />
+      </div>
 
-      {/* Fixed 2D chrome over the canvas */}
       <Header calm={calm} onToggleCalm={() => setCalm((c) => !c)} />
-      <ChapterText activeIndex={activeIndex} />
-      <RightIndex activeIndex={activeIndex} progress={progressPct} />
-      <ScrollHint visible={hintVisible && !!targets} />
 
-      {/* Invisible tall spacer that provides the scroll room the timeline maps to */}
-      <div className="scroll-room" style={scrollRoomStyle} aria-hidden="true" />
+      {/* Tall spacer that provides the scroll room the hero timeline maps to. */}
+      <div
+        id={HERO_SPACER_ID}
+        className="scroll-room"
+        style={scrollRoomStyle}
+        aria-hidden="true"
+      />
+
+      {/* Readable site — sits behind the hero layer, revealed by its fade. */}
+      <SiteContent underHero />
     </>
   )
 }

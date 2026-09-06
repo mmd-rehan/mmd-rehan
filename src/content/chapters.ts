@@ -11,13 +11,7 @@
  */
 
 /** The shapes the single particle buffer can take. */
-export type TargetKey =
-  | 'portrait'
-  | 'nerves'
-  | 'signal'
-  | 'flightArc'
-  | 'hashGrid'
-  | 'torus'
+export type TargetKey = 'portrait' | 'nerves'
 
 export interface Chapter {
   id: string
@@ -65,32 +59,13 @@ export const CONTACT = {
   medium: 'https://medium.com/@mrrehan',
 } as const
 
-/** Nav items in the header pill. Each scrolls to its chapter's position. */
+/**
+ * Header nav. `chapter` items scroll within the cinematic timeline; `section`
+ * items scroll to a DOM section id in the readable content below the hero.
+ */
 export const NAV_ITEMS = [
-  { label: 'The craft', chapterId: 'nerves' },
-  { label: 'About', chapterId: 'intro' },
-  { label: 'Contact', chapterId: 'nerves' },
+  { label: 'The craft', kind: 'chapter', target: 'nerves' },
+  { label: 'About', kind: 'section', target: 'about' },
+  { label: 'Work', kind: 'section', target: 'work' },
+  { label: 'Contact', kind: 'section', target: 'contact' },
 ] as const
-
-export interface ProjectLink {
-  label: string
-  url: string
-}
-
-export interface ProjectMetric {
-  label: string
-  value: string
-}
-
-export interface ProjectDetail {
-  id: string
-  company: string
-  period: string
-  title: string
-  role: string
-  summary: string
-  metrics: ProjectMetric[]
-  highlights: string[]
-  technologies: string[]
-  links?: ProjectLink[]
-}

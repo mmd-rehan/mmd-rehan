@@ -11,34 +11,16 @@ import {
   EMBER_HOT_RGB,
   PARTICLE_LIGHT_RGB,
   STRAND_RGB,
-  DOMAIN_GLOW,
 } from '../theme'
 import type { TargetKey } from '../content/chapters'
 
 /** How strongly each shape lights its outer particles at rest. */
-const TIP_GLOW: Record<TargetKey, number> = {
-  portrait: 0.1,
-  nerves: 0.7,
-  signal: 0.5,
-  flightArc: 0.62,
-  hashGrid: 0.32,
-  torus: 0.52,
-}
+const TIP_GLOW: Record<TargetKey, number> = { portrait: 0.08, nerves: 0.7 }
 
-/** How "portrait" a shape is: 1 shows the real photo colour, 0 the ember scheme. */
-const PORTRAITNESS: Record<TargetKey, number> = {
-  portrait: 1,
-  nerves: 0.4,
-  signal: 0,
-  flightArc: 0,
-  hashGrid: 0,
-  torus: 0,
-}
+/** How "portrait" a shape is: 1 shows the real head colour + lighting, 0 ember. */
+const PORTRAITNESS: Record<TargetKey, number> = { portrait: 1, nerves: 0.4 }
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
-
-const EMBER_FALLBACK = { mid: [1, 0.353, 0.122], hot: [1, 0.706, 0.235] } as const
-const glowFor = (key: TargetKey) => DOMAIN_GLOW[key] ?? EMBER_FALLBACK
 
 interface ParticleFieldProps {
   targets: TargetSet
@@ -49,7 +31,8 @@ interface ParticleFieldProps {
 
 /**
  * The single particle system. Owns one BufferGeometry whose aFrom/aTo
- * attributes are rewritten each frame to the two shapes being morphed, and a
+ * attributes are rewritten each frame to the two shapes being morphed, plus a
+ * static aNormal (the head surface normal, for real lighting), and a
  * ShaderMaterial whose uniforms carry blend / contour / settle / time. Knows
  * nothing about the DOM. Rotation is owned by the parent group in Scene.
  */
@@ -84,6 +67,7 @@ export function ParticleField({
     geo.setAttribute('aTo', new THREE.BufferAttribute(to, 3))
     geo.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1))
     geo.setAttribute('aColor', new THREE.BufferAttribute(targets.colors, 3))
+    geo.setAttribute('aNormal', new THREE.BufferAttribute(targets.normals, 3))
     geo.setDrawRange(0, count)
     geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), 8)
     return geo
@@ -100,7 +84,6 @@ export function ParticleField({
       uContour: { value: 0 },
       uPortrait: { value: PORTRAITNESS.portrait },
       uSettle: { value: 0 },
-      uPortraitReveal: { value: 0 },
       uColorLight: {
         value: new THREE.Vector3(
           PARTICLE_LIGHT_RGB.r,
@@ -143,36 +126,18 @@ export function ParticleField({
       loaded.current = { from: state.from, to: state.to }
     }
 
-    // Slice 1: the position morph is driven by the dissolve beat (not the raw
-    // chapter blend) so the face holds its shape while the head tilts back.
+    // Position morph is driven by the dissolve beat (not the raw chapter blend)
+    // so the face holds its shape while the head tilts back.
     mat.uniforms.uBlend.value = phases.dissolve
     mat.uniforms.uTime.value += delta
     mat.uniforms.uScale.value = size.height * 0.5
     mat.uniforms.uContour.value = phases.contour
     mat.uniforms.uSettle.value = phases.settle
-    mat.uniforms.uPortraitReveal.value = phases.portraitReveal
     mat.uniforms.uTipGlow.value = lerp(TIP_GLOW.portrait, TIP_GLOW.nerves, phases.filament)
     mat.uniforms.uPortrait.value = lerp(
       PORTRAITNESS.portrait,
       PORTRAITNESS.nerves,
       phases.dissolve,
-    )
-
-    // Per-domain glow cross-fade (ember throughout for slice 1).
-    const gFrom = glowFor(state.from)
-    const gTo = glowFor(state.to)
-    const cb = state.blend
-    const ember = mat.uniforms.uColorEmber.value as THREE.Vector3
-    const hot = mat.uniforms.uColorHot.value as THREE.Vector3
-    ember.set(
-      lerp(gFrom.mid[0], gTo.mid[0], cb),
-      lerp(gFrom.mid[1], gTo.mid[1], cb),
-      lerp(gFrom.mid[2], gTo.mid[2], cb),
-    )
-    hot.set(
-      lerp(gFrom.hot[0], gTo.hot[0], cb),
-      lerp(gFrom.hot[1], gTo.hot[1], cb),
-      lerp(gFrom.hot[2], gTo.hot[2], cb),
     )
   })
 

@@ -1,22 +1,34 @@
 import { CONTACT, NAV_ITEMS, CHAPTERS } from '../content/chapters'
+import { heroScrollRange } from '../lib/heroScroll'
 
 interface HeaderProps {
   calm: boolean
   onToggleCalm: () => void
 }
 
-/** Smooth-scroll the window so global progress lands mid-way through a chapter. */
-function scrollToChapter(chapterId: string) {
-  const chapter = CHAPTERS.find((c) => c.id === chapterId)
+type NavItem = (typeof NAV_ITEMS)[number]
+
+/**
+ * Nav click. `chapter` items scrub the hero timeline to the middle of that
+ * chapter's slice (by scrolling the window into the hero spacer); `section`
+ * items scroll to a content anchor in the readable site below the hero.
+ */
+function handleNav(item: NavItem) {
+  if (item.kind === 'section') {
+    document
+      .getElementById(item.target)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    return
+  }
+  const chapter = CHAPTERS.find((c) => c.target === item.target)
   if (!chapter) return
   const mid = (chapter.start + Math.min(chapter.end, 1)) / 2
-  const max = document.documentElement.scrollHeight - window.innerHeight
-  window.scrollTo({ top: max * mid, behavior: 'smooth' })
+  window.scrollTo({ top: heroScrollRange() * mid, behavior: 'smooth' })
 }
 
 /**
  * Fixed top chrome: sparkle logo + wordmark (left), pill nav (center),
- * contact pill + calm-mode toggle (right). Mirrors the reference header.
+ * contact pill + calm-mode toggle (right). Stays visible over the whole page.
  */
 export function Header({ calm, onToggleCalm }: HeaderProps) {
   return (
@@ -35,7 +47,7 @@ export function Header({ calm, onToggleCalm }: HeaderProps) {
               <button
                 type="button"
                 className="nav__link"
-                onClick={() => scrollToChapter(item.chapterId)}
+                onClick={() => handleNav(item)}
               >
                 {item.label}
               </button>

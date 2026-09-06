@@ -66,8 +66,23 @@ a {
   pointer-events: none;
 }
 
+/* Scrim so readable content dissolves as it scrolls up under the floating
+   header instead of colliding with the pill. */
+.header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  bottom: auto;
+  height: 160px;
+  background: linear-gradient(var(--bg) 30%, transparent);
+  -webkit-mask-image: linear-gradient(#000 60%, transparent);
+  mask-image: linear-gradient(#000 60%, transparent);
+  pointer-events: none;
+}
+
 .header > * {
   pointer-events: auto;
+  position: relative;
 }
 
 .brand {
@@ -496,6 +511,427 @@ a {
   }
 }
 
+/* ============================================================
+   Readable site (below the cinematic hero)
+   ============================================================ */
+
+/* The whole hero — canvas + its 2D chrome — lives in this fixed layer. It sits
+   ABOVE the readable site (which is pulled up underneath it) and fades out as
+   one piece once the transforming beats are done, revealing the site in place
+   rather than sliding it up over a dead gap. */
+.hero-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.hero-stage--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.site {
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
+}
+
+/* Immersive path only: pulled up by one viewport so its top lands where the
+   hero timeline ends (t=1 is one screen before the spacer's bottom). The hero
+   covers it until the fade. The fallback renders .site in normal flow. */
+.site--under-hero {
+  margin-top: -100vh;
+}
+
+.section {
+  position: relative;
+  padding: clamp(80px, 12vh, 156px) var(--edge);
+  scroll-margin-top: 88px;
+}
+
+.section + .section {
+  border-top: 1px solid var(--hairline);
+}
+
+.section__inner {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.section__kicker {
+  margin: 0 0 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ember);
+}
+
+.section__title {
+  margin: 0 0 40px;
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  max-width: 22ch;
+}
+
+.prose {
+  max-width: 62ch;
+  margin-bottom: 56px;
+}
+
+.prose p {
+  margin: 0 0 18px;
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.62;
+  color: var(--ink-muted);
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- About: impact cards + traits ---------- */
+.cardgrid {
+  list-style: none;
+  margin: 0 0 64px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+}
+
+.card {
+  background: var(--bg);
+  padding: clamp(24px, 3vw, 36px);
+}
+
+.card__title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.card__body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.traits__list {
+  margin: 16px 0 0;
+}
+
+.traits__row {
+  display: grid;
+  grid-template-columns: minmax(150px, 230px) 1fr;
+  gap: 24px;
+  padding: 20px 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.traits__row dt {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.traits__row dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+/* ---------- Experience timeline ---------- */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.entry {
+  padding: 36px 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.entry:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.entry__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.entry__company {
+  margin: 0;
+  font-size: clamp(17px, 2vw, 21px);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.entry__period {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.entry__role {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: var(--ember-hot);
+}
+
+.entry__summary {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+  max-width: 68ch;
+}
+
+.entry__highlights {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.entry__highlights li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  max-width: 74ch;
+}
+
+.entry__highlights li::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  background: var(--ember);
+  border-radius: 50%;
+}
+
+/* ---------- Selected work ---------- */
+.worklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.work__card {
+  display: block;
+  height: 100%;
+  padding: clamp(22px, 2.6vw, 30px);
+  background: rgba(236, 228, 216, 0.02);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  text-decoration: none;
+  transition: border-color 0.2s, transform 0.2s, background 0.2s;
+}
+
+.work__card--link:hover {
+  border-color: rgba(255, 90, 31, 0.5);
+  transform: translateY(-2px);
+  background: rgba(255, 90, 31, 0.04);
+}
+
+.work__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.work__name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.work__tag {
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.work__summary {
+  margin: 0 0 14px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.work__link {
+  font-size: 12px;
+  color: var(--ember);
+  letter-spacing: 0.02em;
+}
+
+.work__slot {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ---------- Recognition ---------- */
+.reclist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rec {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 24px;
+  padding: 22px 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.rec:first-child {
+  border-top: 0;
+}
+
+.rec__year {
+  font-size: 13px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.rec__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rec__title {
+  font-size: 14.5px;
+  color: var(--ink);
+}
+
+.rec__issuer {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+/* ---------- Contact ---------- */
+.section--contact {
+  text-align: center;
+}
+
+.section--contact .section__kicker,
+.section--contact .section__title {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section--contact .section__title {
+  max-width: 24ch;
+}
+
+.contact__actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+
+.contact__links {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.contact__links a {
+  font-size: 13px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+
+.contact__links a:hover {
+  color: var(--ember);
+}
+
+.contact__loc {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 30px var(--edge) 48px;
+  border-top: 1px solid var(--hairline);
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.site-footer .brand__spark {
+  font-size: 14px;
+}
+
+.site-footer__year {
+  margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .cardgrid,
+  .worklist {
+    grid-template-columns: 1fr;
+  }
+
+  .traits__row,
+  .rec {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .site-footer {
+    flex-wrap: wrap;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -503,5 +939,9 @@ a {
   .scroll-hint__line,
   .loader__spark {
     animation: none;
+  }
+  .hero-stage,
+  .work__card {
+    transition: none;
   }
 }

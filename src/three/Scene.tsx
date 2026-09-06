@@ -1,11 +1,15 @@
-import { Suspense, useRef, type MutableRefObject, type ReactNode } from 'react'
+import {
+  Suspense,
+  useEffect,
+  useRef,
+  type MutableRefObject,
+  type ReactNode,
+} from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { ParticleField } from './ParticleField'
 import { Filaments } from './Filaments'
-// HeadMeshSlot from './HeadMesh' is kept for a follow-up — see the note atop
-// that file for why it isn't mounted yet.
 import type { TargetSet } from './targets'
 import type { DeviceTier } from '../lib/deviceTier'
 import { slicePhasesAt } from '../lib/slicePhases'
@@ -15,6 +19,8 @@ interface SceneProps {
   targets: TargetSet
   tier: DeviceTier
   progress: MutableRefObject<number>
+  /** When false (scrolled past the hero) the render loop is parked to save GPU. */
+  active?: boolean
 }
 
 const STRANDS_BY_LABEL: Record<DeviceTier['label'], number> = {
@@ -65,12 +71,22 @@ function CameraRig({ progress }: { progress: MutableRefObject<number> }) {
   return null
 }
 
-export function Scene({ targets, tier, progress }: SceneProps) {
+export function Scene({ targets, tier, progress, active = true }: SceneProps) {
   const bloomIntensity = tier.label === 'low' ? 0.5 : 0.7
   const strandCount = STRANDS_BY_LABEL[tier.label] || 150
 
+  // R3F sizes the canvas from a ResizeObserver on its container. Mounted inside
+  // the fixed .hero-stage the initial observation can be missed, leaving the
+  // canvas at its 300×150 default until something triggers a resize. Nudge it
+  // once after first paint so the first size is always correct.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
+    return () => cancelAnimationFrame(id)
+  }, [])
+
   return (
     <Canvas
+      frameloop={active ? 'always' : 'never'}
       camera={{ position: [0, 0, 4.4], fov: 42, near: 0.1, far: 100 }}
       dpr={[1, tier.dprCap]}
       gl={{
@@ -78,13 +94,12 @@ export function Scene({ targets, tier, progress }: SceneProps) {
         alpha: false,
         powerPreference: 'high-performance',
       }}
-      style={{ position: 'fixed', inset: 0, zIndex: 0 }}
+      style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0 }}
     >
       <color attach="background" args={[THEME.background]} />
       <fog attach="fog" args={[THEME.background, 6, 13]} />
-      <hemisphereLight args={[0xfff3e6, 0x0a0908, 0.55]} />
-      <directionalLight color={0xfff3e0} intensity={1.15} position={[1.1, 1.3, 2.2]} />
-      <directionalLight color={0xff7a3d} intensity={0.9} position={[-1.6, 0.2, -1.0]} />
+      {/* No scene lights: both materials are unlit ShaderMaterials. The head's
+          key + ember rim are baked into particleShaders via the surface normal. */}
       <Suspense fallback={null}>
         <HeadRig progress={progress}>
           <ParticleField

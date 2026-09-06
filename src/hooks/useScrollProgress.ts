@@ -1,12 +1,14 @@
 import { useEffect, useRef, type MutableRefObject } from 'react'
+import { heroScrollRange } from '../lib/heroScroll'
 
 /**
  * Maps window scroll position to a lerped progress value t ∈ [0, 1].
  *
- * The page has several viewport-heights of scroll room (the tall spacer in
- * App). Raw scroll gives a *target* t; each animation frame we ease the current
- * value toward it, so a flick of the wheel glides instead of snapping - the
- * "damped virtual scroll" from the reference.
+ * The hero has a tall spacer (in App) that provides its scroll room; progress
+ * is measured against that spacer only, so the readable site appended below it
+ * doesn't drag the timeline. Raw scroll gives a *target* t; each animation
+ * frame we ease the current value toward it, so a flick of the wheel glides
+ * instead of snapping - the "damped virtual scroll" from the reference.
  *
  * We don't put t in React state (that would re-render every frame). Instead we
  * expose refs the render loop and DOM chrome read directly, plus an onChange
@@ -30,8 +32,22 @@ export function useScrollProgress(
   const ease = opts.ease ?? 0.12
 
   useEffect(() => {
+    // Dev only: `?scrub=0.42` pins the timeline at a fixed t so the
+    // scroll-scrubbed scene can be screenshotted deterministically (a hidden
+    // automation tab pauses requestAnimationFrame, freezing the ease loop).
+    if (import.meta.env.DEV) {
+      const scrub = new URLSearchParams(window.location.search).get('scrub')
+      if (scrub !== null && Number.isFinite(Number(scrub))) {
+        const v = clamp01(Number(scrub))
+        current.current = v
+        target.current = v
+        onChange?.(v)
+        return
+      }
+    }
+
     const computeTarget = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight
+      const max = heroScrollRange()
       target.current = max > 0 ? clamp01(window.scrollY / max) : 0
     }
 
