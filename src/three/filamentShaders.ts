@@ -77,10 +77,12 @@ export const filamentVertexShader = /* glsl */ `
     vec3 side = sideLen > 1e-3
       ? sideRaw / sideLen
       : normalize(cross(tang, vec3(0.0, 1.0, 0.0)) + vec3(0.001));
-    float facing = smoothstep(0.10, 0.34, sideLen);
+    // Near-edge-on cords are squeezed to nothing by scaling the WIDTH, not by
+    // fading alpha — the material is opaque, so a fade would pop.
+    float facing = smoothstep(0.06, 0.30, sideLen);
 
     // Cords keep most of their girth to the tip — they are rope, not hair.
-    float width = uWidth * (0.72 + 0.28 * (1.0 - aU));
+    float width = uWidth * (0.72 + 0.28 * (1.0 - aU)) * facing;
     mv.xyz += side * aSide * width;
 
     gl_Position = projectionMatrix * mv;
@@ -89,7 +91,9 @@ export const filamentVertexShader = /* glsl */ `
     vSide = aSide;
     vTone = fract(sin(aStrand * 91.37) * 43758.5453);
     vTip = smoothstep(0.7, 1.0, aU);
-    vAlpha = revealed * uReveal * facing;
+    // Reveal only — a clean growing tip. Mixing the facing term in here made
+    // whole segments blink out and read as floating cut cylinders.
+    vAlpha = revealed * uReveal;
     vEnergy = uT;
   }
 `
@@ -140,8 +144,11 @@ export const filamentFragmentShader = /* glsl */ `
     // cool bounce in the shadowed flank keeps it sitting in the palette
     col += uCool * (1.0 - diff) * 0.05;
 
-    // Warm ends, held back through the sphere so it stays cream-white there.
-    float warmAmt = mix(1.0, 0.45, smoothstep(0.62, 0.72, vEnergy) * (1.0 - smoothstep(0.82, 0.9, vEnergy)));
+    // Warm ENDS belong to the head + cable beats only. In the sphere and vortex
+    // the tip is the outer rim, and the reference has the rim cool white with
+    // the heat at the centre — so this must switch off there or the whole thing
+    // reads inside-out.
+    float warmAmt = 1.0 - smoothstep(0.56, 0.70, vEnergy);
     col = mix(col, uYellow * (0.65 + 0.5 * diff), smoothstep(0.62, 0.92, vTip) * warmAmt);
     col = mix(col, uAmber * (0.7 + 0.5 * diff), smoothstep(0.92, 1.0, vTip) * warmAmt);
 
@@ -152,18 +159,22 @@ export const filamentFragmentShader = /* glsl */ `
     // Radial heat: the cords are incandescent where they meet the core and cool
     // to white toward the rim — the reference's red-orange centre bleeding out
     // along the inner third of each cord.
-    float inCore = smoothstep(0.72, 0.86, vEnergy);
-    float heat = (1.0 - smoothstep(0.03, 0.40, vU)) * inCore;
-    col = mix(col, uAmber * (0.75 + 0.45 * diff), heat * 0.9);
-    col = mix(col, uYellow, pow(heat, 2.0) * 0.85);
-    float coreGlow = pow(heat, 3.0);
-    col = mix(col, uHot, coreGlow * 0.9);
+    float inCore = smoothstep(0.62, 0.76, vEnergy);
+    // Tight falloff — only the inner fifth of each cord is hot, so the centre
+    // stays a small bright point instead of a blown-out white lobe.
+    float heat = (1.0 - smoothstep(0.02, 0.24, vU)) * inCore;
+    col = mix(col, uAmber * (0.8 + 0.4 * diff), heat * 0.92);
+    col = mix(col, uYellow, pow(heat, 2.2) * 0.8);
+    float coreGlow = pow(heat, 4.0);
+    col = mix(col, uHot, coreGlow * 0.85);
 
     // Incandescent growing end — lights the cord from inside.
     col = mix(col, uYellow, vFront * 0.6);
     col = mix(col, uAmber, vFront * vFront * 0.5);
 
-    float over = 1.0 + heat * 0.9 + coreGlow * 2.2 + vFront * 0.6;
+    // Keep well clear of clipping: over-brightening the core is what turned it
+    // into a solid white blob that ate a crescent out of the disc.
+    float over = 1.0 + heat * 0.25 + coreGlow * 0.8 + vFront * 0.5;
     gl_FragColor = vec4(col * over, 1.0);
   }
 `

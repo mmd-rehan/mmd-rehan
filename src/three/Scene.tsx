@@ -77,7 +77,9 @@ function HeadRig({
 function CameraRig({ progress }: { progress: MutableRefObject<number> }) {
   useFrame(({ camera }) => {
     const { filament } = slicePhasesAt(progress.current)
-    const z = lerp(4.4, 6.4, filament)
+    // Pull back far enough that the cord burst and the finale both sit inside
+    // the frame instead of running off every edge.
+    const z = lerp(4.4, 7.6, filament)
     camera.position.z += (z - camera.position.z) * 0.05
     camera.lookAt(0, 0, 0)
   })
