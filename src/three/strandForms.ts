@@ -22,11 +22,14 @@ export const STRAND_FORMS_GLSL = /* glsl */ `
     return fract(sin(n * vec3(12.9898, 78.233, 45.164)) * 43758.5453) * 2.0 - 1.0;
   }
 
-  vec3 sfFormHead(vec3 root, vec3 tipHead, float u, float seed) {
+  // Head phase: root and tip are given in HEAD-LOCAL space (roots sit on the
+  // back of the skull) and transformed by uHeadMat, so the fibres stay planted
+  // in the scalp as the head pitches back and turns away.
+  vec3 sfFormHead(vec3 root, vec3 tipHead, float u, float seed, mat4 headMat) {
     vec3 p = mix(root, tipHead, u);
     vec3 bow = normalize(cross(tipHead - root, vec3(0.0, 1.0, 0.2)) + vec3(0.001));
     p += bow * sin(u * 3.14159265) * (0.22 + seed * 0.42);
-    return p;
+    return (headMat * vec4(p, 1.0)).xyz;
   }
 
   // The finale sits right-of-centre, clear of the left-aligned chapter copy.
@@ -94,7 +97,9 @@ export const STRAND_FORMS_GLSL = /* glsl */ `
     return SF_CENTER + p;
   }
 
-  vec3 strandPoint(vec3 root, vec3 tipHead, float u, float strand, float time, float uT) {
+  vec3 strandPoint(
+    vec3 root, vec3 tipHead, float u, float strand, float time, float uT, mat4 headMat
+  ) {
     float seed = fract(strand * 0.61803398875 + 0.1234);
     vec3 h3 = sfHash3(strand * 17.0 + 3.0);
 
@@ -105,7 +110,7 @@ export const STRAND_FORMS_GLSL = /* glsl */ `
     float sum = wHead + wCable + wSphere + wVortex + 1e-4;
 
     vec3 p =
-      sfFormHead(root, tipHead, u, seed) * wHead +
+      sfFormHead(root, tipHead, u, seed, headMat) * wHead +
       sfFormCable(u, seed, h3) * wCable +
       sfFormSphere(u, seed, h3) * wSphere +
       sfFormVortex(u, seed, h3, time, uT) * wVortex;
