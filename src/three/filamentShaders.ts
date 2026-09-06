@@ -144,13 +144,12 @@ export const filamentFragmentShader = /* glsl */ `
     // cool bounce in the shadowed flank keeps it sitting in the palette
     col += uCool * (1.0 - diff) * 0.05;
 
-    // Warm ENDS belong to the head + cable beats only. In the sphere and vortex
-    // the tip is the outer rim, and the reference has the rim cool white with
-    // the heat at the centre — so this must switch off there or the whole thing
-    // reads inside-out.
-    float warmAmt = 1.0 - smoothstep(0.56, 0.70, vEnergy);
-    col = mix(col, uYellow * (0.65 + 0.5 * diff), smoothstep(0.62, 0.92, vTip) * warmAmt);
-    col = mix(col, uAmber * (0.7 + 0.5 * diff), smoothstep(0.92, 1.0, vTip) * warmAmt);
+    // Every cord ends in a glowing ferrule — the orange beads studding the
+    // bloom in reference frames 033 / 039, and the lit fibre ends in 026.
+    // Tight (last ~10%) so it reads as a capped end, not a warm half.
+    float bead = smoothstep(0.88, 0.99, vU);
+    col = mix(col, uYellow * (0.85 + 0.3 * diff), bead * 0.85);
+    col = mix(col, uAmber * (0.9 + 0.3 * diff), smoothstep(0.94, 1.0, vU) * 0.8);
 
     // a whisper of cool energy only while the cable is forming
     float coolBeat = smoothstep(0.48, 0.58, vEnergy) * (1.0 - smoothstep(0.58, 0.68, vEnergy));
@@ -160,10 +159,12 @@ export const filamentFragmentShader = /* glsl */ `
     // to white toward the rim — the reference's red-orange centre bleeding out
     // along the inner third of each cord.
     float inCore = smoothstep(0.62, 0.76, vEnergy);
-    // Tight falloff — only the inner fifth of each cord is hot, so the centre
-    // stays a small bright point instead of a blown-out white lobe.
-    float heat = (1.0 - smoothstep(0.02, 0.24, vU)) * inCore;
-    col = mix(col, uAmber * (0.8 + 0.4 * diff), heat * 0.92);
+    // Very tight falloff — the reference core is a small orange-red knot where
+    // the cords converge, roughly a tenth of the bloom, not a white lobe.
+    float heat = (1.0 - smoothstep(0.01, 0.14, vU)) * inCore;
+    // Incandescent, so NOT diffuse-shaded — directional shading here made the
+    // core read as a lit crescent instead of an even knot of heat.
+    col = mix(col, uAmber, heat * 0.92);
     col = mix(col, uYellow, pow(heat, 2.2) * 0.8);
     float coreGlow = pow(heat, 4.0);
     col = mix(col, uHot, coreGlow * 0.85);
@@ -174,7 +175,7 @@ export const filamentFragmentShader = /* glsl */ `
 
     // Keep well clear of clipping: over-brightening the core is what turned it
     // into a solid white blob that ate a crescent out of the disc.
-    float over = 1.0 + heat * 0.25 + coreGlow * 0.8 + vFront * 0.5;
+    float over = 1.0 + heat * 0.25 + coreGlow * 0.8 + vFront * 0.5 + bead * 0.45;
     gl_FragColor = vec4(col * over, 1.0);
   }
 `

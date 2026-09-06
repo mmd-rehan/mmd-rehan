@@ -85,21 +85,23 @@ export const STRAND_FORMS_GLSL = /* glsl */ `
     return mix(tail, coil, tailU);
   }
 
-  // A compact circular anemone: cords radiate from a hot core out to a clean
-  // rim with only a gentle curl, contained in frame — not a sprawling spiral.
+  // Chrysanthemum (reference frames 033 / 039): every cord leaves a hot centre
+  // at the front pole, arcs out over a DOME, and finishes just past the
+  // equator so its tip points outward at the rim. Not a flat disc — the dome
+  // is what gives the packed-petal look.
   vec3 sfFormVortex(float u, float seed, vec3 h3, float time, float uT) {
-    // Open centre so the cords ring a core rather than piling into one lobe.
-    float r = mix(0.26, 1.62, pow(u, 0.80));
-    float spin = uT * 2.2 + time * 0.10;
-    // ~1 radian of curl over the cord's length reads as a swirl without
-    // wrapping the disc into a spiral.
-    float ang = seed * SF_TAU + u * (1.05 + seed * 0.5) + spin;
-    vec3 p = vec3(cos(ang) * r, sin(ang) * r * 0.94, 0.0);
-    // Flat disc — the dome was pushing the inner ends at the camera and
-    // bunching them into a crescent.
-    p.z = h3.z * 0.06;
-    p.yz = mat2(0.99, -0.14, 0.14, 0.99) * p.yz;   // barely any tilt
-    return SF_CENTER + p;
+    float R = 1.34 * (0.96 + h3.y * 0.07);
+    float spin = uT * 1.5 + time * 0.07;
+    // Polar angle: 0 = pole facing camera (the core). Stops BEFORE the equator
+    // (1.57) so every cord's glowing tip still faces the viewer — that ring of
+    // orange ferrules around the bloom is the signature of frames 033 / 039.
+    // Start almost at the pole so the cords converge to a knot and close the
+    // centre — a wider inner ring left a hole you could see the page through.
+    float phi = mix(0.045, 1.36, pow(u, 0.9));
+    // azimuth: fixed per cord, with a light curl so the bloom swirls
+    float theta = seed * SF_TAU + u * (0.55 + seed * 0.25) + spin;
+    vec3 dir = vec3(sin(phi) * cos(theta), sin(phi) * sin(theta), cos(phi));
+    return SF_CENTER + dir * R;
   }
 
   vec3 strandPoint(

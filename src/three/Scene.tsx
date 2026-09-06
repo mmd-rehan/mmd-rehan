@@ -25,11 +25,12 @@ interface SceneProps {
   active?: boolean
 }
 
-/** Cords are thick and opaque now — far fewer read as far more. */
+/** The reference bloom is densely packed with cord, so this needs a real count
+ *  — but they are opaque rope, so not the thousands a hair system would want. */
 const STRANDS_BY_LABEL: Record<DeviceTier['label'], number> = {
-  high: 260,
-  mid: 160,
-  low: 80,
+  high: 440,
+  mid: 260,
+  low: 120,
   none: 0,
 }
 
