@@ -28,8 +28,10 @@ export interface SlicePhases {
   dissolve: number
   /** 0 = no strands, 1 = strands fully grown. */
   filament: number
-  /** 0 = particles full, 1 = particles are faint drifting debris. */
+  /** 0 = particles full, 1 = particles are gone. */
   settle: number
+  /** 0 = warm rest environment, 1 = cool once the abstract form has developed. */
+  develop: number
 }
 
 export function slicePhasesAt(t: number): SlicePhases {
@@ -40,8 +42,9 @@ export function slicePhasesAt(t: number): SlicePhases {
   const contour = contourIn * (1 - contourOut)
 
   const dissolve = smoothstep(0.12, 0.52, t)
-  const filament = smoothstep(0.32, 0.8, t)
-  const settle = smoothstep(0.6, 0.9, t)
+  const filament = smoothstep(0.28, 0.62, t)
+  const settle = smoothstep(0.5, 0.72, t)
+  const develop = smoothstep(0.16, 0.78, t)
 
-  return { tilt, contour, dissolve, filament, settle }
+  return { tilt, contour, dissolve, filament, settle, develop }
 }

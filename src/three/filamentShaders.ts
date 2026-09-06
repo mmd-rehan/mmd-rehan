@@ -1,86 +1,109 @@
+import { STRAND_FORMS_GLSL } from './strandForms'
+
 /**
- * GLSL for the filament tubes — the "neurons".
+ * GLSL for the filament strands — the "neurons".
  *
- * Geometry is a set of thin tubes swept along splines, merged into one buffer.
- * Per-vertex `aU` (0 root .. 1 tip) and `aStrand` (0..1 id) drive the reveal:
- * each strand grows from its root outward as `uGrow` rises, with a per-strand
- * stagger, and sways with flow noise. NORMAL blended so overlaps build to a soft
- * translucent white rather than blowing out; only the last stretch near the tip
- * takes ember colour and a little over-brightness for the bloom to find.
+ * Geometry is a flat ribbon strip per strand (2 verts per lengthwise sample).
+ * The centre-line is computed in the vertex shader by `strandPoint`, which
+ * morphs each strand across head → cable → sphere → vortex by uT. We sample it
+ * at u±eps for a tangent and offset each edge vert perpendicular to that
+ * tangent in view space, so the ribbon always faces the camera.
+ *
+ * aStrand (0..1 id), aU (0 root .. 1 tip), aSide (-1 / +1 ribbon edge),
+ * aRoot / aTipHead give the head-phase endpoints. uGrow reveals each strand
+ * from its root; uReveal is the global fade.
  */
 
 export const filamentVertexShader = /* glsl */ `
   precision highp float;
 
-  attribute float aU;
   attribute float aStrand;
+  attribute float aU;
+  attribute float aSide;
   attribute vec3 aRoot;
+  attribute vec3 aTipHead;
 
   uniform float uGrow;
+  uniform float uT;
   uniform float uTime;
   uniform float uReveal;
+  uniform float uWidth;
 
+  varying float vU;
   varying float vTip;
   varying float vAlpha;
-  varying float vU;
+  varying float vEnergy;
 
-  vec3 flow(vec3 p, float t) {
-    float a = sin(p.y * 2.0 + t) + cos(p.z * 1.6 - t * 0.7);
-    float b = sin(p.z * 1.8 - t * 1.1) + cos(p.x * 2.2 + t * 0.5);
-    float c = sin(p.x * 1.7 + t * 0.9) + cos(p.y * 1.9 - t * 0.6);
-    return vec3(a, b, c);
-  }
+  ${STRAND_FORMS_GLSL}
 
   void main() {
-    float g = clamp((uGrow - aStrand * 0.4) / 0.6, 0.0, 1.0);
+    float g = clamp((uGrow - aStrand * 0.35) / 0.65, 0.0, 1.0);
     g = g * g * (3.0 - 2.0 * g);
+    float revealed = smoothstep(aU - 0.14, aU - 0.01, g);
 
-    float revealed = smoothstep(aU - 0.16, aU - 0.02, g);
+    float eps = 0.014;
+    vec3 c0 = strandPoint(aRoot, aTipHead, max(aU - eps, 0.0), aStrand, uTime, uT);
+    vec3 c1 = strandPoint(aRoot, aTipHead, min(aU + eps, 1.0), aStrand, uTime, uT);
+    vec3 c = mix(c0, c1, 0.5);
+    c = mix(aRoot, c, revealed);
 
-    // Collapse unrevealed sections onto the root, and thin the tube toward the
-    // tip by pulling vertices toward the strand's local centre-ish (aRoot dir).
-    vec3 p = mix(aRoot, position, revealed);
+    vec4 mv0 = modelViewMatrix * vec4(c0, 1.0);
+    vec4 mv1 = modelViewMatrix * vec4(c1, 1.0);
+    vec4 mv = modelViewMatrix * vec4(c, 1.0);
 
-    float swayAmt = aU * aU * 0.11;
-    p += flow(position + vec3(aStrand * 29.0), uTime * 0.3) * swayAmt;
+    vec3 tang = normalize(mv1.xyz - mv0.xyz + vec3(0.0001));
+    vec3 viewDir = normalize(-mv.xyz);
+    vec3 side = normalize(cross(tang, viewDir));
 
-    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    float width = uWidth * (0.35 + 0.65 * (1.0 - aU));
+    mv.xyz += side * aSide * width;
+
     gl_Position = projectionMatrix * mv;
 
-    vTip = smoothstep(0.78, 1.0, aU);
-    float front = smoothstep(0.07, 0.0, abs(aU - g)) * (1.0 - step(0.985, g)) * 0.3;
-    vTip = clamp(vTip + front, 0.0, 1.0);
     vU = aU;
+    vTip = smoothstep(0.7, 1.0, aU);
     vAlpha = revealed * uReveal;
+    vEnergy = uT;
   }
 `
 
 export const filamentFragmentShader = /* glsl */ `
   precision highp float;
 
-  uniform vec3 uWhite;
-  uniform vec3 uEmber;
+  uniform vec3 uStrand;
+  uniform vec3 uYellow;
+  uniform vec3 uAmber;
   uniform vec3 uHot;
+  uniform vec3 uCool;
 
+  varying float vU;
   varying float vTip;
   varying float vAlpha;
-  varying float vU;
+  varying float vEnergy;
 
   void main() {
     if (vAlpha < 0.02) discard;
 
-    // Off-white body (reads as a light strand on the pale stone), warming to
-    // yellow then amber toward the incandescent tip.
-    vec3 col = uWhite;
-    col = mix(col, uHot, smoothstep(0.45, 0.85, vTip));
-    col = mix(col, uEmber, smoothstep(0.85, 1.0, vTip));
+    // A defined fibre — a muted stone-grey body so dense overlaps read as
+    // structure, not a white haze; warming to yellow then amber at the tip.
+    vec3 col = mix(uStrand, vec3(0.66, 0.67, 0.64), 0.6);
+    col = mix(col, uYellow, smoothstep(0.55, 0.88, vTip));
+    col = mix(col, uAmber, smoothstep(0.88, 1.0, vTip));
 
-    // Translucent body — kept faint so crossings build softly, not a knot —
-    // denser + over-bright at the tip so bloom reads it as a glowing ending.
-    float bodyA = 0.42 * smoothstep(0.04, 0.34, vU) * (1.0 - smoothstep(0.82, 1.0, vU) * 0.4);
-    float a = mix(bodyA, 0.98, vTip);
-    float over = 1.0 + vTip * 2.0;
+    // a whisper of cool energy only while the cable is forming
+    float coolBeat = smoothstep(0.48, 0.58, vEnergy) * (1.0 - smoothstep(0.58, 0.68, vEnergy));
+    col = mix(col, uCool, coolBeat * 0.16);
 
-    gl_FragColor = vec4(col * over, a * vAlpha);
+    // blazing core — toward the centre once the sphere / vortex takes hold
+    float coreGlow = (1.0 - smoothstep(0.0, 0.20, vU)) * smoothstep(0.70, 0.90, vEnergy);
+    col = mix(col, uHot, coreGlow * 0.95);
+
+    // denser bodies once the strands are packed into the sphere / vortex
+    float density = mix(0.15, 0.30, smoothstep(0.60, 0.80, vEnergy));
+    float bodyA = density * smoothstep(0.03, 0.26, vU) * (1.0 - smoothstep(0.85, 1.0, vU) * 0.4);
+    float a = mix(bodyA, 0.6, vTip) + coreGlow * 0.55;
+    float over = 1.0 + vTip * 0.4 + coreGlow * 2.4;
+
+    gl_FragColor = vec4(col * over, clamp(a, 0.0, 1.0) * vAlpha);
   }
 `
