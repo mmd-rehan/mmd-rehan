@@ -85,24 +85,27 @@ export const filamentFragmentShader = /* glsl */ `
     if (vAlpha < 0.02) discard;
 
     // A defined fibre — a muted stone-grey body so dense overlaps read as
-    // structure, not a white haze; warming to yellow then amber at the tip.
+    // structure, not a white haze. Tips warm to yellow / amber — sparingly, so
+    // the sphere stays cream-white and only the vortex arms really glow.
     vec3 col = mix(uStrand, vec3(0.66, 0.67, 0.64), 0.6);
-    col = mix(col, uYellow, smoothstep(0.55, 0.88, vTip));
-    col = mix(col, uAmber, smoothstep(0.88, 1.0, vTip));
+    float warmAmt = mix(1.0, 0.45, smoothstep(0.62, 0.72, vEnergy) * (1.0 - smoothstep(0.82, 0.9, vEnergy)));
+    col = mix(col, uYellow, smoothstep(0.60, 0.9, vTip) * warmAmt);
+    col = mix(col, uAmber, smoothstep(0.9, 1.0, vTip) * warmAmt);
 
     // a whisper of cool energy only while the cable is forming
     float coolBeat = smoothstep(0.48, 0.58, vEnergy) * (1.0 - smoothstep(0.58, 0.68, vEnergy));
     col = mix(col, uCool, coolBeat * 0.16);
 
-    // blazing core — toward the centre once the sphere / vortex takes hold
-    float coreGlow = (1.0 - smoothstep(0.0, 0.20, vU)) * smoothstep(0.70, 0.90, vEnergy);
-    col = mix(col, uHot, coreGlow * 0.95);
+    // a little hot bleed on the innermost vortex strands (the CoreGlow sprite
+    // does most of the blazing-centre work)
+    float coreGlow = (1.0 - smoothstep(0.0, 0.16, vU)) * smoothstep(0.82, 0.94, vEnergy);
+    col = mix(col, uHot, coreGlow * 0.8);
 
     // denser bodies once the strands are packed into the sphere / vortex
-    float density = mix(0.15, 0.30, smoothstep(0.60, 0.80, vEnergy));
+    float density = mix(0.15, 0.26, smoothstep(0.60, 0.80, vEnergy));
     float bodyA = density * smoothstep(0.03, 0.26, vU) * (1.0 - smoothstep(0.85, 1.0, vU) * 0.4);
-    float a = mix(bodyA, 0.6, vTip) + coreGlow * 0.55;
-    float over = 1.0 + vTip * 0.4 + coreGlow * 2.4;
+    float a = mix(bodyA, 0.55, vTip) + coreGlow * 0.4;
+    float over = 1.0 + vTip * 0.4 + coreGlow * 1.8;
 
     gl_FragColor = vec4(col * over, clamp(a, 0.0, 1.0) * vAlpha);
   }
