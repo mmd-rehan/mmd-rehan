@@ -38,9 +38,9 @@ export const STRAND_FORMS_GLSL = /* glsl */ `
   vec3 sfFormCable(float u, float seed, vec3 h3) {
     // Rope centre-line: enters off-screen top-right, curves down, its cut end
     // turning toward the camera so you see the bundle of fibre ends.
-    vec3 a = vec3(3.8, 3.4, -0.6);
-    vec3 b = vec3(1.7, 1.1, 0.4);
-    vec3 c = SF_CENTER + vec3(-0.1, -0.3, 1.4);
+    vec3 a = vec3(4.6, 3.6, -1.0);
+    vec3 b = vec3(1.9, 1.2, 0.1);
+    vec3 c = SF_CENTER + vec3(-1.5, -1.6, 0.7);
     vec3 mid = mix(mix(a, b, u), mix(b, c, u), u);
 
     // frame that follows the rope, so the packed offset stays circular in
@@ -50,8 +50,8 @@ export const STRAND_FORMS_GLSL = /* glsl */ `
     vec3 e2 = cross(dir, e1);
 
     float ang = seed * SF_TAU + u * 2.4;                 // slow twist
-    float rad = 0.03 + 0.11 * sqrt(h3.x * 0.5 + 0.5);    // tight bundle
-    rad *= 1.0 + smoothstep(0.82, 1.0, u) * 9.0;         // splay only at the cut end
+    float rad = 0.03 + 0.10 * sqrt(h3.x * 0.5 + 0.5);    // tight bundle
+    rad *= 1.0 + smoothstep(0.88, 1.0, u) * 3.2;         // slight fray at the cut end
     return mid + (cos(ang) * e1 + sin(ang) * e2) * rad;
   }
 
