@@ -5,7 +5,7 @@ import { loadHead, type HeadAsset } from './head'
 import { headVertexShader, headFragmentShader } from './headMeshShaders'
 import { DISSOLVE_MAX } from './dissolve'
 import { slicePhasesAt } from '../lib/slicePhases'
-import { EMBER_RGB, EMBER_HOT_RGB, STRAND_RGB } from '../theme'
+import { AMBER_RGB, YELLOW_RGB, COOL_ENERGY_RGB, STRAND_RGB } from '../theme'
 
 /**
  * The photoreal rest-state head. Renders the fitted GLB geometry with the
@@ -52,9 +52,14 @@ export function HeadMesh({ progress }: { progress: MutableRefObject<number> }) {
           uDissolve: { value: 0 },
           uContour: { value: 0 },
           uTime: { value: 0 },
-          uEmber: { value: new THREE.Vector3(EMBER_RGB.r, EMBER_RGB.g, EMBER_RGB.b) },
-          uEmberHot: {
-            value: new THREE.Vector3(EMBER_HOT_RGB.r, EMBER_HOT_RGB.g, EMBER_HOT_RGB.b),
+          uAmber: { value: new THREE.Vector3(AMBER_RGB.r, AMBER_RGB.g, AMBER_RGB.b) },
+          uYellow: { value: new THREE.Vector3(YELLOW_RGB.r, YELLOW_RGB.g, YELLOW_RGB.b) },
+          uCool: {
+            value: new THREE.Vector3(
+              COOL_ENERGY_RGB.r,
+              COOL_ENERGY_RGB.g,
+              COOL_ENERGY_RGB.b,
+            ),
           },
           uStrand: { value: new THREE.Vector3(STRAND_RGB.r, STRAND_RGB.g, STRAND_RGB.b) },
         },

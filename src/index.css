@@ -1,14 +1,16 @@
 :root {
-  --bg: #0c0b0d;
-  --bg-deep: #050505;
-  --ink: #ece4d8;
-  --ink-muted: #8b8178;
-  --ink-faint: #5a544d;
-  --ember: #ff5a1f;
-  --ember-hot: #ffb43c;
-  --strand: #fff6ec;
-  --hairline: rgba(236, 228, 216, 0.14);
-  --glass: rgba(10, 9, 11, 0.74);
+  --bg: #ded4cc;
+  --bg-deep: #cec3b9;
+  --ink: #2c2723;
+  --ink-muted: #6e655c;
+  --ink-faint: #a79c8f;
+  /* readable amber for text/accents; --ember-bright is the raw palette amber */
+  --ember: #bd5f16;
+  --ember-bright: #f59632;
+  --ember-hot: #e0a52e;
+  --strand: #f4f1ea;
+  --hairline: rgba(44, 39, 35, 0.16);
+  --glass: rgba(246, 241, 235, 0.72);
 
   --font: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Helvetica, Arial, sans-serif;
@@ -95,9 +97,9 @@ a {
 }
 
 .brand__spark {
-  color: var(--ember);
+  color: var(--ember-bright);
   font-size: 1.05em;
-  filter: drop-shadow(0 0 8px rgba(255, 90, 31, 0.6));
+  filter: drop-shadow(0 0 7px rgba(245, 150, 50, 0.45));
 }
 
 .brand__name {
@@ -129,7 +131,7 @@ a {
   background: transparent;
   font: inherit;
   font-size: 13px;
-  color: #b8ad9f;
+  color: var(--ink-muted);
   padding: 7px 15px;
   border-radius: 999px;
   cursor: pointer;
@@ -138,7 +140,7 @@ a {
 
 .nav__link:hover {
   color: var(--ink);
-  background: rgba(236, 228, 216, 0.07);
+  background: rgba(44, 39, 35, 0.07);
 }
 
 .header__right {
@@ -168,7 +170,7 @@ a {
 
 .pill--contact:hover {
   transform: translateY(-1px);
-  border-color: rgba(255, 90, 31, 0.5);
+  border-color: rgba(245, 150, 50, 0.5);
 }
 
 .calm-toggle {
@@ -176,7 +178,7 @@ a {
   height: 38px;
   border-radius: 50%;
   border: 1px solid var(--hairline);
-  background: rgba(236, 228, 216, 0.06);
+  background: rgba(44, 39, 35, 0.06);
   color: var(--ink);
   cursor: pointer;
   font-size: 13px;
@@ -202,10 +204,10 @@ a {
   z-index: 1;
   pointer-events: none;
   background: radial-gradient(
-    130% 120% at 50% 44%,
-    rgba(12, 11, 13, 0) 46%,
-    rgba(5, 5, 5, 0.35) 82%,
-    rgba(0, 0, 0, 0.6) 100%
+    135% 125% at 50% 42%,
+    rgba(120, 100, 84, 0) 55%,
+    rgba(120, 100, 84, 0.1) 84%,
+    rgba(96, 80, 66, 0.2) 100%
   );
 }
 
@@ -294,7 +296,7 @@ a {
 
 .btn--primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(255, 90, 31, 0.4);
+  box-shadow: 0 10px 30px rgba(245, 150, 50, 0.4);
 }
 
 .btn--ghost {
@@ -304,7 +306,7 @@ a {
 }
 
 .btn--ghost:hover {
-  background: rgba(236, 228, 216, 0.06);
+  background: rgba(44, 39, 35, 0.06);
 }
 
 /* ---------- Right index ---------- */
@@ -323,7 +325,7 @@ a {
   position: relative;
   width: 2px;
   height: 150px;
-  background: rgba(236, 228, 216, 0.14);
+  background: rgba(44, 39, 35, 0.14);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -336,7 +338,7 @@ a {
   background: var(--ember);
   border-radius: 2px;
   transition: height 0.15s linear;
-  box-shadow: 0 0 10px rgba(255, 90, 31, 0.7);
+  box-shadow: 0 0 10px rgba(245, 150, 50, 0.7);
 }
 
 .index__list {
@@ -428,7 +430,7 @@ a {
   font-size: 30px;
   color: var(--ember);
   animation: spin 2.4s linear infinite;
-  filter: drop-shadow(0 0 12px rgba(255, 90, 31, 0.7));
+  filter: drop-shadow(0 0 12px rgba(245, 150, 50, 0.7));
 }
 
 .loader__label {
@@ -748,7 +750,7 @@ a {
   display: block;
   height: 100%;
   padding: clamp(22px, 2.6vw, 30px);
-  background: rgba(236, 228, 216, 0.02);
+  background: rgba(44, 39, 35, 0.02);
   border: 1px solid var(--hairline);
   border-radius: 14px;
   text-decoration: none;
@@ -756,9 +758,9 @@ a {
 }
 
 .work__card--link:hover {
-  border-color: rgba(255, 90, 31, 0.5);
+  border-color: rgba(245, 150, 50, 0.5);
   transform: translateY(-2px);
-  background: rgba(255, 90, 31, 0.04);
+  background: rgba(245, 150, 50, 0.04);
 }
 
 .work__head {

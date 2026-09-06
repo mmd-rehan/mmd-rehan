@@ -5,7 +5,7 @@ import {
   type MutableRefObject,
   type ReactNode,
 } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { ParticleField } from './ParticleField'
@@ -14,7 +14,7 @@ import { HeadMesh } from './HeadMesh'
 import type { TargetSet } from './targets'
 import type { DeviceTier } from '../lib/deviceTier'
 import { slicePhasesAt } from '../lib/slicePhases'
-import { THEME } from '../theme'
+import { WARM_BG_RGB, COOL_BG_RGB } from '../theme'
 
 interface SceneProps {
   targets: TargetSet
@@ -72,8 +72,34 @@ function CameraRig({ progress }: { progress: MutableRefObject<number> }) {
   return null
 }
 
+const WARM = new THREE.Color(WARM_BG_RGB.r, WARM_BG_RGB.g, WARM_BG_RGB.b)
+const COOL = new THREE.Color(COOL_BG_RGB.r, COOL_BG_RGB.g, COOL_BG_RGB.b)
+
+/** The environment tint: warm blush/stone at rest, easing to cool gray-green as
+ *  the abstract form develops. Drives scene.background + fog together. */
+function Backdrop({ progress }: { progress: MutableRefObject<number> }) {
+  const { scene } = useThree()
+  const col = useRef(new THREE.Color().copy(WARM))
+
+  useEffect(() => {
+    scene.background = col.current
+    scene.fog = new THREE.Fog(col.current, 7, 15)
+    return () => {
+      scene.background = null
+      scene.fog = null
+    }
+  }, [scene])
+
+  useFrame(() => {
+    const develop = slicePhasesAt(progress.current).filament
+    col.current.copy(WARM).lerp(COOL, develop)
+    if (scene.fog) (scene.fog as THREE.Fog).color.copy(col.current)
+  })
+  return null
+}
+
 export function Scene({ targets, tier, progress, active = true }: SceneProps) {
-  const bloomIntensity = tier.label === 'low' ? 0.5 : 0.7
+  const bloomIntensity = tier.label === 'low' ? 0.35 : 0.5
   const strandCount = STRANDS_BY_LABEL[tier.label] || 150
 
   // R3F sizes the canvas from a ResizeObserver on its container. Mounted inside
@@ -98,13 +124,13 @@ export function Scene({ targets, tier, progress, active = true }: SceneProps) {
         antialias: tier.label !== 'low',
         alpha: false,
         powerPreference: 'high-performance',
+        toneMapping: THREE.NoToneMapping,
       }}
       style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0 }}
     >
-      <color attach="background" args={[THEME.background]} />
-      <fog attach="fog" args={[THEME.background, 6, 13]} />
+      <Backdrop progress={progress} />
       {/* No scene lights: every material is an unlit ShaderMaterial. The head's
-          key + ember rim are in headMeshShaders / particleShaders. */}
+          key + rim are in headMeshShaders / particleShaders. */}
       <Suspense fallback={null}>
         <HeadRig progress={progress}>
           <HeadMesh progress={progress} />
@@ -120,12 +146,12 @@ export function Scene({ targets, tier, progress, active = true }: SceneProps) {
         <EffectComposer>
           <Bloom
             intensity={bloomIntensity}
-            luminanceThreshold={0.9}
-            luminanceSmoothing={0.25}
+            luminanceThreshold={0.95}
+            luminanceSmoothing={0.3}
             mipmapBlur
-            radius={0.5}
+            radius={0.6}
           />
-          <Vignette eskil={false} offset={0.3} darkness={0.72} />
+          <Vignette eskil={false} offset={0.42} darkness={0.28} />
         </EffectComposer>
       </Suspense>
     </Canvas>

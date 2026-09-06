@@ -1,11 +1,12 @@
 import { DISSOLVE_GLSL } from './dissolve'
 
 /**
- * The photoreal head. The GLB's baked albedo texture, lifted by a soft warm key
- * + an ember rim so it sits on the charcoal stage instead of a cream one. A
- * sweep front (uDissolve, shared with the particle field via dissolveField)
- * eats the mesh away — fragments behind the front are discarded, fragments just
- * ahead of it flare ember-hot; surviving skin resolves into contour isolines.
+ * The photoreal head. The GLB's baked albedo, gently graded and lit like a soft
+ * studio portrait to sit on the pale stone environment — warm key, cool fill,
+ * high ambient. A sweep front (uDissolve, shared with the particle field via
+ * dissolveField) eats the mesh away: fragments behind it are discarded,
+ * fragments just ahead flare amber; surviving skin resolves into cool contour
+ * isolines.
  */
 
 export const headVertexShader = /* glsl */ `
@@ -32,8 +33,9 @@ export const headFragmentShader = /* glsl */ `
   uniform float uDissolve;
   uniform float uContour;
   uniform float uTime;
-  uniform vec3 uEmber;
-  uniform vec3 uEmberHot;
+  uniform vec3 uAmber;
+  uniform vec3 uYellow;
+  uniform vec3 uCool;
   uniform vec3 uStrand;
 
   varying vec2 vUv;
@@ -48,35 +50,34 @@ export const headFragmentShader = /* glsl */ `
     if (edge > 0.0) discard;
 
     vec3 albedo = uHasMap > 0.5 ? texture2D(uMap, vUv).rgb : uFlat;
-    // Grade the flat scan texture into a studio portrait on charcoal: a soft
-    // contrast curve (no pow — keep it driver-safe), a little saturation, warm.
-    albedo = albedo * (albedo * 0.45 + 0.62);
+    // gentle grade — soft, no pow (driver-safe)
+    albedo = albedo * (albedo * 0.22 + 0.82);
     float l = dot(albedo, vec3(0.299, 0.587, 0.114));
-    albedo = mix(vec3(l), albedo, 1.14);
-    albedo *= vec3(1.10, 1.0, 0.90);
-    // pull the reddish baked AO out of the beard / neck shadows
-    float shadow = 1.0 - smoothstep(0.12, 0.46, l);
-    albedo = mix(albedo, vec3(l) * vec3(0.94, 0.97, 1.02), shadow * 0.45);
+    albedo = mix(vec3(l), albedo, 1.05);
+    // de-red the baked beard / neck AO
+    float shadow = 1.0 - smoothstep(0.12, 0.44, l);
+    albedo = mix(albedo, vec3(l) * vec3(0.96, 0.98, 1.02), shadow * 0.38);
 
     vec3 n = normalize(vNormalV);
-    float key = max(dot(n, normalize(vec3(0.40, 0.42, 0.90))), 0.0);
-    float up = 0.5 + 0.5 * n.y;
-    vec3 lit = albedo * (0.78 + 0.5 * key + 0.12 * up);
+    float key = max(dot(n, normalize(vec3(0.45, 0.5, 0.85))), 0.0);
+    float fill = max(dot(n, normalize(vec3(-0.5, -0.15, 0.35))), 0.0);
+    vec3 light = vec3(0.70) + vec3(1.0, 0.96, 0.90) * key * 0.52 + uCool * fill * 0.16;
+    vec3 lit = albedo * light;
 
-    // ember back-rim — the brand colour catching the edge of the form
+    // amber rim catching the silhouette
     float rim = pow(1.0 - clamp(dot(n, vec3(0.0, 0.0, 1.0)), 0.0, 1.0), 3.0);
-    lit += uEmber * rim * 0.38;
+    lit += uAmber * rim * 0.26;
 
-    // topographic isolines resolve over the surviving skin during the flip
+    // cool-white contour isolines resolve over the surviving skin
     float ff = vLocalPos.y * 6.5 + sin(vLocalPos.x * 3.4) * 0.6 + vLocalPos.z * 2.2;
     float iso = abs(fract(ff - uTime * 0.03) - 0.5) * 2.0;
     float line = smoothstep(0.80, 0.99, iso) * uContour;
-    lit = mix(lit, uStrand * (0.45 + 0.7 * key), line);
+    lit = mix(lit, mix(uStrand, uCool, 0.45), line * 0.9);
 
-    // ember burn just ahead of the eat line — a thin bright edge, not a wash
+    // amber burn just ahead of the eat line — a thin bright edge
     float glow = smoothstep(-0.035, 0.004, edge);
-    lit = mix(lit, uEmberHot, glow * 0.72);
-    lit += uEmber * glow * 0.35;
+    lit = mix(lit, uYellow, glow * 0.55);
+    lit += uAmber * glow * 0.5;
 
     gl_FragColor = vec4(lit, 1.0);
   }
