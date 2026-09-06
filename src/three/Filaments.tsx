@@ -60,9 +60,9 @@ function buildRibbons(strandCount: number, seed = 4242): THREE.BufferGeometry {
     dir.y += (rng() - 0.5) * 0.7
     dir.z += (rng() - 0.5) * 0.5
     dir.normalize()
-    // Short enough that the growing fibres read as a dense spiky brush bursting
-    // out of the skull (the reference's white tuft), not long thin streamers.
-    const len = 1.5 + rng() * 1.5
+    // Short enough that the growing cords stay in frame around the head — the
+    // reference's contained white tuft, not streamers shooting off every edge.
+    const len = 0.9 + rng() * 1.0
     const tx = rx + dir.x * len
     const ty = ry + dir.y * len
     const tz = rz + dir.z * len
@@ -147,7 +147,7 @@ export function Filaments({ strandCount, progress, headMatrix }: FilamentsProps)
     mat.uniforms.uHeadMat.value.copy(headMatrix.current)
     // Chunky cord throughout — the reference is macramé rope, not hair. A touch
     // thinner once they spread into the wide field so it doesn't turn to soup.
-    mat.uniforms.uWidth.value = lerp(0.042, 0.028, Math.min(1, Math.max(0, (t - 0.42) / 0.22)))
+    mat.uniforms.uWidth.value = lerp(0.020, 0.019, Math.min(1, Math.max(0, (t - 0.42) / 0.22)))
     mat.uniforms.uReveal.value =
       Math.min(1, filament * 5) * (1 - Math.max(0, (t - 0.97) / 0.03))
   })

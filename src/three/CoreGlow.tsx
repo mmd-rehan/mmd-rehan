@@ -34,10 +34,12 @@ const fragment = /* glsl */ `
   void main() {
     float d = length(vUv - 0.5) * 2.0;
     if (d > 1.0) discard;
-    float core = pow(1.0 - clamp(d / 0.22, 0.0, 1.0), 2.0);
-    float halo = pow(1.0 - d, 3.0);
-    vec3 col = uHot * core + uWarm * halo * 0.8 + uRim * pow(halo, 2.0) * 0.6;
-    float a = (core * 1.4 + halo * 0.35) * uOpacity;
+    // Warm halo, not a white dot — it should read as heat bleeding out of the
+    // cords, so lead with amber/yellow and keep the white core tiny.
+    float core = pow(1.0 - clamp(d / 0.16, 0.0, 1.0), 2.0);
+    float halo = pow(1.0 - d, 2.0);
+    vec3 col = uHot * core * 0.7 + uWarm * halo * 0.9 + uRim * pow(halo, 1.5) * 0.8;
+    float a = (core * 0.7 + halo * 0.55) * uOpacity;
     gl_FragColor = vec4(col, a);
   }
 `
@@ -60,8 +62,11 @@ export function CoreGlow({ progress }: { progress: MutableRefObject<number> }) {
 
   useFrame(({ camera }) => {
     const t = progress.current
+    // Small and restrained: the cords' own radial heat carries the centre, this
+    // is only the last bit of incandescence. Oversized, it burned a white hole
+    // straight through the disc.
     const appear = smoothstep(0.62, 0.74, t)
-    const bloom = 0.4 + 0.6 * smoothstep(0.76, 0.92, t)
+    const bloom = 0.22 + 0.24 * smoothstep(0.76, 0.92, t)
     const fadeOut = 1 - smoothstep(0.985, 1, t)
     if (matRef.current) matRef.current.uniforms.uOpacity.value = appear * bloom * fadeOut
     if (meshRef.current) meshRef.current.quaternion.copy(camera.quaternion)
@@ -70,7 +75,7 @@ export function CoreGlow({ progress }: { progress: MutableRefObject<number> }) {
   return (
     // Compact — a small blazing centre, not a bloom that swallows the disc.
     <mesh ref={meshRef} position={FINALE_CENTER} renderOrder={4} frustumCulled={false}>
-      <planeGeometry args={[1.5, 1.5]} />
+      <planeGeometry args={[1.15, 1.15]} />
       <shaderMaterial
         ref={matRef}
         uniforms={uniforms}
