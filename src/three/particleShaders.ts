@@ -5,9 +5,10 @@ import { DISSOLVE_GLSL } from './dissolve'
  *
  * Each particle has a home position on the head surface (aFrom). It stays
  * invisible, hidden behind the solid mesh, until the sweep front reaches it
- * (uDissolve crosses dissolveField(home)); at that instant it "detaches",
- * flares ember-hot, and blows backward into the scene, cooling to pale dust and
- * fading out as the strands take over (uSettle).
+ * (uDissolve crosses dissolveField(home)); at that instant it "detaches" as a
+ * dark voxel of the surface, flares amber for a moment, blows backward into the
+ * scene and disperses — thinning toward the environment tint and fading out as
+ * the strands take over (uSettle).
  *
  * Complementary by construction: the mesh shader discards exactly the fragments
  * this shader brings to life, using the same dissolveField.
@@ -122,22 +123,18 @@ export const particleFragmentShader = /* glsl */ `
     vec2 uv = gl_PointCoord - 0.5;
     float d = length(uv);
     if (d > 0.5) discard;
-    float alpha = smoothstep(0.5, 0.12, d);
+    float sprite = smoothstep(0.5, 0.12, d);
 
-    // Skin colour when fresh -> pale dust as it cools.
-    vec3 skin = vColor * vLight;
-    vec3 dust = mix(uColorLight, uStrand, 0.6);
-    vec3 col = mix(skin, dust, clamp(vAge * 1.4, 0.0, 1.0));
+    // A dark voxel of the source surface; flares amber at the front; thins
+    // toward the environment tint and disperses as it ages.
+    vec3 base = vColor * (0.34 + 0.24 * vLight);
+    vec3 col = mix(base, uColorHot, vBurn * 0.7);
+    col += uColorEmber * vBurn * 0.30;
+    col = mix(col, uStrand, vAge * 0.45);
 
-    // Ember flash at the moment it detaches — tight, at the front only.
-    col = mix(col, uColorHot, vBurn * 0.6);
-    col += uColorEmber * vBurn * 0.22;
+    float a = sprite * (1.0 - vAge * 0.92) * (1.0 - uSettle * 0.95);
+    a += sprite * vBurn * 0.55;
 
-    // Fade: a touch as it ages, hard once the strands lead.
-    alpha *= mix(1.0, 0.28, vAge);
-    alpha *= mix(1.0, 0.05, uSettle);
-
-    float boost = 1.0 + vBurn * 1.6;
-    gl_FragColor = vec4(col * boost, alpha);
+    gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));
   }
 `

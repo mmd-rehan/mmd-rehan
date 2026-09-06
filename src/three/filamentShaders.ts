@@ -69,16 +69,17 @@ export const filamentFragmentShader = /* glsl */ `
   void main() {
     if (vAlpha < 0.02) discard;
 
+    // Off-white body (reads as a light strand on the pale stone), warming to
+    // yellow then amber toward the incandescent tip.
     vec3 col = uWhite;
-    col = mix(col, uEmber, smoothstep(0.35, 0.8, vTip));
-    col = mix(col, uHot, smoothstep(0.8, 1.0, vTip));
+    col = mix(col, uHot, smoothstep(0.45, 0.85, vTip));
+    col = mix(col, uEmber, smoothstep(0.85, 1.0, vTip));
 
-    // Translucent body, faded hard over the first third so the origin stays
-    // diffuse instead of a hot white knot; denser + over-bright at the tip so
-    // bloom reads it as a glowing nerve ending.
-    float bodyA = 0.3 * smoothstep(0.05, 0.38, vU) * (1.0 - smoothstep(0.82, 1.0, vU) * 0.5);
-    float a = mix(bodyA, 0.95, vTip);
-    float over = 1.0 + vTip * 1.5;
+    // Translucent body — kept faint so crossings build softly, not a knot —
+    // denser + over-bright at the tip so bloom reads it as a glowing ending.
+    float bodyA = 0.42 * smoothstep(0.04, 0.34, vU) * (1.0 - smoothstep(0.82, 1.0, vU) * 0.4);
+    float a = mix(bodyA, 0.98, vTip);
+    float over = 1.0 + vTip * 2.0;
 
     gl_FragColor = vec4(col * over, a * vAlpha);
   }
