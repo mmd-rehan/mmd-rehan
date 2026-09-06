@@ -85,15 +85,18 @@ export const STRAND_FORMS_GLSL = /* glsl */ `
     return mix(tail, coil, tailU);
   }
 
+  // A compact circular anemone: cords radiate from a hot core out to a clean
+  // rim with only a gentle curl, contained in frame — not a sprawling spiral.
   vec3 sfFormVortex(float u, float seed, vec3 h3, float time, float uT) {
-    float r = mix(0.10, 2.1, pow(u, 0.72));
-    // swirl is mostly scroll-driven (tightens as you scroll into it) with a
-    // slow idle drift on top
-    float spin = uT * 9.0 + time * 0.12;
-    float ang = seed * SF_TAU + u * (5.0 + seed * 2.2) + spin * (1.0 - u * 0.55);
-    vec3 p = vec3(cos(ang) * r, sin(ang) * r * 0.60, sin(ang * 0.5) * 0.20 * (1.0 - u));
-    p.z += h3.z * 0.09;
-    p.yz = mat2(0.93, -0.36, 0.36, 0.93) * p.yz;   // tilt the disc
+    float r = mix(0.14, 1.62, pow(u, 0.80));
+    float spin = uT * 2.2 + time * 0.10;
+    // ~1 radian of curl over the cord's length reads as a swirl without
+    // wrapping the disc into a spiral.
+    float ang = seed * SF_TAU + u * (1.05 + seed * 0.5) + spin;
+    vec3 p = vec3(cos(ang) * r, sin(ang) * r * 0.94, 0.0);
+    // slight dome so the disc has volume, plus a little per-cord jitter
+    p.z = (0.34 - 0.34 * u) + h3.z * 0.05;
+    p.yz = mat2(0.97, -0.22, 0.22, 0.97) * p.yz;   // gentle tilt
     return SF_CENTER + p;
   }
 
