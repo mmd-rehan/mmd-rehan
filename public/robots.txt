@@ -1,4 +1,4 @@
-# https://mmd-rehan.com
+# https://www.mmd-rehan.com
 User-agent: *
 Allow: /
 
@@ -19,4 +19,4 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://mmd-rehan.com/sitemap.xml
+Sitemap: https://www.mmd-rehan.com/sitemap.xml

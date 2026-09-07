@@ -32,7 +32,7 @@
 
 ## Links
 
-- Site: https://mmd-rehan.com
+- Site: https://www.mmd-rehan.com
 - LinkedIn: https://www.linkedin.com/in/mmd-rehan
 - GitHub: https://github.com/mmd-rehan
 - Writing: https://medium.com/@mrrehan
