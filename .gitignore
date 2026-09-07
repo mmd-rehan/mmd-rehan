@@ -7,3 +7,5 @@ dist-ssr
 _scan_tmp/
 public/models/
 public/_tmp_view/
+.vercel
+.env*
