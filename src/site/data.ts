@@ -63,3 +63,122 @@ export const COMPANIES = [
   { name: 'amadeus', className: 'amadeus' },
   { name: 'Winsoft', className: '', suffix: ' Solutions' },
 ]
+
+export type Testimonial = {
+  name: string
+  role: string
+  /** How they knew each other — the detail that makes a quote credible. */
+  relationship: string
+  quote: string
+}
+
+/** Excerpts from the recommendations on linkedin.com/in/mmd-rehan, each
+ *  trimmed to its strongest line or two. Full text lives on LinkedIn. */
+export const FEATURED_TESTIMONIAL: Testimonial = {
+  name: 'Salah Uddin',
+  role: 'Senior Android Developer at Amadeus',
+  relationship: 'Sat alongside Rehan at Amadeus',
+  quote:
+    'His positive attitude and willingness to help made him a great colleague to have around.',
+}
+
+export const TESTIMONIALS: Testimonial[] = [
+  {
+    name: 'Athena Rahmatie',
+    role: 'Project & Operation Manager',
+    relationship: 'Worked with Rehan across teams',
+    quote:
+      'Rehan is not only incredibly skilled but also has a great work ethic and a professional attitude that makes working with him a pleasure.',
+  },
+  {
+    name: 'Atta Ur Rehman',
+    role: 'Chief Technology Officer at Santra',
+    relationship: 'Managed Rehan directly',
+    quote:
+      'He consistently demonstrated strong technical skills, a proactive attitude, and the ability to tackle challenges effectively.',
+  },
+  {
+    name: 'Muiz Mahdi',
+    role: 'Software Engineer at Stripe',
+    relationship: 'Same team at Amadeus',
+    quote:
+      'He approaches problems methodically and is always willing to find effective solutions.',
+  },
+  {
+    name: 'Abdulhamid Tork',
+    role: 'Tech Leader & Founder, Oona One',
+    relationship: 'Same team at Winsoft Solutions',
+    quote:
+      'His dedication, creativity, and problem-solving abilities have been invaluable to our team.',
+  },
+  {
+    name: 'Bakht Munir',
+    role: 'Software Engineer',
+    relationship: 'Worked under Rehan at Winsoft Solutions',
+    quote:
+      'His innovative approach, attention to detail, and strong problem-solving skills consistently contributed to our project’s success.',
+  },
+  {
+    name: 'Asad Syed',
+    role: 'Mobile Architect · iOS & Flutter',
+    relationship: 'Collaborated at Shisheo',
+    quote:
+      'Rehan brings a rare blend of technical expertise and creative problem-solving to the table.',
+  },
+]
+
+export type Reference = {
+  name: string
+  /** Current designation only — no contact details. */
+  title: string
+  context: string
+  /** Paraphrased summary of the letter, not a quotation. */
+  summary: string
+}
+
+/** Summarised from written recommendation letters held on file. Bakht Munir
+ *  also wrote one; he already appears in TESTIMONIALS, so he is not repeated. */
+export const REFERENCES: Reference[] = [
+  {
+    name: 'Abdul Rahman',
+    title: 'HCI & UX Project Delivery Consultant, American University of Sharjah',
+    context: 'Head of Product Design at Phoenix Group',
+    summary:
+      'Credits Rehan with the real-time miner monitoring dashboards and APIs, a drop of more than 25% in downtime incidents, and deployment cycles cut by over 40% after the move to Kubernetes and CI/CD. Notes his habit of translating between business and engineering goals.',
+  },
+  {
+    name: 'Abdul Basit',
+    title: 'Product Architect, Rakuten Singapore',
+    context: 'Joint projects over seven years',
+    summary:
+      'Describes rebuilding a client’s observability stack in live production, where Rehan proposed a parallel-stack migration that let customers move across with minimal risk, alongside per-flow bandwidth monitoring and alerting that cut downtime in critical systems by 20%.',
+  },
+  {
+    name: 'Danyal Tariq',
+    title: 'Software Engineer, Phoenix Group',
+    context: 'Reported to Rehan for two years',
+    summary:
+      'Writes about the mentoring side: learning React and Strapi directly from Rehan, and crediting much of his own progress as a developer to that guidance. Describes Rehan setting the architecture and technical direction for the monitoring work.',
+  },
+  {
+    name: 'Muhammad Ahmed',
+    title: 'Engineering Cutting-Edge HPC and AI Infrastructure | University of Cambridge',
+    context: 'IT Services Lead at the American University of Sharjah',
+    summary:
+      'Recalls Rehan’s ERP and CRM work at AUS, including the transition off the legacy Ellucian Banner system onto Oracle Fusion, and describes the work as reliable and well organised across faculty, staff and student systems.',
+  },
+  {
+    name: 'Sameed Kashif',
+    title: 'IT Administration Supervisor, Corsec Services, Australia',
+    context: 'Studied together at COMSATS',
+    summary:
+      'Recalls Rehan helping shape his final-year breast cancer detection project and organising programming competitions for their cohort, and says he has remained a person he turns to for advice on cloud technologies since.',
+  },
+  {
+    name: 'Muneeb Ahmad',
+    title: 'Senior Department Manager, Australia · MSc Data Science',
+    context: 'Studied together at COMSATS',
+    summary:
+      'Writes from thirteen years of knowing him: consistently strong in programming, robotics and networking at university, usually the first to pick up a new technology, and regularly helping classmates untangle their own projects.',
+  },
+]

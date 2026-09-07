@@ -1,6 +1,7 @@
 import { Clock } from './Clock'
 import { NetworkCanvas } from './NetworkCanvas'
 import { Project } from './Project'
+import { Testimonials } from './Testimonials'
 import { ROLES, TOOLKIT } from './data'
 
 const CorsArt = (
@@ -299,26 +300,7 @@ export default function Site() {
           </div>
         </section>
 
-        <section className="quote-section">
-          <span className="quote-mark" aria-hidden="true">
-            “
-          </span>
-          <blockquote>
-            His positive attitude and willingness to help made him a great colleague to have around.
-          </blockquote>
-          <p>
-            <strong>Salah Uddin</strong>
-            <span>Colleague at Amadeus · LinkedIn recommendation</span>
-          </p>
-          <a
-            href="https://www.linkedin.com/in/mmd-rehan/details/recommendations/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-link"
-          >
-            More from people I’ve worked with <span aria-hidden="true">↗</span>
-          </a>
-        </section>
+        <Testimonials />
 
         <section id="contact" className="section contact">
           <p className="eyebrow">NEXT CONVERSATION</p>
