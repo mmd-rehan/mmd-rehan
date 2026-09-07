@@ -1,22 +1,3 @@
-# mmd-rehan.com
-
-Source for my personal site — a single-page portfolio built with React, TypeScript and Vite.
-
-**Live:** [mmd-rehan.com](https://mmd-rehan.com)
-
-## Running it
-
-```bash
-npm install
-npm run dev      # dev server
-npm run build    # typecheck + production build
-npm run test     # unit tests
-```
-
-The page is composed in `src/site/`. `Site.tsx` holds the sections, `data.ts` holds the
-role and toolkit content, and `NetworkCanvas.tsx` draws the wireframe torus in the hero
-on a 2D canvas. Styling is one plain stylesheet, `src/site/site.css`.
-
 ## About me
 
 I'm a software engineer based in Dubai, currently at Gulf Agency Company. Over the past
