@@ -55,8 +55,24 @@ export const STRAND_FORMS_GLSL = /* glsl */ `
     return mid + (cos(ang) * e1 + sin(ang) * e2) * rad;
   }
 
-  vec3 sfFormSphere(float u, float seed, vec3 h3) {
-    float R = 1.4;
+  /**
+   * COMBING. The reference bloom is a wound skein: neighbouring cords lie
+   * parallel in ordered bands. Ours tangled because each cord drew its curl
+   * rate, radius and turn count from a hash — so neighbours diverged and
+   * crossed. The fix is to derive position from the ORDERED strand index
+   * instead: cords are dealt into a few concentric layers, and within a layer
+   * the azimuth advances monotonically, so cord N always sits beside cord N+1.
+   * Every cord in a layer shares the same curl, so they can never cross.
+   *
+   * Returns: x = layer index, y = ordered position within the layer (0..1).
+   */
+  vec2 sfComb(float strand, float layers) {
+    float s = clamp(strand, 0.0, 0.99999) * layers;
+    return vec2(floor(s), fract(s));
+  }
+
+  vec3 sfFormSphere(float u, float seed, vec3 h3, float strand) {
+    float R = 1.32;
     vec3 poleN = normalize(vec3(-0.5, 0.78, -0.28));
     vec3 entry = SF_CENTER + poleN * R;
     // the cable tail arcing in from the top-left — a bundled rope, not a line
@@ -71,37 +87,52 @@ export const STRAND_FORMS_GLSL = /* glsl */ `
     vec3 tail = tailMid + (cos(tang) * tperp + sin(tang) * cross(tdir, tperp)) * 0.12;
 
     float t = clamp((u - 0.18) / 0.82, 0.0, 1.0);
-    // each strand owns a latitude band and sweeps out+back within it, so the
-    // strands wrap the whole ball instead of converging at one pole
-    float lat0 = 0.18 + seed * 2.55;
-    float phi = lat0 + sin(t * 3.14159265) * 1.35 + h3.y * 0.18;
-    float turns = 3.0 + fract(seed * 7.13) * 4.0;
-    float theta = seed * SF_TAU * 3.0 + t * turns * SF_TAU;
+
+    // Wound ball: ordered meridians laid side by side, layered into shells.
+    vec2 comb = sfComb(strand, 5.0);
+    float li = comb.x;
+    float within = comb.y;
+    float shell = R + li * 0.055;
+    // every cord sweeps pole -> past the equator by the SAME amount
+    float phi = mix(0.10, 2.62, t);
+    // azimuth is set by the cord's place in its layer, plus one shared lean
+    float theta = within * SF_TAU + li * 0.62 + t * 0.85;
+
     vec3 up = abs(poleN.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
     vec3 e1 = normalize(cross(poleN, up));
     vec3 e2 = cross(poleN, e1);
     vec3 dir = cos(phi) * poleN + sin(phi) * (cos(theta) * e1 + sin(theta) * e2);
-    vec3 coil = SF_CENTER + dir * (R + h3.z * 0.12);
+    vec3 coil = SF_CENTER + dir * (shell + h3.z * 0.012);
     return mix(tail, coil, tailU);
   }
 
   // Chrysanthemum (reference frames 033 / 039): every cord leaves a hot centre
-  // at the front pole, arcs out over a DOME, and finishes just past the
-  // equator so its tip points outward at the rim. Not a flat disc — the dome
-  // is what gives the packed-petal look.
-  vec3 sfFormVortex(float u, float seed, vec3 h3, float time, float uT) {
-    float R = 1.34 * (0.96 + h3.y * 0.07);
+  // at the front pole, arcs out over a DOME, and finishes just before the
+  // equator so its tip points at the viewer. Combed into concentric layers so
+  // the petals lie parallel like a wound skein.
+  vec3 sfFormVortex(float u, float seed, vec3 h3, float time, float uT, float strand) {
+    vec2 comb = sfComb(strand, 4.0);
+    float li = comb.x;
+    float within = comb.y;
+
+    // Stacked shells rather than a random radius per cord.
+    float R = 1.20 + li * 0.085;
     float spin = uT * 1.5 + time * 0.07;
-    // Polar angle: 0 = pole facing camera (the core). Stops BEFORE the equator
-    // (1.57) so every cord's glowing tip still faces the viewer — that ring of
-    // orange ferrules around the bloom is the signature of frames 033 / 039.
-    // Start almost at the pole so the cords converge to a knot and close the
-    // centre — a wider inner ring left a hole you could see the page through.
-    float phi = mix(0.045, 1.36, pow(u, 0.9));
-    // azimuth: fixed per cord, with a light curl so the bloom swirls
-    float theta = seed * SF_TAU + u * (0.55 + seed * 0.25) + spin;
+
+    // Polar angle: 0 = pole facing camera (the core). Starts almost at the pole
+    // so cords converge into a knot and close the centre; stops BEFORE the
+    // equator (1.57) so every glowing ferrule still faces the viewer — that
+    // ring of orange ends is the signature of frames 033 / 039. Outer layers
+    // stop slightly shorter so the tips stagger instead of forming one hard rim.
+    float phi = mix(0.045, 1.38 - li * 0.055, pow(u, 0.9));
+
+    // Ordered azimuth + a curl that is IDENTICAL for every cord. A per-cord
+    // curl rate was what let neighbours drift apart and tangle.
+    float theta = within * SF_TAU + li * 0.40 + u * 0.62 + spin;
+
     vec3 dir = vec3(sin(phi) * cos(theta), sin(phi) * sin(theta), cos(phi));
-    return SF_CENTER + dir * R;
+    // whisper of jitter so perfectly coincident cords don't z-fight
+    return SF_CENTER + dir * (R + h3.z * 0.008);
   }
 
   vec3 strandPoint(
@@ -119,8 +150,8 @@ export const STRAND_FORMS_GLSL = /* glsl */ `
     vec3 p =
       sfFormHead(root, tipHead, u, seed, headMat) * wHead +
       sfFormCable(u, seed, h3) * wCable +
-      sfFormSphere(u, seed, h3) * wSphere +
-      sfFormVortex(u, seed, h3, time, uT) * wVortex;
+      sfFormSphere(u, seed, h3, strand) * wSphere +
+      sfFormVortex(u, seed, h3, time, uT, strand) * wVortex;
     return p / sum;
   }
 `
