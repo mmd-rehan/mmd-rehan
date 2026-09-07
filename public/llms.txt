@@ -1,0 +1,39 @@
+# Muhammad Rehan
+
+> Full-stack software engineer based in Dubai, UAE, with 7+ years building
+> production systems across healthcare, aviation, mining infrastructure and
+> logistics.
+
+## Summary
+
+- **Role**: Software Engineer, Full-Stack at Gulf Agency Company (2024–present)
+- **Location**: Dubai, United Arab Emirates
+- **Core stack**: React, Angular, TypeScript, Node.js, NestJS, SQL, MongoDB
+- **Delivery**: Docker, Kubernetes, AWS, CI/CD, Nginx
+- **Education**: BSc Computer Science, COMSATS (2018)
+
+## Experience
+
+- **Gulf Agency Company** (2024–present) — React and Angular applications for
+  shipping and logistics; APIs, SQL, CI/CD and release management.
+- **Phoenix Group** (2023–2024) — Senior Software Engineer. Miner monitoring,
+  operational dashboards and APIs; Kubernetes and CI/CD reliability work.
+- **Amadeus** (2021–2023) — Airline booking and servicing flows, including
+  Saudia booking, Etihad manage-booking and Royal Air Maroc services.
+- **Winsoft Solutions** (2019–2021) — Unified Medical File EMR, monolith to
+  microservices migration, HL7 prescription and insurance integrations.
+
+## Independent projects
+
+- [FixCors](https://fixcors.com): CORS proxy utility for developers.
+- [NoBoxTV](https://noboxtv.com): browser-based IPTV player, NestJS + HLS.
+- [Textile POS](https://github.com/mmd-rehan/textile-pos): open-source POS and
+  inventory for fabric retail.
+
+## Links
+
+- Site: https://mmd-rehan.com
+- LinkedIn: https://www.linkedin.com/in/mmd-rehan
+- GitHub: https://github.com/mmd-rehan
+- Writing: https://medium.com/@mrrehan
+- Contact: hi@mmd-rehan.com

@@ -1,0 +1,22 @@
+# https://mmd-rehan.com
+User-agent: *
+Allow: /
+
+# AI crawlers are allowed on purpose: citations in ChatGPT, Perplexity and
+# AI Overviews are a discovery channel for a personal brand.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://mmd-rehan.com/sitemap.xml
