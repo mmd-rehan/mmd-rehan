@@ -2,7 +2,7 @@ import { Clock } from './Clock'
 import { NetworkCanvas } from './NetworkCanvas'
 import { Project } from './Project'
 import { Testimonials } from './Testimonials'
-import { ROLES, TOOLKIT } from './data'
+import { REPOS, ROLES, TOOLKIT } from './data'
 
 const CorsArt = (
   <div className="project-art cors-art">
@@ -156,29 +156,34 @@ export default function Site() {
               tags={['NestJS', 'HLS / MediaMTX', 'Independent product']}
               detail="I separated playback authorization from media delivery. A NestJS and MySQL control plane selects sources and issues signed URLs; Nginx and MediaMTX handle the HLS streams. The architecture keeps source handling behind a controlled playback interface."
             />
-            <article className="project wide-project">
-              <div>
-                <span className="eyebrow">OPEN SOURCE</span>
-                <h3>Textile POS &amp; Inventory</h3>
-                <p>
-                  Software shaped around the realities of fabric retail: rolls, inventory, sales,
-                  and the details that generic POS systems miss.
-                </p>
-                <div className="tags">
-                  <span>TypeScript</span>
-                  <span>MySQL</span>
-                  <span>Retail operations</span>
-                </div>
-              </div>
-              <a
-                className="button outline"
-                href="https://github.com/mmd-rehan/textile-pos"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Explore the repository <span aria-hidden="true">↗</span>
-              </a>
-            </article>
+          </div>
+
+          <div className="repos">
+            <p className="eyebrow repos-label">ALSO ON GITHUB</p>
+            <div className="repo-grid">
+              {REPOS.map((repo) => (
+                <article className="repo" key={repo.name}>
+                  <div className="repo-head">
+                    <h3>{repo.name}</h3>
+                    <a
+                      href={repo.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${repo.name} on GitHub`}
+                    >
+                      ↗
+                    </a>
+                  </div>
+                  <p>{repo.blurb}</p>
+                  {repo.meta && <p className="repo-meta">{repo.meta}</p>}
+                  <div className="tags">
+                    {repo.tags.map((tag) => (
+                      <span key={tag}>{tag}</span>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 

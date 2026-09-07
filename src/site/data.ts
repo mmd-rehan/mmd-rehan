@@ -182,3 +182,37 @@ export const REFERENCES: Reference[] = [
       'Writes from thirteen years of knowing him: consistently strong in programming, robotics and networking at university, usually the first to pick up a new technology, and regularly helping classmates untangle their own projects.',
   },
 ]
+
+export type Repo = {
+  name: string
+  href: string
+  blurb: string
+  tags: string[]
+  /** Only set where the numbers are worth showing. */
+  meta?: string
+}
+
+export const REPOS: Repo[] = [
+  {
+    name: 'ADMS Server for ZKTeco',
+    href: 'https://github.com/mmd-rehan/ADMS-server-ZKTeco',
+    blurb:
+      'An ADMS server for ZKTeco SpeedFace terminals, so attendance hardware can push records straight into your own system instead of the vendor’s software.',
+    tags: ['PHP', 'Attendance hardware', 'Self-hosted'],
+    meta: '27 stars · 16 forks',
+  },
+  {
+    name: 'Prescriptionly',
+    href: 'https://github.com/Prescriptionly/app',
+    blurb:
+      'A personal health app for capturing, storing and tracking your medication history, and sharing it with the people treating you.',
+    tags: ['TypeScript', 'Health', 'In progress'],
+  },
+  {
+    name: 'Textile POS & Inventory',
+    href: 'https://github.com/mmd-rehan/textile-pos',
+    blurb:
+      'Software shaped around the realities of fabric retail: rolls, inventory, sales, and the details that generic POS systems miss.',
+    tags: ['TypeScript', 'MySQL', 'Retail operations'],
+  },
+]

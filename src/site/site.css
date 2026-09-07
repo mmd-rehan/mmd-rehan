@@ -35,3 +35,20 @@
 .ref-list p{margin:0;max-width:660px;font-size:15px;line-height:1.75;color:var(--muted)}
 @media(max-width:1000px){.voice-grid{grid-template-columns:repeat(2,1fr)}.ref-list li{grid-template-columns:230px 1fr;gap:26px}}
 @media(max-width:700px){.voice-grid{grid-template-columns:1fr}.references{margin-top:46px}.references-head{display:block}.ref-note{margin-top:10px}.ref-list li{grid-template-columns:1fr;gap:12px;padding:22px 0}.ref-list p{font-size:14px}}
+
+/* --- Public repositories ----------------------------------------------- */
+.repos{margin-top:52px}
+.repos-label{color:var(--blue);margin-bottom:20px}
+.repo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.repo{background:#edf0ed;border:1px solid var(--line);border-radius:8px;padding:26px 24px;transition:border-color .2s,transform .2s}
+.repo:hover{border-color:#a5adb4;transform:translateY(-3px)}
+.repo-head{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.repo h3{font-size:21px;margin-bottom:0;letter-spacing:-.5px}
+.repo-head a{flex-shrink:0;width:34px;height:34px;display:grid;place-items:center;font-size:19px;border:1px solid var(--line);border-radius:50%}
+.repo-head a:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.repo>p{margin:14px 0 0;font-size:14px;line-height:1.7;color:var(--muted)}
+.repo .repo-meta{margin-top:12px;font-size:12px;letter-spacing:.3px;color:var(--blue)}
+.repo .tags{margin-top:16px}
+.repo .tags span{border-color:#ccd3cc}
+@media(max-width:1000px){.repo-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.repos{margin-top:38px}.repo-grid{grid-template-columns:1fr}.repo{padding:22px 20px}}
