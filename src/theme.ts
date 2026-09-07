@@ -1,58 +1,60 @@
+import * as THREE from 'three'
+
 /**
- * Visual system constants shared between the WebGL scene and the DOM chrome,
- * so the two layers stay in lockstep. Colors are warm cream + ember, matching
- * the reference design.
+ * Visual system constants shared between the WebGL scene and the DOM chrome.
+ *
+ * Palette: a soft, pale environment — a warm blush/stone that shifts toward a
+ * cool gray-green as the abstract form develops, matching the reference. These
+ * are RENDER-TARGET colours (what should land on screen), not eyedropped source
+ * samples: the renderer runs with colour management on and tone mapping off, so
+ * a shader that outputs `*_RGB` (converted to linear below) reproduces the hex.
  */
 
-export const THEME = {
-  /** Warm cream page background (faint pink undertone). */
-  background: '#F2ECE3',
-  backgroundDeep: '#E9E0D2',
-  /** Particles at rest (portrait / structural states). */
-  particleDark: '#1A1512',
-  /** Strand / highlight white. */
-  strandLight: '#FFF8F0',
-  /** Ember accent - the morph-front glow. */
-  ember: '#FF5A1F',
-  emberHot: '#FFC24B',
-  /** Text tones on cream. */
-  ink: '#211B14',
-  inkMuted: '#6E6156',
+export const PALETTE = {
+  /** Warm blush/stone — the rest-state background. */
+  warmBg: '#DED4CC',
+  /** Cool gray-green — the background once the form has developed. */
+  coolBg: '#D4DEDA',
+  /** Strand body / drifting dust. */
+  strandBody: '#E8ECE5',
+  /** Cool energy — contour lines, cool conduits. */
+  coolEnergy: '#7CDDED',
+  /** Blazing core (sphere / vortex centre). */
+  hotCore: '#FFF8D0',
+  /** Yellow energy — strand tips, mid-heat. */
+  yellowEnergy: '#FFD34D',
+  /** Amber rim — the burn front, hot edges, rim light. */
+  amberRim: '#F59632',
 } as const
 
-/** Numeric ember colors for Three.js (avoids re-parsing hex each frame). */
-export const EMBER_RGB = { r: 1.0, g: 0.353, b: 0.122 } // #FF5A1F
-export const EMBER_HOT_RGB = { r: 1.0, g: 0.761, b: 0.294 } // #FFC24B
-export const PARTICLE_DARK_RGB = { r: 0.102, g: 0.082, b: 0.071 } // #1A1512
+export const THEME = {
+  background: PALETTE.warmBg,
+  backgroundCool: PALETTE.coolBg,
+  strandLight: PALETTE.strandBody,
+  ember: PALETTE.amberRim,
+  emberHot: PALETTE.yellowEnergy,
+  /** DOM text tones on pale stone. */
+  ink: '#2C2723',
+  inkMuted: '#6E655C',
+  inkFaint: '#A79C8F',
+} as const
 
-/**
- * Per-domain glow palette. Particles rest dark (crisp on cream); as they light
- * up - outer tips at rest, and the whole cloud as it disperses on scroll - they
- * heat toward `mid` then `hot`. Each domain gets its own hue so every
- * disappear/reappear moment reads distinctly, while the hero forms (portrait,
- * nerves) keep the signature ember. Tweak these triples to recolor a domain.
- */
-export type RGB = readonly [number, number, number]
-export interface GlowPair {
-  mid: RGB
-  hot: RGB
+/** sRGB hex -> linear RGB triple (ColorManagement is on, so THREE.Color stores
+ *  linear). Shader uniforms want these; the renderer encodes back to sRGB. */
+function lin(hex: string): { r: number; g: number; b: number } {
+  const c = new THREE.Color(hex)
+  return { r: c.r, g: c.g, b: c.b }
 }
 
-const EMBER_GLOW: GlowPair = {
-  mid: [1.0, 0.353, 0.122], // ember #FF5A1F
-  hot: [1.0, 0.761, 0.294], // hot #FFC24B
-}
+export const WARM_BG_RGB = lin(PALETTE.warmBg)
+export const COOL_BG_RGB = lin(PALETTE.coolBg)
+export const STRAND_RGB = lin(PALETTE.strandBody)
+export const COOL_ENERGY_RGB = lin(PALETTE.coolEnergy)
+export const HOT_CORE_RGB = lin(PALETTE.hotCore)
+export const YELLOW_RGB = lin(PALETTE.yellowEnergy)
+export const AMBER_RGB = lin(PALETTE.amberRim)
 
-/** Keyed by TargetKey (kept as a plain map so theme.ts stays dependency-free). */
-export const DOMAIN_GLOW: Record<string, GlowPair> = {
-  portrait: EMBER_GLOW,
-  nerves: EMBER_GLOW,
-  // Health - vital emerald (monitor green).
-  signal: { mid: [0.063, 0.725, 0.506], hot: [0.435, 0.925, 0.72] },
-  // Aviation - jet / sky blue.
-  flightArc: { mid: [0.184, 0.502, 0.929], hot: [0.6, 0.79, 1.0] },
-  // Crypto - mining gold.
-  hashGrid: { mid: [0.898, 0.63, 0.086], hot: [1.0, 0.855, 0.42] },
-  // Logistics - container cyan (sea / flow).
-  torus: { mid: [0.055, 0.647, 0.718], hot: [0.42, 0.912, 0.976] },
-}
+/** Back-compat aliases for shaders written against the old names. */
+export const EMBER_RGB = AMBER_RGB
+export const EMBER_HOT_RGB = YELLOW_RGB
+export const PARTICLE_LIGHT_RGB = STRAND_RGB

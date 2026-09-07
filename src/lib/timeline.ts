@@ -46,7 +46,7 @@ export function morphStateAt(t: number): MorphState {
   // Keep the forms in near-continuous motion: a brief settled beat to register
   // the shape, then a long transition that runs right up to the next chapter, so
   // one form is still arriving as the previous one disperses (no dead gap).
-  const settleUntil = 0.22
+  const settleUntil = 0.15
   const next = CHAPTERS[idx + 1]
 
   let blend = 0

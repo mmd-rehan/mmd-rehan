@@ -1,5 +1,6 @@
 import { CHAPTERS, CONTACT } from '../content/chapters'
 import { ChapterSection } from './ChapterText'
+import { SiteContent } from './SiteContent'
 
 interface FallbackViewProps {
   /** Show the portrait image if available (no-WebGL path). */
@@ -20,7 +21,7 @@ export function FallbackView({ showPortrait, reason }: FallbackViewProps) {
         {showPortrait && (
           <img
             className="fallback-hero__img"
-            src="/portrait.png"
+            src="/portrait-real.jpg"
             alt={`${CONTACT.name}, ${CONTACT.title}`}
             width={220}
             height={308}
@@ -29,10 +30,10 @@ export function FallbackView({ showPortrait, reason }: FallbackViewProps) {
         <p className="chapter__eyebrow">
           {CONTACT.title} · {CONTACT.location}
         </p>
-        <h1 className="fallback-hero__title">Building reliable web and backend software.</h1>
+        <h1 className="fallback-hero__title">The same hands, every system.</h1>
         <p className="chapter__proof">
-          Software engineer with 7+ years of experience across healthcare, aviation, crypto
-          infrastructure, and logistics.
+          Software engineer, seven years — healthcare, aviation, crypto infrastructure,
+          logistics. Frontend to DevOps.
         </p>
         {reason === 'calm' && (
           <p className="fallback-note">Calm mode is on - motion is reduced.</p>
@@ -42,6 +43,8 @@ export function FallbackView({ showPortrait, reason }: FallbackViewProps) {
       {CHAPTERS.filter((c) => c.id !== 'intro').map((chapter) => (
         <ChapterSection key={chapter.id} chapter={chapter} />
       ))}
+
+      <SiteContent />
     </main>
   )
 }
