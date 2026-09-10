@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import type { PlaygroundEntry, PlaygroundId } from '../data'
 import { createScene } from './scene'
 import { buildObject, buildScenery } from './objects'
+import { attachControls } from './controls'
 
 export type EngineOptions = {
   catalog: PlaygroundEntry[]
@@ -23,7 +24,7 @@ export type EngineHandle = {
 
 export function createEngine(container: HTMLElement, opts: EngineOptions): EngineHandle {
   const stage = createScene(container)
-  const { scene, camera } = stage
+  const { scene } = stage
 
   // Build the interactive objects at their home positions.
   const objects = new Map<PlaygroundId, THREE.Group>()
@@ -40,12 +41,30 @@ export function createEngine(container: HTMLElement, opts: EngineOptions): Engin
   let disposed = false
   let onScreen = true
   let raf = 0
+  let current: PlaygroundId | null = null
   const clock = new THREE.Clock()
+
+  const controls = attachControls({
+    stage,
+    objects,
+    reducedMotion: opts.reducedMotion,
+    onObjectClick: (id) => handle.select(id),
+    onObjectDrag: (id, point) => {
+      const g = objects.get(id)
+      if (!g) return
+      g.position.x = point.x
+      g.position.z = point.z
+      g.userData.baseY = g.position.y
+      if (!raf) stage.render()
+    },
+  })
 
   const frame = () => {
     if (disposed) return
     raf = requestAnimationFrame(frame)
     const t = clock.getElapsedTime()
+
+    controls.update()
 
     if (!paused && !opts.reducedMotion) {
       // Gentle idle bob so the scene feels alive.
@@ -66,6 +85,21 @@ export function createEngine(container: HTMLElement, opts: EngineOptions): Engin
   const stop = () => {
     if (raf) cancelAnimationFrame(raf)
     raf = 0
+  }
+
+  // Run the loop briefly to let eased camera moves settle even while paused.
+  let kickUntil = 0
+  const kickFrame = () => {
+    if (disposed) return
+    controls.update()
+    stage.render()
+    if (performance.now() < kickUntil && !raf) requestAnimationFrame(kickFrame)
+  }
+  const kick = () => {
+    if (raf) return
+    const wasIdle = kickUntil < performance.now()
+    kickUntil = performance.now() + 700
+    if (wasIdle) requestAnimationFrame(kickFrame)
   }
 
   // Record resting heights for the bob.
@@ -96,29 +130,25 @@ export function createEngine(container: HTMLElement, opts: EngineOptions): Engin
   loop()
   stage.render()
 
-  // --- Imperative handle (camera / interaction wiring lands in later tasks) ---
-  let current: PlaygroundId | null = null
-
   const handle: EngineHandle = {
     select(id) {
       if (id === current) return
       current = id
+      controls.focus(id)
       opts.onDiscover(id)
       opts.onSelect(id)
-      if (!raf) stage.render()
+      kick()
     },
     play() {
-      if (!raf) stage.render()
+      kick()
     },
     zoom(dir) {
-      camera.zoom = THREE.MathUtils.clamp(camera.zoom * (dir === 1 ? 1.15 : 0.87), 0.6, 2)
-      camera.updateProjectionMatrix()
-      if (!raf) stage.render()
+      controls.zoom(dir)
+      kick()
     },
     recenter() {
-      camera.zoom = stage.homeZoom
-      camera.updateProjectionMatrix()
-      if (!raf) stage.render()
+      controls.recenter()
+      kick()
     },
     togglePause() {
       paused = !paused
@@ -134,7 +164,8 @@ export function createEngine(container: HTMLElement, opts: EngineOptions): Engin
           g.userData.baseY = entry.home[1]
         }
       }
-      handle.recenter()
+      controls.recenter()
+      kick()
     },
     shuffle() {
       const cells = shuffled(gridCells(opts.catalog.length))
@@ -147,11 +178,12 @@ export function createEngine(container: HTMLElement, opts: EngineOptions): Engin
           g.userData.baseY = entry.home[1]
         }
       }
-      if (!raf) stage.render()
+      kick()
     },
     dispose() {
       disposed = true
       stop()
+      controls.dispose()
       ro.disconnect()
       io.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)

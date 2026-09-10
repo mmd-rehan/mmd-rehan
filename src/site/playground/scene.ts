@@ -6,10 +6,14 @@ export type Stage = {
   camera: THREE.OrthographicCamera
   /** Ground plane at y = 0 — raycast target for placing dragged objects. */
   ground: THREE.Mesh
+  /** Point the camera orbits and looks at. */
+  target: THREE.Vector3
   /** Default framing, so controls can ease back to it. */
   readonly homeAzimuth: number
   readonly homePolar: number
   readonly homeZoom: number
+  /** Reposition the camera on its orbit sphere. */
+  setOrbit(azimuth: number, polar: number): void
   resize(): void
   render(): void
   dispose(): void
@@ -43,7 +47,7 @@ export function createScene(container: HTMLElement): Stage {
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100)
   const target = new THREE.Vector3(0, 0.6, 0)
 
-  const applyCamera = (azimuth: number, polar: number) => {
+  const setOrbit = (azimuth: number, polar: number) => {
     const sinP = Math.sin(polar)
     camera.position.set(
       target.x + RADIUS * sinP * Math.sin(azimuth),
@@ -52,7 +56,7 @@ export function createScene(container: HTMLElement): Stage {
     )
     camera.lookAt(target)
   }
-  applyCamera(HOME_AZIMUTH, HOME_POLAR)
+  setOrbit(HOME_AZIMUTH, HOME_POLAR)
 
   // Lighting — soft fill + one shadow-casting key.
   const hemi = new THREE.HemisphereLight(0xffffff, 0xd8d6cf, 1.05)
@@ -146,9 +150,11 @@ export function createScene(container: HTMLElement): Stage {
     scene,
     camera,
     ground,
+    target,
     homeAzimuth: HOME_AZIMUTH,
     homePolar: HOME_POLAR,
     homeZoom: 1,
+    setOrbit,
     resize,
     render,
     dispose,
