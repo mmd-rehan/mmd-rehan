@@ -220,7 +220,7 @@ export const PLAYGROUND: PlaygroundEntry[] = [
     cta: 'Send a packet',
     caption: 'A cleaner path for every request.',
     storyHref: 'https://fixcors.com',
-    home: [1.4, 0, -0.6],
+    home: [0.2, 0, -1.6],
   },
   {
     id: 'streaming',
@@ -232,7 +232,7 @@ export const PLAYGROUND: PlaygroundEntry[] = [
     cta: 'Change channel',
     caption: 'A new channel. Same curiosity.',
     storyHref: 'https://noboxtv.com',
-    home: [-1.6, 0, -0.4],
+    home: [-2.7, 0, -1.4],
   },
   {
     id: 'healthcare',
@@ -244,7 +244,7 @@ export const PLAYGROUND: PlaygroundEntry[] = [
     cta: 'Open the file',
     caption: 'Built where correctness matters.',
     storyHref: 'https://github.com/Prescriptionly/app',
-    home: [1.0, 0, 1.6],
+    home: [1.7, 0, 1.7],
   },
   {
     id: 'aviation',
@@ -256,7 +256,7 @@ export const PLAYGROUND: PlaygroundEntry[] = [
     cta: 'Take off',
     caption: 'Every seat, every leg, in sync.',
     storyHref: '#work',
-    home: [-0.4, 0, 0.9],
+    home: [-0.6, 0, 1.9],
   },
   {
     id: 'logistics',
@@ -268,7 +268,7 @@ export const PLAYGROUND: PlaygroundEntry[] = [
     cta: 'Dispatch cargo',
     caption: 'A closer look at the work.',
     storyHref: '#work',
-    home: [-2.5, 0, 1.1],
+    home: [-3.2, 0, 0.6],
   },
   {
     id: 'cloud',
@@ -280,7 +280,7 @@ export const PLAYGROUND: PlaygroundEntry[] = [
     cta: 'Pulse the servers',
     caption: 'Systems that stay up.',
     storyHref: '#work',
-    home: [2.7, 0, 0.5],
+    home: [3.0, 0, -0.9],
   },
 ]
 

@@ -49,6 +49,12 @@ a:focus-visible,summary:focus-visible,button:focus-visible{outline:3px solid var
 .playground-canvas{flex:1;min-height:clamp(320px,42vw,520px);width:100%;touch-action:none;cursor:grab}
 .playground-canvas:active{cursor:grabbing}
 .playground-canvas canvas{display:block;width:100%!important;height:100%!important}
+.control-cluster{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;padding:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;box-shadow:0 12px 30px -20px rgba(20,20,40,.5)}
+.control-cluster button{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;color:var(--muted);cursor:pointer}
+.control-cluster button:hover{background:var(--ice);color:var(--accent)}
+.control-cluster button[aria-pressed="true"]{color:var(--accent)}
+.control-cluster svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:640px){.control-cluster{right:2px;transform:translateY(-50%) scale(.9)}}
 .hero__hint{margin:12px 0 0;text-align:center;font-size:12px;color:var(--muted)}
 .hero__footline{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:26px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 .hero__footline-mid{flex:1;text-align:center}

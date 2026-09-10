@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { PLAYGROUND, type PlaygroundId } from './data'
 import { FeatureCard } from './FeatureCard'
 import { ExploreBar } from './ExploreBar'
+import { ControlCluster } from './ControlCluster'
 import { Playground } from './playground/Playground'
 import type { EngineHandle } from './playground/engine'
 
@@ -16,6 +17,7 @@ export function Hero() {
     () => new Set<PlaygroundId>(['apis']),
   )
   const engineRef = useRef<EngineHandle | null>(null)
+  const [paused, setPaused] = useState(false)
 
   const entry = byId(selectedId)
 
@@ -67,6 +69,16 @@ export function Hero() {
             onSelect={pick}
             onDiscover={() => {}}
             engineRef={engineRef}
+          />
+          <ControlCluster
+            paused={paused}
+            onZoomIn={() => engineRef.current?.zoom(1)}
+            onZoomOut={() => engineRef.current?.zoom(-1)}
+            onRecenter={() => engineRef.current?.recenter()}
+            onTogglePause={() =>
+              setPaused(engineRef.current?.togglePause() ?? !paused)
+            }
+            onReset={() => engineRef.current?.reset()}
           />
           <p className="hero__hint">
             <span aria-hidden="true">✋</span> Drag objects. Click to play.
