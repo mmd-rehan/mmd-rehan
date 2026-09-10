@@ -3,7 +3,6 @@ import { PLAYGROUND, type PlaygroundId } from '../data'
 import type { EngineHandle } from './engine'
 
 type Props = {
-  selectedId: PlaygroundId
   onSelect: (id: PlaygroundId) => void
   onDiscover: (id: PlaygroundId) => void
   engineRef: React.MutableRefObject<EngineHandle | null>
@@ -13,7 +12,7 @@ const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
-export function Playground({ selectedId, onSelect, onDiscover, engineRef }: Props) {
+export function Playground({ onSelect, onDiscover, engineRef }: Props) {
   const hostRef = useRef<HTMLDivElement>(null)
   // Keep the latest callbacks without re-running the mount effect.
   const cbRef = useRef({ onSelect, onDiscover })
@@ -53,11 +52,6 @@ export function Playground({ selectedId, onSelect, onDiscover, engineRef }: Prop
       engineRef.current = null
     }
   }, [engineRef])
-
-  // Reflect external selection (category tab / reducer) into the engine.
-  useEffect(() => {
-    engineRef.current?.select(selectedId)
-  }, [selectedId, engineRef])
 
   return <div className="playground-canvas" ref={hostRef} aria-hidden="true" />
 }

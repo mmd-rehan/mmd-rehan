@@ -1,39 +1,51 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { PLAYGROUND, type PlaygroundId } from './data'
 import { FeatureCard } from './FeatureCard'
 import { ExploreBar } from './ExploreBar'
 import { ControlCluster } from './ControlCluster'
 import { Playground } from './playground/Playground'
 import type { EngineHandle } from './playground/engine'
+import {
+  initialPlaygroundState,
+  playgroundReducer,
+} from './playgroundState'
 
 const byId = (id: PlaygroundId) =>
   PLAYGROUND.find((e) => e.id === id) ?? PLAYGROUND[0]
 
 export function Hero() {
-  // Stub state for the shell — replaced with the pure reducer + engine wiring
-  // in a later task.
-  const [selectedId, setSelectedId] = useState<PlaygroundId>('apis')
-  const [discovered, setDiscovered] = useState<ReadonlySet<PlaygroundId>>(
-    () => new Set<PlaygroundId>(['apis']),
-  )
+  const [state, dispatch] = useReducer(playgroundReducer, initialPlaygroundState)
+  const { selectedId, discovered } = state
   const engineRef = useRef<EngineHandle | null>(null)
   const [paused, setPaused] = useState(false)
 
   const entry = byId(selectedId)
 
+  // User picked a category tab / hit the card CTA — tell the engine, which will
+  // focus + play and echo back through onSelect.
   const pick = useCallback((id: PlaygroundId) => {
-    setSelectedId(id)
-    setDiscovered((prev) => {
-      if (prev.has(id)) return prev
-      const next = new Set(prev)
-      next.add(id)
-      return next
-    })
+    if (engineRef.current) engineRef.current.select(id)
+    else dispatch({ type: 'select', id })
+  }, [])
+
+  const replay = useCallback((id: PlaygroundId) => {
+    if (engineRef.current) engineRef.current.play(id)
+    dispatch({ type: 'select', id })
+  }, [])
+
+  // Engine emitted a selection (object click, or echo of pick()).
+  const onEngineSelect = useCallback((id: PlaygroundId) => {
+    dispatch({ type: 'select', id })
   }, [])
 
   const shuffle = useCallback(() => {
     engineRef.current?.shuffle()
   }, [])
+
+  // Keep the engine's camera focus in step with external selection changes.
+  useEffect(() => {
+    engineRef.current?.select(selectedId)
+  }, [selectedId])
 
   const entries = useMemo(() => PLAYGROUND, [])
 
@@ -60,13 +72,12 @@ export function Hero() {
           </p>
           <p className="hero__lead">I build the systems behind everyday experiences.</p>
 
-          <FeatureCard entry={entry} onCta={() => pick(entry.id)} />
+          <FeatureCard entry={entry} onCta={() => replay(entry.id)} />
         </div>
 
         <div className="hero__stage">
           <Playground
-            selectedId={selectedId}
-            onSelect={pick}
+            onSelect={onEngineSelect}
             onDiscover={() => {}}
             engineRef={engineRef}
           />

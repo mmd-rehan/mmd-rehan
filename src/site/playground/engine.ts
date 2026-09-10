@@ -132,14 +132,16 @@ export function createEngine(container: HTMLElement, opts: EngineOptions): Engin
 
   const handle: EngineHandle = {
     select(id) {
-      if (id === current) return
+      const isNew = id !== current
       current = id
       controls.focus(id)
+      if (isNew) handle.play(id)
       opts.onDiscover(id)
       opts.onSelect(id)
       kick()
     },
-    play() {
+    play(id) {
+      void id
       kick()
     },
     zoom(dir) {
