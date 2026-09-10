@@ -3,6 +3,7 @@ import type { PlaygroundEntry, PlaygroundId } from '../data'
 import { createScene } from './scene'
 import { buildObject, buildScenery } from './objects'
 import { attachControls } from './controls'
+import { playAnimation, disposeAnimationCache } from './animations'
 
 export type EngineOptions = {
   catalog: PlaygroundEntry[]
@@ -69,6 +70,7 @@ export function createEngine(container: HTMLElement, opts: EngineOptions): Engin
     if (!paused && !opts.reducedMotion) {
       // Gentle idle bob so the scene feels alive.
       for (const group of objects.values()) {
+        if (group.userData.animating) continue
         const phase = group.position.x + group.position.z
         group.position.y = (group.userData.baseY ?? 0) + Math.sin(t * 1.1 + phase) * 0.03
       }
@@ -95,10 +97,13 @@ export function createEngine(container: HTMLElement, opts: EngineOptions): Engin
     stage.render()
     if (performance.now() < kickUntil && !raf) requestAnimationFrame(kickFrame)
   }
-  const kick = () => {
-    if (raf) return
+  const kick = (ms = 700) => {
+    if (raf) {
+      kickUntil = Math.max(kickUntil, performance.now() + ms)
+      return
+    }
     const wasIdle = kickUntil < performance.now()
-    kickUntil = performance.now() + 700
+    kickUntil = performance.now() + ms
     if (wasIdle) requestAnimationFrame(kickFrame)
   }
 
@@ -141,8 +146,9 @@ export function createEngine(container: HTMLElement, opts: EngineOptions): Engin
       kick()
     },
     play(id) {
-      void id
-      kick()
+      const g = objects.get(id)
+      if (g) playAnimation(id, g, { reducedMotion: opts.reducedMotion })
+      kick(1100)
     },
     zoom(dir) {
       controls.zoom(dir)
@@ -185,6 +191,7 @@ export function createEngine(container: HTMLElement, opts: EngineOptions): Engin
     dispose() {
       disposed = true
       stop()
+      disposeAnimationCache()
       controls.dispose()
       ro.disconnect()
       io.disconnect()
