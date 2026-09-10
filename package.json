@@ -9,13 +9,9 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "bake:head": "node scripts/bakeHead.mjs"
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@react-three/fiber": "^8.17.10",
-    "@react-three/postprocessing": "^2.16.3",
-    "postprocessing": "^6.36.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "three": "^0.169.0"
@@ -29,7 +25,6 @@
     "@types/three": "^0.169.0",
     "@vitejs/plugin-react": "^4.3.2",
     "jsdom": "^29.1.1",
-    "node-three-gltf": "^2.1.0",
     "typescript": "^5.6.2",
     "vite": "^5.4.8",
     "vitest": "^4.1.11"
