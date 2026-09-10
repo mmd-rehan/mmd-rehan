@@ -183,6 +183,58 @@ export const REFERENCES: Reference[] = [
   },
 ]
 
+export type JourneyEntry = {
+  start: string
+  end: string
+  company: string
+  role: string
+  blurb: string
+  industry: string
+}
+
+export const JOURNEY: JourneyEntry[] = [
+  {
+    start: 'NOV 2024',
+    end: 'PRESENT',
+    company: 'Gulf Agency Company',
+    role: 'Software Engineer · via TASC',
+    blurb: 'Enterprise frontends, reusable components, REST APIs, and integrations for logistics.',
+    industry: 'Logistics',
+  },
+  {
+    start: 'NOV 2023',
+    end: 'OCT 2024',
+    company: 'Phoenix Group',
+    role: 'Senior Software Engineer',
+    blurb: 'Digital mining platforms, monitoring dashboards, APIs, and deployment workflows.',
+    industry: 'Digital infrastructure',
+  },
+  {
+    start: 'SEP 2021',
+    end: 'NOV 2023',
+    company: 'Amadeus',
+    role: 'Software Engineer · via Astek Middle East',
+    blurb: 'Travel technology, enterprise applications, user experiences, and Azure CI/CD.',
+    industry: 'Aviation',
+  },
+  {
+    start: 'SEP 2019',
+    end: 'SEP 2021',
+    company: 'Winsoft Solutions',
+    role: 'Software Developer',
+    blurb: 'Healthcare web and mobile applications, backend services, and developer mentorship.',
+    industry: 'Healthcare',
+  },
+  {
+    start: 'JAN 2018',
+    end: 'SEP 2019',
+    company: 'Freelance / Independent',
+    role: 'Software Developer',
+    blurb: 'A multi-branch, multi-brand restaurant point-of-sale system, built end to end.',
+    industry: 'Retail systems',
+  },
+]
+
 export type PlaygroundId =
   | 'apis'
   | 'streaming'

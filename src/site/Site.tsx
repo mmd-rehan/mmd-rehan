@@ -1,8 +1,9 @@
 import { Hero } from './Hero'
+import { Journey } from './Journey'
 import { Nav } from './Nav'
 import { Project } from './Project'
 import { Testimonials } from './Testimonials'
-import { REPOS, ROLES, TOOLKIT } from './data'
+import { REPOS, TOOLKIT } from './data'
 
 const CorsArt = (
   <div className="project-art cors-art">
@@ -114,55 +115,7 @@ export default function Site() {
           </div>
         </section>
 
-        <section id="experience" className="section experience">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">THE PROFESSIONAL CHAPTERS</p>
-              <h2 className="dual-heading">
-                <span>Different industries.</span>
-                <em>The same curiosity.</em>
-              </h2>
-            </div>
-            <p>
-              I move between the interface, the API, and the deployment pipeline to solve the
-              problem in front of me.
-            </p>
-          </div>
-          <div className="timeline">
-            {ROLES.map((role) => (
-              <details key={role.company} open={role.open}>
-                <summary>
-                  <span className="years">{role.years}</span>
-                  <span className="job">
-                    <strong>{role.company}</strong>
-                    <span>{role.title}</span>
-                  </span>
-                  <span className="industry">{role.industry}</span>
-                  <span className="expand">+</span>
-                </summary>
-                <div className="job-body">
-                  <p>{role.body}</p>
-                  {role.outcomes && (
-                    <div className="outcomes">
-                      {role.outcomes.map((o) => (
-                        <div key={o.label}>
-                          <strong>{o.figure}</strong>
-                          <span>{o.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {role.sourceNote && <p className="source-note">{role.sourceNote}</p>}
-                  <div className="tags">
-                    {role.tags.map((tag) => (
-                      <span key={tag}>{tag}</span>
-                    ))}
-                  </div>
-                </div>
-              </details>
-            ))}
-          </div>
-        </section>
+        <Journey />
 
         <section id="about" className="section about">
           <div className="about-intro">
