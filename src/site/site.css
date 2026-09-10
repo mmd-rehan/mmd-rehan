@@ -138,8 +138,13 @@ a:focus-visible,summary:focus-visible,button:focus-visible{outline:3px solid var
 /* --- Public repositories ----------------------------------------------- */
 .repos{margin-top:52px}
 .repos-label{color:var(--blue);margin-bottom:20px}
-.repo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
-.repo{background:#edf0ed;border:1px solid var(--line);border-radius:8px;padding:26px 24px;transition:border-color .2s,transform .2s}
+.repo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;align-items:stretch}
+.repo{display:flex;flex-direction:column;background:#edf0ed;border:1px solid var(--line);border-radius:8px;padding:26px 24px;transition:border-color .2s,transform .2s}
+.repo-blurb.clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.repo-more{align-self:flex-start;margin-top:8px;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer}
+.repo-more:hover{text-decoration:underline}
+.repo .tags{margin-top:16px}
+.repo .repo-meta{margin-top:auto;padding-top:14px;font-size:12px;letter-spacing:.3px;color:var(--accent);min-height:0}
 .repo:hover{border-color:#a5adb4;transform:translateY(-3px)}
 .repo-head{display:flex;justify-content:space-between;align-items:center;gap:14px}
 .repo h3{font-size:21px;margin-bottom:0;letter-spacing:-.5px}

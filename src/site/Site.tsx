@@ -2,6 +2,7 @@ import { Hero } from './Hero'
 import { Journey } from './Journey'
 import { Nav } from './Nav'
 import { Project } from './Project'
+import { RepoCard } from './RepoCard'
 import { Testimonials } from './Testimonials'
 import { REPOS, TOOLKIT } from './data'
 
@@ -90,26 +91,7 @@ export default function Site() {
             <p className="eyebrow repos-label">ALSO ON GITHUB</p>
             <div className="repo-grid">
               {REPOS.map((repo) => (
-                <article className="repo" key={repo.name}>
-                  <div className="repo-head">
-                    <h3>{repo.name}</h3>
-                    <a
-                      href={repo.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${repo.name} on GitHub`}
-                    >
-                      ↗
-                    </a>
-                  </div>
-                  <p>{repo.blurb}</p>
-                  {repo.meta && <p className="repo-meta">{repo.meta}</p>}
-                  <div className="tags">
-                    {repo.tags.map((tag) => (
-                      <span key={tag}>{tag}</span>
-                    ))}
-                  </div>
-                </article>
+                <RepoCard key={repo.name} repo={repo} />
               ))}
             </div>
           </div>
