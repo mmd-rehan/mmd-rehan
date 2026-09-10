@@ -1,6 +1,5 @@
-import { Clock } from './Clock'
+import { Hero } from './Hero'
 import { Nav } from './Nav'
-import { NetworkCanvas } from './NetworkCanvas'
 import { Project } from './Project'
 import { Testimonials } from './Testimonials'
 import { REPOS, ROLES, TOOLKIT } from './data'
@@ -51,69 +50,7 @@ export default function Site() {
 
 
       <main id="main">
-        <section className="hero">
-          <div className="hero-top">
-            <span className="eyebrow">MUHAMMAD REHAN / SOFTWARE ENGINEER</span>
-            <span className="location">
-              Based in Dubai, UAE <Clock />
-            </span>
-          </div>
-          <div className="hero-grid">
-            <div className="hero-copy">
-              <h1>
-                Good ideas.
-                <br />
-                Thoughtful code.
-                <br />
-                <em>Real impact.</em>
-              </h1>
-              <p>
-                I build software that connects people to what matters. From patient records to
-                airline journeys, and the infrastructure behind it all.
-              </p>
-              <a className="button primary" href="#work">
-                Explore my work <span aria-hidden="true">↘</span>
-              </a>
-            </div>
-            <div className="visual">
-              <NetworkCanvas />
-              <div className="visual-label">
-                <span>FROM INTERFACE TO INFRASTRUCTURE</span>
-                <span>Connected by curiosity.</span>
-              </div>
-            </div>
-          </div>
-          <div className="hero-bottom">
-            <p>
-              Full-stack engineer.
-              <br />
-              Product builder. Always learning.
-            </p>
-            <div className="experience-stat">
-              <strong>7+</strong>
-              <span>
-                years turning complex problems
-                <br />
-                into working software
-              </span>
-            </div>
-            <a href="#experience" className="scroll-note">
-              A little further down <span aria-hidden="true">↓</span>
-            </a>
-          </div>
-        </section>
-
-        <div className="companies">
-          <span>EXPERIENCE ACROSS</span>
-          <div>
-            <strong>GAC</strong>
-            <strong className="phoenix">PHOENIX GROUP</strong>
-            <strong className="amadeus">amadeus</strong>
-            <strong>
-              Winsoft<span className="small"> Solutions</span>
-            </strong>
-          </div>
-        </div>
+        <Hero />
 
         <section id="work" className="section work">
           <div className="section-heading">

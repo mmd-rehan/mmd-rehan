@@ -183,6 +183,107 @@ export const REFERENCES: Reference[] = [
   },
 ]
 
+export type PlaygroundId =
+  | 'apis'
+  | 'streaming'
+  | 'healthcare'
+  | 'aviation'
+  | 'logistics'
+  | 'cloud'
+
+export type PlaygroundEntry = {
+  id: PlaygroundId
+  /** Label on the category tab in the explore bar. */
+  category: string
+  /** Which body of work this object stands for. */
+  project: string
+  eyebrow: string
+  title: string
+  body: string
+  /** Label on the card's primary button — also replays the object animation. */
+  cta: string
+  /** Bottom-left micro-caption shown while this object is selected. */
+  caption: string
+  storyHref: string
+  /** Resting position on the platform, [x, y, z] in world units. */
+  home: [number, number, number]
+}
+
+export const PLAYGROUND: PlaygroundEntry[] = [
+  {
+    id: 'apis',
+    category: 'APIs',
+    project: 'FixCors',
+    eyebrow: 'DEVELOPER TOOLS',
+    title: 'FixCors',
+    body: 'Less friction between an idea and the API it needs.',
+    cta: 'Send a packet',
+    caption: 'A cleaner path for every request.',
+    storyHref: 'https://fixcors.com',
+    home: [1.4, 0, -0.6],
+  },
+  {
+    id: 'streaming',
+    category: 'Streaming',
+    project: 'NoBoxTV',
+    eyebrow: 'INDEPENDENT PRODUCT',
+    title: 'NoBoxTV',
+    body: 'A browser, a stream, and a simpler way to watch.',
+    cta: 'Change channel',
+    caption: 'A new channel. Same curiosity.',
+    storyHref: 'https://noboxtv.com',
+    home: [-1.6, 0, -0.4],
+  },
+  {
+    id: 'healthcare',
+    category: 'Healthcare',
+    project: 'Winsoft / Prescriptionly',
+    eyebrow: 'HEALTHCARE · WINSOFT',
+    title: 'Records that follow the patient.',
+    body: 'EMR systems and prescription workflows built where correctness matters.',
+    cta: 'Open the file',
+    caption: 'Built where correctness matters.',
+    storyHref: 'https://github.com/Prescriptionly/app',
+    home: [1.0, 0, 1.6],
+  },
+  {
+    id: 'aviation',
+    category: 'Aviation',
+    project: 'Amadeus',
+    eyebrow: 'AVIATION · AMADEUS',
+    title: 'Booking the journey.',
+    body: 'Airline booking and servicing flows serving millions of travellers.',
+    cta: 'Take off',
+    caption: 'Every seat, every leg, in sync.',
+    storyHref: '#work',
+    home: [-0.4, 0, 0.9],
+  },
+  {
+    id: 'logistics',
+    category: 'Logistics',
+    project: 'Gulf Agency Company',
+    eyebrow: 'GAC · 2024–PRESENT',
+    title: 'Keeping things moving.',
+    body: 'Connected interfaces and services for global logistics.',
+    cta: 'Dispatch cargo',
+    caption: 'A closer look at the work.',
+    storyHref: '#work',
+    home: [-2.5, 0, 1.1],
+  },
+  {
+    id: 'cloud',
+    category: 'Cloud',
+    project: 'Phoenix Group',
+    eyebrow: 'PHOENIX GROUP · 2023–2024',
+    title: 'Behind the uptime.',
+    body: 'Real-time dashboards and infrastructure built to keep running.',
+    cta: 'Pulse the servers',
+    caption: 'Systems that stay up.',
+    storyHref: '#work',
+    home: [2.7, 0, 0.5],
+  },
+]
+
 export type Repo = {
   name: string
   href: string
