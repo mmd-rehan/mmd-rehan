@@ -1,4 +1,5 @@
 import { Clock } from './Clock'
+import { Nav } from './Nav'
 import { NetworkCanvas } from './NetworkCanvas'
 import { Project } from './Project'
 import { Testimonials } from './Testimonials'
@@ -45,19 +46,9 @@ export default function Site() {
         Skip to content
       </a>
 
-      <header className="header">
-        <a className="brand" href="#" aria-label="Muhammad Rehan home">
-          mr<span>.</span>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="#work">Selected work</a>
-          <a href="#experience">Experience</a>
-          <a href="#about">About</a>
-        </nav>
-        <a className="contact-link" href="mailto:hi@mmd-rehan.com">
-          Let’s talk <span aria-hidden="true">↗</span>
-        </a>
-      </header>
+      <Nav />
+      <a id="top" />
+
 
       <main id="main">
         <section className="hero">
