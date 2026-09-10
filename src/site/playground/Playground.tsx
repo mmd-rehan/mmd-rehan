@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { PLAYGROUND, type PlaygroundId } from '../data'
 import type { EngineHandle } from './engine'
+import { supportsWebGL } from './supportsWebGL'
 
 type Props = {
   onSelect: (id: PlaygroundId) => void
@@ -18,8 +19,14 @@ export function Playground({ onSelect, onDiscover, engineRef }: Props) {
   const cbRef = useRef({ onSelect, onDiscover })
   cbRef.current = { onSelect, onDiscover }
 
+  // Assume capable during SSR / first paint; re-check on the client.
+  const [webgl, setWebgl] = useState(true)
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    setWebgl(supportsWebGL())
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !webgl) return
     const host = hostRef.current
     if (!host) return
 
@@ -51,7 +58,17 @@ export function Playground({ onSelect, onDiscover, engineRef }: Props) {
       handle?.dispose()
       engineRef.current = null
     }
-  }, [engineRef])
+  }, [engineRef, webgl])
+
+  if (!webgl) {
+    return (
+      <img
+        className="playground-still"
+        src="/playground-still.webp"
+        alt="An isometric scene of six low-poly objects — a retro TV, an API ring, a first-aid kit, an aeroplane, a shipping container, and a server rack — on a tilted platform, one for each field Rehan has built software in."
+      />
+    )
+  }
 
   return <div className="playground-canvas" ref={hostRef} aria-hidden="true" />
 }
