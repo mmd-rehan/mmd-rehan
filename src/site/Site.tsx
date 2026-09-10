@@ -56,10 +56,9 @@ export default function Site() {
           <div className="section-heading">
             <div>
               <p className="eyebrow">INDEPENDENT WORK</p>
-              <h2>
-                Problems worth
-                <br />
-                <em>building for.</em>
+              <h2 className="dual-heading">
+                <span>Built from curiosity.</span>
+                <em>Made to be useful.</em>
               </h2>
             </div>
             <p>
@@ -119,10 +118,9 @@ export default function Site() {
           <div className="section-heading">
             <div>
               <p className="eyebrow">THE PROFESSIONAL CHAPTERS</p>
-              <h2>
-                Different industries.
-                <br />
-                <em>Same ownership.</em>
+              <h2 className="dual-heading">
+                <span>Different industries.</span>
+                <em>The same curiosity.</em>
               </h2>
             </div>
             <p>
@@ -169,10 +167,9 @@ export default function Site() {
         <section id="about" className="section about">
           <div className="about-intro">
             <p className="eyebrow">A BIT ABOUT ME</p>
-            <h2>
-              Curiosity is
-              <br />
-              the <em>constant.</em>
+            <h2 className="dual-heading">
+              <span>Curiosity is</span>
+              <em>the constant.</em>
             </h2>
             <p>
               I’m Muhammad Rehan, a software engineer based in Dubai. I started with computer
@@ -237,9 +234,8 @@ export default function Site() {
 
         <section id="contact" className="section contact">
           <p className="eyebrow">NEXT CONVERSATION</p>
-          <h2>
-            Have something
-            <br />
+          <h2 className="dual-heading">
+            <span>Have something</span>
             <em>worth building?</em>
           </h2>
           <a className="email" href="mailto:hi@mmd-rehan.com">

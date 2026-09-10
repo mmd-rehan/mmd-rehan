@@ -142,3 +142,27 @@ a:focus-visible,summary:focus-visible,button:focus-visible{outline:3px solid var
 .repo .tags span{border-color:#ccd3cc}
 @media(max-width:1000px){.repo-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){.repos{margin-top:38px}.repo-grid{grid-template-columns:1fr}.repo{padding:22px 20px}}
+
+/* --- Section restyle into the playground visual system ---------------- */
+main{max-width:1320px;margin:0 auto}
+.section{padding:clamp(64px,10vw,120px) 5.4%}
+.section-heading .dual-heading{font-size:clamp(34px,4vw,54px)}
+.section-heading>p{color:var(--muted)}
+.eyebrow{color:var(--muted)}
+.repos-label,.wide-project .eyebrow,.contact .eyebrow{color:var(--accent)}
+.experience{background:transparent}
+.timeline,.timeline details{border-color:var(--line)}
+.job-body .tags span,.repo .tags span,.tags span{border-color:var(--line);color:var(--muted);border-radius:999px}
+.outcomes strong,.job strong,.repo h3,h3,.experience-stat strong,.email{font-family:var(--font-sans)}
+.about em,h1 em,h2 em,.job em{font-family:var(--font-serif);font-style:italic;color:var(--accent)}
+.project-art{border:1px solid var(--line)}
+.cors-art{background:var(--ice)}
+.repo{background:var(--surface)}
+.recognition{background:var(--ice)}
+.contact{background:var(--accent);color:#fff}
+.contact .dual-heading>em{color:#c8c2ff}
+.voice,.wide-project{background:var(--surface)}
+.quote-section .quote-mark,.featured-voice .quote-mark{color:var(--accent)}
+footer .brand{font-family:var(--font-sans);font-weight:800;letter-spacing:-3px}
+footer .brand span{color:var(--accent)}
+@media(max-width:900px){main{max-width:100%}}
