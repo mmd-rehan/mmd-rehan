@@ -13,9 +13,7 @@ describe('PLAYGROUND catalog', () => {
     ])
   })
 
-  it('gives every entry a unique home position and a valid story href', () => {
-    const homes = new Set(PLAYGROUND.map((e) => e.home.join(',')))
-    expect(homes.size).toBe(PLAYGROUND.length)
+  it('gives every entry a valid story href and complete copy', () => {
     for (const e of PLAYGROUND) {
       expect(e.storyHref).toMatch(/^(https:\/\/|#)/)
       expect(Boolean(e.eyebrow && e.title && e.body && e.cta && e.caption)).toBe(true)

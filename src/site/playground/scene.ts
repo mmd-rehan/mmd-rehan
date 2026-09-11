@@ -1,130 +1,155 @@
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
+import { PALETTE, createMaterials, type Palette } from './materials'
+import { box, label, mesh, type TextureBin } from './build'
 
 export type Stage = {
   renderer: THREE.WebGLRenderer
   scene: THREE.Scene
-  camera: THREE.OrthographicCamera
-  /** Ground plane at y = 0 — raycast target for placing dragged objects. */
-  ground: THREE.Mesh
-  /** Point the camera orbits and looks at. */
-  target: THREE.Vector3
-  /** Default framing, so controls can ease back to it. */
-  readonly homeAzimuth: number
-  readonly homePolar: number
-  readonly homeZoom: number
-  /** Reposition the camera on its orbit sphere. */
-  setOrbit(azimuth: number, polar: number): void
+  camera: THREE.PerspectiveCamera
+  controls: OrbitControls
+  materials: Palette
+  textures: TextureBin
   resize(): void
   render(): void
   dispose(): void
 }
 
-const BG = 0xf6f5f1
-const SURFACE = 0xffffff
-const ACCENT = 0x4b3fe4
-
-/** Distance of the camera from the target — only the direction matters for an
- *  orthographic camera; zoom controls the actual scale. */
-const RADIUS = 18
-const HOME_AZIMUTH = Math.PI / 4
-const HOME_POLAR = Math.PI / 4 // 45° above the horizon → isometric-ish
-const FRUSTUM = 7.4 // world units visible vertically at zoom 1
+/** Where the camera starts, and the framing it returns to on reset. */
+const HOME = new THREE.Vector3(11, 11.5, 16.3)
+/** Half-extent the objects are allowed to roam across the desk top. */
+export const DESK_LIMIT = { x: 5.15, z: 2.9 }
 
 export function createScene(container: HTMLElement): Stage {
+  const scene = new THREE.Scene()
+  const textures: TextureBin = []
+
   const renderer = new THREE.WebGLRenderer({
-    antialias: window.devicePixelRatio < 2,
-    powerPreference: 'high-performance',
+    antialias: true,
     alpha: true,
+    powerPreference: 'high-performance',
   })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75))
+  renderer.setClearColor(PALETTE.paper, 0)
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
-  renderer.toneMapping = THREE.NoToneMapping
+  renderer.toneMapping = THREE.ACESFilmicToneMapping
+  renderer.toneMappingExposure = 1.16
+  renderer.outputColorSpace = THREE.SRGBColorSpace
   container.appendChild(renderer.domElement)
 
-  const scene = new THREE.Scene()
+  const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 150)
+  camera.position.copy(HOME)
 
-  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100)
-  const target = new THREE.Vector3(0, 0.6, 0)
+  const controls = new OrbitControls(camera, renderer.domElement)
+  controls.target.set(0, 0.4, 0)
+  controls.enableDamping = true
+  controls.dampingFactor = 0.08
+  controls.enablePan = false
+  controls.minDistance = 15
+  controls.maxDistance = 37
+  controls.minPolarAngle = 0.32
+  controls.maxPolarAngle = Math.PI / 2.35
+  controls.autoRotateSpeed = 0.55
+  controls.rotateSpeed = 0.55
+  controls.zoomSpeed = 0.65
+  controls.update()
+  controls.saveState()
 
-  const setOrbit = (azimuth: number, polar: number) => {
-    const sinP = Math.sin(polar)
-    camera.position.set(
-      target.x + RADIUS * sinP * Math.sin(azimuth),
-      target.y + RADIUS * Math.cos(polar),
-      target.z + RADIUS * sinP * Math.cos(azimuth),
-    )
-    camera.lookAt(target)
-  }
-  setOrbit(HOME_AZIMUTH, HOME_POLAR)
+  // A soft studio bounce, so the plastics read as plastic and the chrome
+  // actually has something to reflect.
+  const room = new RoomEnvironment()
+  const pmrem = new THREE.PMREMGenerator(renderer)
+  const environment = pmrem.fromScene(room, 0.04)
+  scene.environment = environment.texture
+  scene.environmentIntensity = 0.75
+  room.dispose()
+  pmrem.dispose()
 
-  // Lighting — soft fill + one shadow-casting key.
-  const hemi = new THREE.HemisphereLight(0xffffff, 0xd8d6cf, 1.05)
-  scene.add(hemi)
+  scene.add(new THREE.HemisphereLight(PALETTE.skyLight, PALETTE.groundLight, 2.2))
 
-  const key = new THREE.DirectionalLight(0xffffff, 1.5)
-  key.position.set(6, 10, 4)
+  const key = new THREE.DirectionalLight(0xffffff, 4.2)
+  key.position.set(-5, 15, 8)
   key.castShadow = true
-  key.shadow.mapSize.set(1024, 1024)
+  key.shadow.mapSize.set(2048, 2048)
+  key.shadow.camera.left = -11
+  key.shadow.camera.right = 11
+  key.shadow.camera.top = 11
+  key.shadow.camera.bottom = -11
   key.shadow.camera.near = 1
-  key.shadow.camera.far = 40
-  key.shadow.camera.left = -12
-  key.shadow.camera.right = 12
-  key.shadow.camera.top = 12
-  key.shadow.camera.bottom = -12
-  key.shadow.bias = -0.0004
+  key.shadow.camera.far = 45
+  key.shadow.normalBias = 0.04
+  key.shadow.bias = -0.00015
+  key.shadow.radius = 4
   scene.add(key)
 
-  // The platform the objects sit on.
-  const platformGeo = new THREE.BoxGeometry(11, 0.5, 8)
-  const platformMat = new THREE.MeshStandardMaterial({
-    color: SURFACE,
-    roughness: 0.9,
-    metalness: 0,
-  })
-  const platform = new THREE.Mesh(platformGeo, platformMat)
-  platform.position.y = -0.25
-  platform.receiveShadow = true
-  platform.castShadow = true
-  scene.add(platform)
+  const fill = new THREE.DirectionalLight(PALETTE.fillLight, 2.1)
+  fill.position.set(7, 8, -9)
+  scene.add(fill)
 
-  // Grid inlaid on the platform top.
-  const grid = new THREE.GridHelper(10.4, 26, 0xcbccd6, 0xe4e4ea)
-  grid.position.y = 0.011
-  ;(grid.material as THREE.Material).transparent = true
-  ;(grid.material as THREE.Material).opacity = 0.5
-  scene.add(grid)
+  const materials = createMaterials()
+  const maxAnisotropy = renderer.capabilities.getMaxAnisotropy()
 
-  // Contact-shadow catcher just above the platform so object shadows read.
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(11, 8),
-    new THREE.ShadowMaterial({ opacity: 0.16 }),
+  // --- The desk -----------------------------------------------------------
+  // Three stacked slabs: the working surface, a pale reveal, and the base.
+  const desk = new THREE.Group()
+  scene.add(desk)
+  box(desk, [13.4, 0.46, 8.6], [0, -0.26, 0], materials.white, 0.28)
+  box(desk, [12.95, 0.1, 8.14], [0, -0.51, 0], materials.pale, 0.16)
+  box(desk, [11.8, 0.2, 7], [0, -0.65, 0], materials.white, 0.16)
+
+  // The floor only exists to catch the desk's shadow.
+  const floor = mesh(
+    new THREE.PlaneGeometry(100, 100),
+    new THREE.ShadowMaterial({ color: PALETTE.floorShadow, opacity: 0.18 }),
+    scene,
+    [0, -0.83, 0],
   )
-  ground.rotation.x = -Math.PI / 2
-  ground.position.y = 0.012
-  ground.receiveShadow = true
-  scene.add(ground)
+  floor.rotation.x = -Math.PI / 2
+  floor.castShadow = false
 
-  // A faint accent edge line around the deck.
-  const rim = new THREE.LineSegments(
-    new THREE.EdgesGeometry(new THREE.BoxGeometry(11.02, 0.52, 8.02)),
-    new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.25 }),
+  // Squashed on Z so the cells read as a drafting grid, not graph paper.
+  const grid = new THREE.GridHelper(12, 24, PALETTE.gridMajor, PALETTE.gridMinor)
+  grid.position.set(0, -0.018, 0)
+  grid.scale.z = 0.64
+  const gridMaterial = grid.material as THREE.Material
+  gridMaterial.transparent = true
+  gridMaterial.opacity = 0.55
+  desk.add(grid)
+
+  label(textures, maxAnisotropy, desk, 'mr.', 1.3, 0.35, [-4.9, -0.013, 3.65],
+    '#193ee8', '#fbfcfa', 'bold 85px Arial').rotation.x = -Math.PI / 2
+  label(textures, maxAnisotropy, desk, 'MADE TO BE EXPLORED', 2.75, 0.29, [3.65, -0.011, 3.65],
+    '#7b8690', '#fbfcfa', '500 32px Arial').rotation.x = -Math.PI / 2
+
+  // A chamfered keyline traced onto the surface.
+  const outline = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(
+      ([
+        [-4, 0.012, -2.6],
+        [3.7, 0.012, -2.6],
+        [4.55, 0.012, -1.75],
+        [4.55, 0.012, 2.75],
+        [-4, 0.012, 2.75],
+      ] as [number, number, number][]).map((p) => new THREE.Vector3(...p)),
+    ),
+    new THREE.LineBasicMaterial({
+      color: PALETTE.deskOutline,
+      transparent: true,
+      opacity: 0.6,
+    }),
   )
-  rim.position.y = -0.25
-  scene.add(rim)
-
-  scene.background = null
-  void BG
+  desk.add(outline)
 
   const resize = () => {
-    const w = Math.max(1, container.clientWidth)
-    const h = Math.max(1, container.clientHeight)
-    renderer.setSize(w, h, false)
-    const aspect = w / h
-    camera.top = FRUSTUM
-    camera.bottom = -FRUSTUM
-    camera.left = -FRUSTUM * aspect
-    camera.right = FRUSTUM * aspect
+    const w = container.clientWidth
+    const h = container.clientHeight
+    if (!w || !h) return
+    renderer.setSize(w, h)
+    camera.aspect = w / h
+    // Portrait-ish stages need a wider lens or the desk runs off the edges.
+    camera.fov = w / h < 1.13 ? 44 : 34
     camera.updateProjectionMatrix()
   }
   resize()
@@ -132,31 +157,23 @@ export function createScene(container: HTMLElement): Stage {
   const render = () => renderer.render(scene, camera)
 
   const dispose = () => {
+    controls.dispose()
+    const geometries = new Set<THREE.BufferGeometry>()
+    const mats = new Set<THREE.Material>()
+    scene.traverse((o) => {
+      const m = o as THREE.Mesh
+      if (m.geometry) geometries.add(m.geometry)
+      if (m.material) {
+        for (const one of Array.isArray(m.material) ? m.material : [m.material]) mats.add(one)
+      }
+    })
+    geometries.forEach((g) => g.dispose())
+    mats.forEach((m) => m.dispose())
+    textures.forEach((t) => t.dispose())
+    environment.dispose()
     renderer.dispose()
-    renderer.forceContextLoss()
-    platformGeo.dispose()
-    platformMat.dispose()
-    grid.geometry.dispose()
-    ;(grid.material as THREE.Material).dispose()
-    ground.geometry.dispose()
-    ;(ground.material as THREE.Material).dispose()
-    rim.geometry.dispose()
-    ;(rim.material as THREE.Material).dispose()
     renderer.domElement.remove()
   }
 
-  return {
-    renderer,
-    scene,
-    camera,
-    ground,
-    target,
-    homeAzimuth: HOME_AZIMUTH,
-    homePolar: HOME_POLAR,
-    homeZoom: 1,
-    setOrbit,
-    resize,
-    render,
-    dispose,
-  }
+  return { renderer, scene, camera, controls, materials, textures, resize, render, dispose }
 }

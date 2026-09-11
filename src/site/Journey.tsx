@@ -19,11 +19,14 @@ export function Journey() {
 
         <ol className="timeline-list">
           {JOURNEY.map((entry) => (
-            <li key={entry.company}>
+            <li key={entry.company} className={entry.current ? 'is-current' : undefined}>
               <span className="timeline-list__period">
                 {entry.start} &ndash; {entry.end}
               </span>
-              <h3>{entry.company}</h3>
+              <div className="timeline-list__title">
+                <h3>{entry.company}</h3>
+                {entry.current && <span className="timeline-list__now">Current</span>}
+              </div>
               <p className="timeline-list__role">{entry.role}</p>
               <p className="timeline-list__blurb">{entry.blurb}</p>
               <span className="chip">{entry.industry}</span>
