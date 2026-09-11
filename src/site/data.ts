@@ -183,6 +183,155 @@ export const REFERENCES: Reference[] = [
   },
 ]
 
+export type JourneyEntry = {
+  start: string
+  end: string
+  company: string
+  role: string
+  blurb: string
+  industry: string
+  /** Marks the role still in progress — renders the Current pill + filled dot. */
+  current?: boolean
+}
+
+export const JOURNEY: JourneyEntry[] = [
+  {
+    start: 'NOV 2024',
+    end: 'PRESENT',
+    company: 'Gulf Agency Company',
+    role: 'Software Engineer · via TASC',
+    blurb: 'Enterprise frontends, reusable components, REST APIs, and integrations for logistics.',
+    industry: 'Logistics',
+    current: true,
+  },
+  {
+    start: 'NOV 2023',
+    end: 'OCT 2024',
+    company: 'Phoenix Group',
+    role: 'Senior Software Engineer',
+    blurb: 'Digital mining platforms, monitoring dashboards, APIs, and deployment workflows.',
+    industry: 'Digital infrastructure',
+  },
+  {
+    start: 'SEP 2021',
+    end: 'NOV 2023',
+    company: 'Amadeus',
+    role: 'Software Engineer · via Astek Middle East',
+    blurb: 'Travel technology, enterprise applications, user experiences, and Azure CI/CD.',
+    industry: 'Aviation',
+  },
+  {
+    start: 'SEP 2019',
+    end: 'SEP 2021',
+    company: 'Winsoft Solutions',
+    role: 'Software Developer',
+    blurb: 'Healthcare web and mobile applications, backend services, and developer mentorship.',
+    industry: 'Healthcare',
+  },
+  {
+    start: 'JAN 2018',
+    end: 'SEP 2019',
+    company: 'Freelance / Independent',
+    role: 'Software Developer',
+    blurb: 'A multi-branch, multi-brand restaurant point-of-sale system, built end to end.',
+    industry: 'Retail systems',
+  },
+]
+
+export type PlaygroundId =
+  | 'apis'
+  | 'streaming'
+  | 'healthcare'
+  | 'aviation'
+  | 'logistics'
+  | 'cloud'
+
+export type PlaygroundEntry = {
+  id: PlaygroundId
+  /** Label on the category tab in the explore bar. */
+  category: string
+  /** Which body of work this object stands for. */
+  project: string
+  eyebrow: string
+  title: string
+  body: string
+  /** Label on the card's primary button — also replays the object animation. */
+  cta: string
+  /** Bottom-left micro-caption shown while this object is selected. */
+  caption: string
+  storyHref: string
+  /** Resting position on the platform, [x, y, z] in world units. */
+}
+
+export const PLAYGROUND: PlaygroundEntry[] = [
+  {
+    id: 'apis',
+    category: 'APIs',
+    project: 'FixCors',
+    eyebrow: 'DEVELOPER TOOLS',
+    title: 'FixCors',
+    body: 'Less friction between an idea and the API it needs.',
+    cta: 'Send a packet',
+    caption: 'A cleaner path for every request.',
+    storyHref: 'https://fixcors.com',
+  },
+  {
+    id: 'streaming',
+    category: 'Streaming',
+    project: 'NoBoxTV',
+    eyebrow: 'INDEPENDENT PRODUCT',
+    title: 'NoBoxTV',
+    body: 'A browser, a stream, and a simpler way to watch.',
+    cta: 'Change channel',
+    caption: 'A new channel. Same curiosity.',
+    storyHref: 'https://noboxtv.com',
+  },
+  {
+    id: 'healthcare',
+    category: 'Healthcare',
+    project: 'Winsoft / Prescriptionly',
+    eyebrow: 'HEALTHCARE · WINSOFT',
+    title: 'Records that follow the patient.',
+    body: 'EMR systems and prescription workflows built where correctness matters.',
+    cta: 'Open the file',
+    caption: 'Built where correctness matters.',
+    storyHref: 'https://github.com/Prescriptionly/app',
+  },
+  {
+    id: 'aviation',
+    category: 'Aviation',
+    project: 'Amadeus',
+    eyebrow: 'AVIATION · AMADEUS',
+    title: 'Booking the journey.',
+    body: 'Airline booking and servicing flows serving millions of travellers.',
+    cta: 'Take off',
+    caption: 'Every seat, every leg, in sync.',
+    storyHref: '#work',
+  },
+  {
+    id: 'logistics',
+    category: 'Logistics',
+    project: 'Gulf Agency Company',
+    eyebrow: 'GAC · 2024–PRESENT',
+    title: 'Keeping things moving.',
+    body: 'Connected interfaces and services for global logistics.',
+    cta: 'Dispatch cargo',
+    caption: 'A closer look at the work.',
+    storyHref: '#work',
+  },
+  {
+    id: 'cloud',
+    category: 'Cloud',
+    project: 'Phoenix Group',
+    eyebrow: 'PHOENIX GROUP · 2023–2024',
+    title: 'Behind the uptime.',
+    body: 'Real-time dashboards and infrastructure built to keep running.',
+    cta: 'Pulse the servers',
+    caption: 'Systems that stay up.',
+    storyHref: '#work',
+  },
+]
+
 export type Repo = {
   name: string
   href: string

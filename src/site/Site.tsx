@@ -1,8 +1,10 @@
-import { Clock } from './Clock'
-import { NetworkCanvas } from './NetworkCanvas'
+import { Hero } from './Hero'
+import { Journey } from './Journey'
+import { Nav } from './Nav'
 import { Project } from './Project'
+import { RepoCard } from './RepoCard'
 import { Testimonials } from './Testimonials'
-import { REPOS, ROLES, TOOLKIT } from './data'
+import { REPOS, TOOLKIT } from './data'
 
 const CorsArt = (
   <div className="project-art cors-art">
@@ -45,93 +47,20 @@ export default function Site() {
         Skip to content
       </a>
 
-      <header className="header">
-        <a className="brand" href="#" aria-label="Muhammad Rehan home">
-          mr<span>.</span>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="#work">Selected work</a>
-          <a href="#experience">Experience</a>
-          <a href="#about">About</a>
-        </nav>
-        <a className="contact-link" href="mailto:hi@mmd-rehan.com">
-          Let’s talk <span aria-hidden="true">↗</span>
-        </a>
-      </header>
+      <Nav />
+      <a id="top" />
+
 
       <main id="main">
-        <section className="hero">
-          <div className="hero-top">
-            <span className="eyebrow">MUHAMMAD REHAN / SOFTWARE ENGINEER</span>
-            <span className="location">
-              Based in Dubai, UAE <Clock />
-            </span>
-          </div>
-          <div className="hero-grid">
-            <div className="hero-copy">
-              <h1>
-                Good ideas.
-                <br />
-                Thoughtful code.
-                <br />
-                <em>Real impact.</em>
-              </h1>
-              <p>
-                I build software that connects people to what matters. From patient records to
-                airline journeys, and the infrastructure behind it all.
-              </p>
-              <a className="button primary" href="#work">
-                Explore my work <span aria-hidden="true">↘</span>
-              </a>
-            </div>
-            <div className="visual">
-              <NetworkCanvas />
-              <div className="visual-label">
-                <span>FROM INTERFACE TO INFRASTRUCTURE</span>
-                <span>Connected by curiosity.</span>
-              </div>
-            </div>
-          </div>
-          <div className="hero-bottom">
-            <p>
-              Full-stack engineer.
-              <br />
-              Product builder. Always learning.
-            </p>
-            <div className="experience-stat">
-              <strong>7+</strong>
-              <span>
-                years turning complex problems
-                <br />
-                into working software
-              </span>
-            </div>
-            <a href="#experience" className="scroll-note">
-              A little further down <span aria-hidden="true">↓</span>
-            </a>
-          </div>
-        </section>
-
-        <div className="companies">
-          <span>EXPERIENCE ACROSS</span>
-          <div>
-            <strong>GAC</strong>
-            <strong className="phoenix">PHOENIX GROUP</strong>
-            <strong className="amadeus">amadeus</strong>
-            <strong>
-              Winsoft<span className="small"> Solutions</span>
-            </strong>
-          </div>
-        </div>
+        <Hero />
 
         <section id="work" className="section work">
           <div className="section-heading">
             <div>
               <p className="eyebrow">INDEPENDENT WORK</p>
-              <h2>
-                Problems worth
-                <br />
-                <em>building for.</em>
+              <h2 className="dual-heading">
+                <span>Built from curiosity.</span>
+                <em>Made to be useful.</em>
               </h2>
             </div>
             <p>
@@ -162,89 +91,20 @@ export default function Site() {
             <p className="eyebrow repos-label">ALSO ON GITHUB</p>
             <div className="repo-grid">
               {REPOS.map((repo) => (
-                <article className="repo" key={repo.name}>
-                  <div className="repo-head">
-                    <h3>{repo.name}</h3>
-                    <a
-                      href={repo.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${repo.name} on GitHub`}
-                    >
-                      ↗
-                    </a>
-                  </div>
-                  <p>{repo.blurb}</p>
-                  {repo.meta && <p className="repo-meta">{repo.meta}</p>}
-                  <div className="tags">
-                    {repo.tags.map((tag) => (
-                      <span key={tag}>{tag}</span>
-                    ))}
-                  </div>
-                </article>
+                <RepoCard key={repo.name} repo={repo} />
               ))}
             </div>
           </div>
         </section>
 
-        <section id="experience" className="section experience">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">THE PROFESSIONAL CHAPTERS</p>
-              <h2>
-                Different industries.
-                <br />
-                <em>Same ownership.</em>
-              </h2>
-            </div>
-            <p>
-              I move between the interface, the API, and the deployment pipeline to solve the
-              problem in front of me.
-            </p>
-          </div>
-          <div className="timeline">
-            {ROLES.map((role) => (
-              <details key={role.company} open={role.open}>
-                <summary>
-                  <span className="years">{role.years}</span>
-                  <span className="job">
-                    <strong>{role.company}</strong>
-                    <span>{role.title}</span>
-                  </span>
-                  <span className="industry">{role.industry}</span>
-                  <span className="expand">+</span>
-                </summary>
-                <div className="job-body">
-                  <p>{role.body}</p>
-                  {role.outcomes && (
-                    <div className="outcomes">
-                      {role.outcomes.map((o) => (
-                        <div key={o.label}>
-                          <strong>{o.figure}</strong>
-                          <span>{o.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {role.sourceNote && <p className="source-note">{role.sourceNote}</p>}
-                  <div className="tags">
-                    {role.tags.map((tag) => (
-                      <span key={tag}>{tag}</span>
-                    ))}
-                  </div>
-                </div>
-              </details>
-            ))}
-          </div>
-        </section>
+        <Journey />
 
         <section id="about" className="section about">
           <div className="about-intro">
             <p className="eyebrow">A BIT ABOUT ME</p>
-            <h2>
-              Curiosity is
-              <br />
-              the <em>constant.</em>
+            <h2 className="dual-heading">
+              <span>Curiosity is</span>
+              <em>the constant.</em>
             </h2>
             <p>
               I’m Muhammad Rehan, a software engineer based in Dubai. I started with computer
@@ -309,9 +169,8 @@ export default function Site() {
 
         <section id="contact" className="section contact">
           <p className="eyebrow">NEXT CONVERSATION</p>
-          <h2>
-            Have something
-            <br />
+          <h2 className="dual-heading">
+            <span>Have something</span>
             <em>worth building?</em>
           </h2>
           <a className="email" href="mailto:hi@mmd-rehan.com">

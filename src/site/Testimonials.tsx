@@ -41,9 +41,8 @@ export function Testimonials() {
       <div className="section-heading">
         <div>
           <p className="eyebrow">IN THEIR WORDS</p>
-          <h2>
-            People I’ve
-            <br />
+          <h2 className="dual-heading">
+            <span>People I’ve</span>
             <em>worked with.</em>
           </h2>
         </div>
