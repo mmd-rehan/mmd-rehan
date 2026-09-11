@@ -42,7 +42,7 @@ a:focus-visible,summary:focus-visible,button:focus-visible{outline:3px solid var
 /* The desk is absolutely positioned and sits *behind* the copy, so the
    headline reads against the paper while the scene runs full-bleed to the
    right. Everything else in the section is normal flow on top of it. */
-.playground{position:relative;padding:44px 0 0;overflow:hidden}
+.playground{position:relative;padding:44px 0 0}
 .playground>.intro,.playground>.object-card,.playground>.desk-console,.playground>.play-status{
   position:relative;z-index:2;margin-inline:var(--gutter)}
 
