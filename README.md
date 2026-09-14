@@ -1,33 +1,12 @@
-## About me
+<p align="center">
+  <a href="https://mmd-rehan.com">
+    <img src="./assets/bug-runner.gif" width="960" alt="Bug Runner: Muhammad Rehan, a full-stack engineer in Dubai, as a pixel character jumping over bugs, CORS errors, server errors, nulls and merge conflicts. Build. Debug. Repeat." />
+  </a>
+</p>
 
-I'm a software engineer based in Dubai, currently at Gulf Agency Company. Over the past
-seven years I've worked on healthcare records, airline booking flows, mining
-infrastructure dashboards, and logistics systems — mostly full-stack, moving between
-the frontend, the API, and the deployment pipeline.
-
-Outside of work I build small products and contribute to open source.
-
-**Independent projects**
-
-- [FixCors](https://fixcors.com) — a CORS proxy utility for developers
-- [NoBoxTV](https://noboxtv.com) — browser-based IPTV player
-- [Textile POS](https://github.com/mmd-rehan/textile-pos) — open-source POS and inventory for fabric retail
-
-**Mostly working with**
-
-React · Angular · TypeScript · Node.js · NestJS · SQL · MongoDB · Docker · Kubernetes · AWS
-
-## Along the way
-
-- 2nd runner-up, HCLTech Hack2Hire 2.0 (2025)
-- Took part in the Kanz AI Hackathon, held as part of a Guinness World Records attempt
-  for the largest online AI lesson
-- MongoDB and Angular certifications (2025)
-- BSc Computer Science, COMSATS (2018)
-
-## Contact
-
-[hi@mmd-rehan.com](mailto:hi@mmd-rehan.com) ·
-[LinkedIn](https://linkedin.com/in/mmd-rehan) ·
-[GitHub](https://github.com/mmd-rehan) ·
-[Medium](https://medium.com/@mrrehan)
+<p align="center">
+  <a href="https://mmd-rehan.com">Portfolio</a> &nbsp;·&nbsp;
+  <a href="https://linkedin.com/in/mmd-rehan">LinkedIn</a> &nbsp;·&nbsp;
+  <a href="mailto:hi@mmd-rehan.com">Email</a> &nbsp;·&nbsp;
+  <a href="./assets/bug-runner-still.png">Still version</a>
+</p>
