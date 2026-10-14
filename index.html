@@ -7,23 +7,23 @@
     <title>Muhammad Rehan | Full-Stack Software Engineer in Dubai</title>
     <meta
       name="description"
-      content="Full-stack software engineer in Dubai with 7+ years across healthcare, aviation and logistics. React, Angular, Node.js, TypeScript and Kubernetes."
+      content="Full-stack software engineer in Dubai with 7+ years across healthcare, aviation, bitcoin mining infrastructure and logistics. Angular, React, Node.js and TypeScript."
     />
     <link rel="canonical" href="https://www.mmd-rehan.com/" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <meta name="author" content="Muhammad Rehan" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#F8F9F5" />
+    <meta name="theme-color" content="#020d17" />
+    <meta name="color-scheme" content="dark" />
 
-    <!-- Fonts: preconnect + direct link. A CSS @import is only discovered after
-         the stylesheet parses, which delays first paint. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400..800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800;900&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap"
     />
+    <link rel="preload" as="image" href="/rehan.webp" fetchpriority="high" />
 
     <meta property="og:type" content="profile" />
     <meta property="og:site_name" content="Muhammad Rehan" />
@@ -37,7 +37,7 @@
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1730" />
     <meta property="og:image:height" content="909" />
-    <meta property="og:image:alt" content="Muhammad Rehan — Software Engineer &amp; Product Builder, Dubai, UAE" />
+    <meta property="og:image:alt" content="Muhammad Rehan, Software Engineer and Product Builder, Dubai, UAE" />
     <meta property="og:locale" content="en_US" />
     <meta property="profile:first_name" content="Muhammad" />
     <meta property="profile:last_name" content="Rehan" />
@@ -65,38 +65,13 @@
             "url": "https://www.mmd-rehan.com/",
             "image": "https://www.mmd-rehan.com/portrait-real.jpg",
             "email": "mailto:hi@mmd-rehan.com",
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "Dubai",
-              "addressCountry": "AE"
-            },
-            "worksFor": {
-              "@type": "Organization",
-              "name": "Gulf Agency Company"
-            },
-            "alumniOf": {
-              "@type": "CollegeOrUniversity",
-              "name": "COMSATS University Islamabad"
-            },
+            "address": { "@type": "PostalAddress", "addressLocality": "Dubai", "addressCountry": "AE" },
+            "worksFor": { "@type": "Organization", "name": "Gulf Agency Company" },
+            "alumniOf": { "@type": "CollegeOrUniversity", "name": "COMSATS University Islamabad" },
             "knowsAbout": [
-              "Software Engineering",
-              "Full-Stack Development",
-              "React",
-              "Angular",
-              "TypeScript",
-              "Node.js",
-              "NestJS",
-              "REST API Design",
-              "Microservices",
-              "Docker",
-              "Kubernetes",
-              "AWS",
-              "CI/CD",
-              "React Native",
-              "Flutter",
-              "SQL",
-              "MongoDB",
-              "HL7 Healthcare Interoperability"
+              "Software Engineering", "Full-Stack Development", "React", "Angular", "TypeScript",
+              "Node.js", "NestJS", "REST API Design", "Microservices", "Docker", "Kubernetes", "AWS",
+              "CI/CD", "React Native", "Flutter", "SQL", "MongoDB", "HL7 Healthcare Interoperability"
             ],
             "sameAs": [
               "https://www.linkedin.com/in/mmd-rehan",
@@ -132,9 +107,685 @@
         y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
       })(window, document, "clarity", "script", "yx2umwiuvl");
     </script>
+    <style>
+/* Layout concept: a short film in six reels. One pinned title sequence, stacked full-screen
+   scenes that slide over each other, then a credits roll. Native scroll only, so a thumb
+   on a phone drives the whole thing. */
+:root{
+  --ink:#020d17;          /* matches the photo backdrop so the portrait melts into the page */
+  --ink-2:#071a2a;
+  --ink-3:#0d2538;
+  --paper:#eef1ee;
+  --muted:#8fa0ad;
+  --ember:#ff6a1a;        /* the shirt, the strand tips */
+  --flare:#ffc24a;
+  --ice:#7fd0ff;          /* cool counter-light */
+  --line:rgba(238,241,238,.12);
+  --display:"Big Shoulders Display","Oswald","Arial Narrow",Impact,sans-serif;
+  --serif:"Instrument Serif","Iowan Old Style",Georgia,serif;
+  --body:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --gutter:max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r:max(16px, env(safe-area-inset-right, 0px));
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+html{background:var(--ink);-webkit-text-size-adjust:100%}
+body{background:var(--ink);color:var(--paper);font-family:var(--body);font-size:16px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+::selection{background:var(--ember);color:var(--ink)}
+:focus-visible{outline:2px solid var(--flare);outline-offset:3px;border-radius:4px}
+.wrap{padding-left:var(--gutter);padding-right:var(--gutter-r);max-width:1280px;margin-inline:auto}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.serif{font-family:var(--serif);font-style:italic;font-weight:400}
+
+/* film grain + letterbox, the two things that make a browser feel like a cinema */
+.grain{position:fixed;inset:-50%;z-index:60;pointer-events:none;opacity:.07;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 1s steps(6) infinite}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
+.bars{position:fixed;left:0;right:0;z-index:70;background:#000;pointer-events:none;height:50vh;transition:height 1.1s cubic-bezier(.77,0,.18,1)}
+.bars.top{top:0}.bars.bot{bottom:0}
+body.rolling .bars{height:0}
+
+/* intro slate */
+.slate{position:fixed;inset:0;z-index:80;display:grid;place-items:center;pointer-events:none;transition:opacity .5s .55s}
+.slate span{font-family:var(--mono);font-size:12px;letter-spacing:.3em;color:var(--muted)}
+.slate b{display:block;text-align:center;font-family:var(--display);font-weight:800;font-size:64px;line-height:1;color:var(--paper);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+body.rolling .slate{opacity:0}
+
+/* top bar */
+.top{position:fixed;top:0;left:0;right:0;z-index:50;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-bottom:14px;padding-left:var(--gutter);padding-right:var(--gutter-r);display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:linear-gradient(var(--ink) 0%, rgba(2,13,23,0) 100%)}
+.mark{font-family:var(--display);font-weight:900;font-size:22px;letter-spacing:.04em;text-decoration:none;line-height:1}
+.mark i{color:var(--ember);font-style:normal}
+.top nav{display:flex;gap:4px;align-items:center}
+.top nav a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--muted);padding:10px 10px;border-radius:999px;transition:color .2s}
+.top nav a:hover{color:var(--paper)}
+.top nav .cta{color:var(--ink);background:var(--paper);padding:10px 16px}
+.top nav .cta:hover{color:var(--ink);background:var(--flare)}
+@media (max-width:640px){.top nav a:not(.cta){display:none}}
+
+/* HUD: reel counter + play-the-film button */
+.hud{position:fixed;left:0;right:0;bottom:0;z-index:50;padding-left:var(--gutter);padding-right:var(--gutter-r);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px);padding-top:28px;display:flex;align-items:center;gap:14px;pointer-events:none;
+  background:linear-gradient(rgba(2,13,23,0), var(--ink) 75%)}
+.hud > *{pointer-events:auto}
+.play{display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 18px 0 14px;border-radius:999px;border:1px solid var(--line);background:rgba(7,26,42,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.play:hover{border-color:var(--ember)}
+.play svg{width:14px;height:14px;fill:var(--ember)}
+.play .ico-pause{display:none}
+body.touring .play .ico-play{display:none}
+body.touring .play .ico-pause{display:block}
+.reel{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.reel-row{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden}
+.reel-row b{color:var(--paper);font-weight:500;overflow:hidden;text-overflow:ellipsis}
+.reel-row .yr{color:var(--flare);font-variant-numeric:tabular-nums}
+.track{height:2px;background:var(--line);border-radius:2px;overflow:hidden}
+.track i{display:block;height:100%;width:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--ice),var(--flare),var(--ember))}
+
+/* ---------- REEL 1: title sequence ---------- */
+.title-seq{position:relative;height:320vh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:grid;place-items:center}
+#fil{position:absolute;inset:0;width:100%;height:100%}
+.portrait{position:absolute;left:50%;bottom:0;width:min(78vw,520px);aspect-ratio:864/1040;transform:translateX(-50%);will-change:transform,opacity,filter;
+  -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 98%),radial-gradient(ellipse 70% 80% at 50% 45%,#000 50%,transparent 75%);
+  -webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,#000 55%,transparent 98%),radial-gradient(ellipse 70% 80% at 50% 45%,#000 50%,transparent 75%);mask-composite:intersect}
+.portrait img{width:100%;height:100%;object-fit:cover;display:block}
+.name{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;pointer-events:none;z-index:2}
+.name h1{margin:0;font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.8;letter-spacing:-.01em;text-align:center;font-size:clamp(96px,26vw,340px)}
+.name h1 .l1{display:block;font-size:.56em;letter-spacing:.02em;color:transparent;-webkit-text-stroke:1.5px rgba(238,241,238,.55)}
+.name h1 .l2{display:block;color:var(--paper);mix-blend-mode:difference}
+.name h1 span span{display:inline-block;transform:translateY(110%);opacity:0;transition:transform 1s cubic-bezier(.2,.8,.2,1),opacity 1s}
+body.rolling .name h1 span span{transform:none;opacity:1}
+.byline{position:absolute;z-index:3;left:var(--gutter);right:var(--gutter-r);bottom:calc(env(safe-area-inset-bottom,0px) + 104px);display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;pointer-events:none}
+.byline p{margin:0;max-width:30ch;font-size:15px;color:var(--paper)}
+.byline .eyebrow{color:var(--flare)}
+.overlay{position:absolute;z-index:4;left:var(--gutter);right:var(--gutter-r);top:50%;transform:translateY(-50%);text-align:center;pointer-events:none}
+.overlay p{margin:0 auto;max-width:18ch;font-family:var(--serif);font-style:italic;font-size:clamp(34px,7vw,88px);line-height:1.02;text-wrap:balance;opacity:0;transform:translateY(24px);filter:blur(8px);transition:none}
+.overlay p em{font-style:normal;font-family:var(--display);font-weight:800;text-transform:uppercase;color:var(--flare);letter-spacing:.01em}
+.cue{position:absolute;z-index:3;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 84px);width:1px;height:44px;background:linear-gradient(var(--paper),transparent);opacity:.6;animation:cue 2.2s infinite}
+@keyframes cue{0%{transform:translateX(-50%) scaleY(0);transform-origin:top}45%{transform:translateX(-50%) scaleY(1);transform-origin:top}55%{transform:translateX(-50%) scaleY(1);transform-origin:bottom}100%{transform:translateX(-50%) scaleY(0);transform-origin:bottom}}
+
+/* ---------- REELS 2-6: stacked scenes ---------- */
+.reels-intro{padding-block:22vh 10vh}
+.reels-intro h2{margin:12px 0 0;font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:clamp(48px,10vw,140px);line-height:.88;text-wrap:balance}
+.reels-intro h2 .serif{text-transform:none;color:var(--ember);font-size:.8em}
+.scenes{position:relative}
+.scene{position:sticky;top:0;min-height:100vh;min-height:100svh;overflow:hidden;display:flex;align-items:center;background:var(--bg,var(--ink-2));border-top:1px solid var(--line);transform-origin:50% 0}
+.scene .ghost{position:absolute;top:50%;left:0;white-space:nowrap;font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:clamp(160px,34vw,520px);line-height:.8;color:transparent;-webkit-text-stroke:1px var(--ghost,rgba(238,241,238,.08));transform:translateY(-50%);will-change:transform;pointer-events:none;user-select:none}
+.scene .shade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:5}
+.scene-in{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:clamp(24px,5vw,80px);align-items:end;padding-block:96px 120px}
+.meta{display:flex;flex-direction:column;gap:14px}
+.when{font-family:var(--display);font-weight:800;font-size:clamp(64px,12vw,170px);line-height:.82;color:var(--accent,var(--ember));font-variant-numeric:tabular-nums}
+.when small{display:block;font-size:.32em;color:var(--muted);letter-spacing:.04em;margin-top:10px}
+.who{display:flex;flex-direction:column;gap:2px}
+.who b{font-size:19px;font-weight:600}
+.who span{color:var(--muted);font-size:14px}
+.strip{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--accent,var(--ember));border:1px dashed color-mix(in srgb,var(--accent,var(--ember)) 45%,transparent);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:nowrap;max-width:100%}
+.story{display:flex;flex-direction:column;gap:22px;min-width:0}
+.story h3{margin:0;font-family:var(--serif);font-weight:400;font-size:clamp(36px,5.4vw,76px);line-height:1;text-wrap:balance;letter-spacing:-.01em}
+.story h3 em{color:var(--accent,var(--ember))}
+.story p{margin:0;max-width:56ch;color:#c9d3d9;font-size:16.5px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.fig{background:var(--bg,var(--ink-2));padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.fig b{font-family:var(--display);font-weight:800;font-size:40px;line-height:1;color:var(--paper);font-variant-numeric:tabular-nums}
+.fig span{font-size:13px;color:var(--muted);line-height:1.35}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tags span{font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:6px 10px;border:1px solid var(--line);border-radius:999px;color:#c9d3d9}
+.s-pos{--bg:#0a1622;--accent:#9fd6c0;--ghost:rgba(159,214,192,.09)}
+.s-med{--bg:#071c24;--accent:#6fe3d2;--ghost:rgba(111,227,210,.08)}
+.s-air{--bg:#0a1430;--accent:#8fb7ff;--ghost:rgba(143,183,255,.09)}
+.s-btc{--bg:#170d07;--accent:#ff8a2a;--ghost:rgba(255,138,42,.1)}
+.s-gac{--bg:#0b1b2b;--accent:#ffc24a;--ghost:rgba(255,194,74,.09)}
+@media (max-width:820px){
+  .scene-in{grid-template-columns:minmax(0,1fr);align-items:start;padding-block:92px 120px;gap:22px}
+  .meta{flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:10px 18px}
+  .when{font-size:72px}
+  .story{gap:16px}
+  .story p{font-size:15.5px}
+  .fig b{font-size:30px}
+  .fig{padding:12px 14px}
+}
+@media (max-height:700px) and (max-width:820px){ .story p.more{display:none} }
+
+/* ---------- counters ---------- */
+.band{padding-block:18vh 14vh;position:relative}
+.band h2{margin:10px 0 48px;font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:clamp(44px,8vw,110px);line-height:.9;max-width:14ch;text-wrap:balance}
+.counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line)}
+.count{padding:26px 18px 6px 0;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.count:last-child{border-right:0}
+.count b{font-family:var(--display);font-weight:900;font-size:clamp(56px,8vw,120px);line-height:.85;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,var(--paper) 30%,var(--flare));-webkit-background-clip:text;background-clip:text;color:transparent}
+.count span{color:var(--muted);font-size:14px;max-width:22ch}
+@media (max-width:820px){.counts{grid-template-columns:repeat(2,minmax(0,1fr))}.count{padding:22px 14px 22px 0;border-bottom:1px solid var(--line)}.count:nth-child(2n){border-right:0;padding-left:14px}.count:nth-child(2n+1){padding-left:0}}
+
+/* ---------- marquee ---------- */
+.marquee{border-block:1px solid var(--line);overflow:hidden;padding-block:22px;background:var(--ink-2)}
+.marquee .row{display:flex;gap:42px;width:max-content;animation:mq 38s linear infinite;font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:clamp(34px,5vw,64px);line-height:1;color:transparent;-webkit-text-stroke:1px rgba(238,241,238,.45)}
+.marquee .row span:nth-child(3n){color:var(--ember);-webkit-text-stroke:0}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ---------- side projects ---------- */
+.side{padding-block:16vh 10vh}
+.side-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:36px}
+.side-head h2{margin:10px 0 0;font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:clamp(44px,8vw,110px);line-height:.9}
+.side-head p{margin:0;max-width:40ch;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{position:relative;display:flex;flex-direction:column;gap:14px;padding:24px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,var(--ink-3),var(--ink-2));text-decoration:none;overflow:hidden;min-height:300px;transition:border-color .3s,transform .5s cubic-bezier(.2,.8,.2,1)}
+.card:hover{border-color:var(--ember);transform:translateY(-4px)}
+.card .glow{position:absolute;width:280px;height:280px;border-radius:50%;right:-90px;top:-110px;background:radial-gradient(circle,var(--c,var(--ember)) 0%,transparent 65%);opacity:.35;filter:blur(10px);transition:opacity .4s}
+.card:hover .glow{opacity:.6}
+.card h3{margin:auto 0 0;font-family:var(--display);font-weight:800;font-size:44px;line-height:.9;text-transform:uppercase}
+.card p{margin:0;color:#c9d3d9;font-size:15px}
+.card .go{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c,var(--ember))}
+@media (max-width:900px){.cards{grid-template-columns:minmax(0,1fr)}.card{min-height:230px}}
+
+/* ---------- voices ---------- */
+.voices{padding-block:14vh;position:relative}
+.voice-stage{position:relative;min-height:340px;margin-top:28px}
+.voice{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:22px;opacity:0;transform:translateY(16px);transition:opacity .8s,transform .8s;pointer-events:none}
+.voice.on{opacity:1;transform:none;pointer-events:auto}
+.voice q{font-family:var(--serif);font-style:italic;font-size:clamp(30px,4.6vw,62px);line-height:1.08;max-width:24ch;text-wrap:balance;quotes:"\201C" "\201D"}
+.voice q::before{color:var(--ember)}
+.voice cite{font-style:normal;display:flex;flex-direction:column;gap:2px}
+.voice cite b{font-weight:600}
+.voice cite span{color:var(--muted);font-size:14px}
+.dots{display:flex;gap:6px;margin-top:20px}
+.dots button{width:44px;height:28px;border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center}
+.dots button i{display:block;width:100%;height:2px;background:var(--line);border-radius:2px;overflow:hidden;position:relative}
+.dots button.on i::after{content:"";position:absolute;inset:0;background:var(--flare);transform-origin:left;animation:fill 6s linear forwards}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (max-width:640px){.voice-stage{min-height:400px}}
+
+/* ---------- honours ---------- */
+.honours{padding-block:4vh 12vh}
+.hlist{list-style:none;margin:24px 0 0;padding:0;border-top:1px solid var(--line)}
+.hlist li{display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:18px;align-items:baseline;padding:22px 0;border-bottom:1px solid var(--line)}
+.hlist .y{font-family:var(--mono);font-size:12px;color:var(--flare);letter-spacing:.1em}
+.hlist b{font-family:var(--serif);font-weight:400;font-size:clamp(24px,3vw,36px);line-height:1.1}
+.hlist span{color:var(--muted);font-size:14px;text-align:right}
+@media (max-width:700px){.hlist li{grid-template-columns:minmax(0,1fr);gap:6px}.hlist span{text-align:left}}
+
+/* ---------- credits ---------- */
+.credits{position:relative;min-height:100vh;min-height:100svh;overflow:hidden;display:flex;align-items:center;border-top:1px solid var(--line)}
+#fil2{position:absolute;inset:0;width:100%;height:100%}
+.credits-in{position:relative;z-index:2;width:100%;padding-block:120px 150px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:26px}
+.credits h2{margin:0;font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:clamp(64px,15vw,220px);line-height:.82}
+.credits h2 .serif{display:block;text-transform:none;font-size:.42em;color:var(--flare);line-height:1.1}
+.roll{display:grid;grid-template-columns:auto auto;gap:6px 22px;font-size:14px;text-align:left;margin-top:6px}
+.roll dt{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-align:right;padding-top:3px}
+.roll dd{margin:0;color:var(--paper)}
+.mail{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+.mail .addr{font-family:var(--serif);font-style:italic;font-size:clamp(30px,5vw,56px);user-select:all;color:var(--paper);text-decoration:none;border-bottom:1px solid var(--ember);line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:rgba(7,26,42,.6);color:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;cursor:pointer}
+.btn:hover{border-color:var(--ember)}
+.btn.solid{background:var(--ember);border-color:var(--ember);color:var(--ink)}
+.links{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.foot{position:relative;z-index:2;border-top:1px solid var(--line);padding-block:22px calc(env(safe-area-inset-bottom,0px) + 96px);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+
+@media (prefers-reduced-motion:reduce){
+  .grain,.cue,.marquee .row{animation:none}
+  .bars{display:none}.slate{display:none}
+  .name h1 span span{transform:none;opacity:1;transition:none}
+}
+</style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+<div class="grain" aria-hidden="true"></div>
+<div class="bars top" aria-hidden="true"></div>
+<div class="bars bot" aria-hidden="true"></div>
+<div class="slate" aria-hidden="true"><div><span>MMD-REHAN.COM · ROLL 01</span><b id="slateN">00</b></div></div>
+
+<header class="top">
+  <a class="mark" href="#top" aria-label="Muhammad Rehan, back to top">MR<i>.</i></a>
+  <nav aria-label="Sections">
+    <a href="#reels">Work</a>
+    <a href="#side">Projects</a>
+    <a href="#voices">Voices</a>
+    <a class="cta" href="#credits">Say hello</a>
+  </nav>
+</header>
+
+<main id="top">
+  <!-- REEL 01 · title sequence -->
+  <section class="title-seq" id="title" data-reel="Title sequence" data-year="2026">
+    <div class="stage">
+      <canvas id="fil" aria-hidden="true"></canvas>
+      <div class="portrait" id="portrait"><img src="/rehan.webp" alt="Muhammad Rehan in an orange t-shirt and dark glasses, lit against a deep navy backdrop" fetchpriority="high"></div>
+      <div class="name" id="name">
+        <h1 aria-label="Muhammad Rehan">
+          <span class="l1" aria-hidden="true"><span>Muhammad</span></span>
+          <span class="l2" aria-hidden="true"><span>Rehan</span></span>
+        </h1>
+      </div>
+      <div class="overlay" aria-live="off">
+        <p data-o="0">Seven years. <em>Four</em> industries.</p>
+        <p data-o="1">Airlines, hospitals, bitcoin miners and <em>cargo</em>.</p>
+        <p data-o="2">I make the hard systems feel <em>simple</em>.</p>
+      </div>
+      <div class="byline" id="byline">
+        <div>
+          <div class="eyebrow">Full-stack engineer · Dubai, UAE</div>
+          <p>Angular, React and Node.js. Front end first, comfortable all the way down to the pipeline.</p>
+        </div>
+        <div class="eyebrow" style="color:var(--muted)">Scroll, or press play</div>
+      </div>
+      <div class="cue" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <section class="reels-intro wrap" id="reels">
+    <div class="eyebrow">The story so far · 2018 to now</div>
+    <h2>Five reels, <span class="serif">one engineer</span></h2>
+  </section>
+
+  <div class="scenes" id="scenes">
+    <section class="scene s-pos" data-reel="Reel 02 · Restaurants" data-year="2018">
+      <div class="ghost" aria-hidden="true">Orders · Orders ·</div>
+      <div class="wrap scene-in">
+        <div class="meta">
+          <div class="when">2018<small>to 2019</small></div>
+          <div class="who"><b>Freelance</b><span>Software developer · Dubai</span></div>
+          <div class="strip">KITCHEN › SECTION › RIDER › TABLE</div>
+        </div>
+        <div class="story">
+          <h3>A whole restaurant group, <em>on one screen.</em></h3>
+          <p>Right after graduating I co-built a point-of-sale system for a multi-brand, multi-branch restaurant company. Orders route to the right kitchen section, delivery runs through Careem, Talabat or in-house riders, and every dish is costed from its recipe.</p>
+          <div class="tags"><span>POS</span><span>Cloud kitchens</span><span>Recipe costing</span></div>
+        </div>
+      </div>
+      <div class="shade"></div>
+    </section>
+
+    <section class="scene s-med" data-reel="Reel 03 · Healthcare" data-year="2019">
+      <div class="ghost" aria-hidden="true">Records · Records ·</div>
+      <div class="wrap scene-in">
+        <div class="meta">
+          <div class="when">2019<small>to 2021</small></div>
+          <div class="who"><b>Winsoft Solutions</b><span>Software developer · Healthcare</span></div>
+          <div class="strip">MSH|^~\&amp;|UMF|… HL7 › HAAD / DHA › PBM</div>
+        </div>
+        <div class="story">
+          <h3>Medical records that <em>follow the patient.</em></h3>
+          <p>I worked on the Unified Medical File, an EMR that exports patient records to formats like HL7. I built the doctor app end to end and the pipeline that sends prescriptions to health authorities and on to insurance billing.</p>
+          <p class="more">Along the way I helped move a monolith to microservices, built about 30% of the new APIs and led Dawa24, a medicine delivery app, as a team of two.</p>
+          <div class="tags"><span>Angular</span><span>Node.js</span><span>HL7</span><span>Flutter / .NET</span></div>
+        </div>
+      </div>
+      <div class="shade"></div>
+    </section>
+
+    <section class="scene s-air" data-reel="Reel 04 · Aviation" data-year="2021">
+      <div class="ghost" aria-hidden="true">Boarding · Boarding ·</div>
+      <div class="wrap scene-in">
+        <div class="meta">
+          <div class="when">2021<small>to 2023</small></div>
+          <div class="who"><b>Amadeus</b><span>Software engineer · via Astek Middle East</span></div>
+          <div class="strip">SV · EY · AT  ▸  BOOK · MANAGE · ADD SERVICES</div>
+        </div>
+        <div class="story">
+          <h3>Booking flows for <em>millions of travellers.</em></h3>
+          <p>I built Saudia's booking system, worked on Etihad's manage-booking flow and its add-on services, and added purchasable services for Royal Air Maroc. Multi-step journeys where one broken step means a lost seat.</p>
+          <div class="tags"><span>Angular</span><span>Spring Boot</span><span>Azure CI/CD</span></div>
+        </div>
+      </div>
+      <div class="shade"></div>
+    </section>
+
+    <section class="scene s-btc" data-reel="Reel 05 · Mining infrastructure" data-year="2023">
+      <div class="ghost" aria-hidden="true">Hashrate · Hashrate ·</div>
+      <div class="wrap scene-in">
+        <div class="meta">
+          <div class="when">2023<small>to 2024</small></div>
+          <div class="who"><b>Phoenix Group</b><span>Senior software engineer · Bitcoin mining</span></div>
+          <div class="strip">300,000+ MINERS · UAE · OMAN · UPTIME · COST PER MINER</div>
+        </div>
+        <div class="story">
+          <h3>No miner goes dark <em>without anyone noticing.</em></h3>
+          <p>Before, a miner could drop offline and nobody would know. I built per-miner monitoring from scratch, tracking uptime and electricity cost, plus the CI/CD on AWS and the Kafka and RabbitMQ messaging behind it.</p>
+          <div class="figs">
+            <div class="fig"><b data-count="25" data-suffix="%+">25%+</b><span>fewer downtime incidents</span></div>
+            <div class="fig"><b data-count="40" data-suffix="%+">40%+</b><span>shorter deployment cycles</span></div>
+            <div class="fig"><b>~3s</b><span>wallet setup, down from 20 to 30 min</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="shade"></div>
+    </section>
+
+    <section class="scene s-gac" data-reel="Reel 06 · Logistics" data-year="2024">
+      <div class="ghost" aria-hidden="true">Cargo · Cargo ·</div>
+      <div class="wrap scene-in">
+        <div class="meta">
+          <div class="when">2024<small>to now</small></div>
+          <div class="who"><b>Gulf Agency Company</b><span>Software engineer, full-stack · Logistics</span></div>
+          <div class="strip">PORT › AGENT › CLIENT › RELEASE</div>
+        </div>
+        <div class="story">
+          <h3>Keeping global shipping <em>moving.</em></h3>
+          <p>Hired for the front end, I now lead it on active projects and also cover APIs, SQL, DevOps and release management. I work directly with business analysts and clients on how their systems connect.</p>
+          <div class="tags"><span>React</span><span>Angular</span><span>TypeScript</span><span>Azure DevOps</span><span>Docker</span></div>
+        </div>
+      </div>
+      <div class="shade"></div>
+    </section>
+  </div>
+
+  <section class="band wrap" data-reel="By the numbers" data-year="2026">
+    <div class="eyebrow">By the numbers</div>
+    <h2>Small teams, <span class="serif" style="text-transform:none;color:var(--ember)">big blast radius</span></h2>
+    <div class="counts">
+      <div class="count"><b data-count="7" data-suffix="+">7+</b><span>years shipping production software</span></div>
+      <div class="count"><b data-count="300" data-suffix="K+">300K+</b><span>miners covered by the monitoring I built</span></div>
+      <div class="count"><b data-count="4">4</b><span>industries, from healthcare to aviation</span></div>
+      <div class="count"><b data-count="3" data-suffix="s">3s</b><span>to create a wallet, once 20 to 30 minutes</span></div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><div class="row" id="mq"></div></div>
+
+  <section class="side wrap" id="side" data-reel="After hours" data-year="2026">
+    <div class="side-head">
+      <div><div class="eyebrow">After hours</div><h2>Things I ship<br>for myself</h2></div>
+      <p>Small products I design, build and run on my own. They are where I try the ideas that are too odd for a sprint.</p>
+    </div>
+    <div class="cards">
+      <a class="card" href="https://fixcors.com" target="_blank" rel="noopener" style="--c:#ff6a1a">
+        <div class="glow"></div>
+        <span class="eyebrow">Micro SaaS · Founder</span>
+        <h3>FixCors</h3>
+        <p>Fixes CORS configuration headaches for cloud apps, with an HLS proxy for video streams on the way.</p>
+        <span class="go">fixcors.com ↗</span>
+      </a>
+      <a class="card" href="https://noboxtv.com" target="_blank" rel="noopener" style="--c:#7fd0ff">
+        <div class="glow"></div>
+        <span class="eyebrow">Streaming · Live</span>
+        <h3>NoBoxTV</h3>
+        <p>Free TV in the browser. A Node.js control plane signs every stream, while Nginx and MediaMTX relay HLS and hide the source.</p>
+        <span class="go">noboxtv.com ↗</span>
+      </a>
+      <div class="card" style="--c:#ffc24a">
+        <div class="glow"></div>
+        <span class="eyebrow">Maps · Geospatial</span>
+        <h3>Nearby Services</h3>
+        <p>Find local services on a map without making an account, powered by MongoDB 2dsphere queries.</p>
+        <span class="go">In the lab</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="voices wrap" id="voices" data-reel="Voices" data-year="2026">
+    <div class="eyebrow">What people I worked with say</div>
+    <div class="voice-stage" id="voiceStage">
+      <figure class="voice on" style="margin:0"><q>Rehan brings a rare blend of technical expertise and creative problem-solving to the table.</q><cite><b>Asad Syed</b><span>Mobile Architect · iOS and Flutter</span></cite></figure>
+      <figure class="voice" style="margin:0"><q>He consistently demonstrated strong technical skills, a proactive attitude, and the ability to tackle challenges effectively.</q><cite><b>Atta Ur Rehman</b><span>CTO at Santra · managed Rehan directly</span></cite></figure>
+      <figure class="voice" style="margin:0"><q>He approaches problems methodically and is always willing to find effective solutions.</q><cite><b>Muiz Mahdi</b><span>Software Engineer at Stripe · same team at Amadeus</span></cite></figure>
+      <figure class="voice" style="margin:0"><q>His dedication, creativity, and problem-solving abilities have been invaluable to our team.</q><cite><b>Abdulhamid Tork</b><span>Founder, Oona One · same team at Winsoft</span></cite></figure>
+      <figure class="voice" style="margin:0"><q>Rehan is not only incredibly skilled but also has a great work ethic and a professional attitude.</q><cite><b>Athena Rahmatie</b><span>Project and Operation Manager</span></cite></figure>
+    </div>
+    <div class="dots" id="dots" role="tablist" aria-label="Choose a quote"></div>
+  </section>
+
+  <section class="honours wrap" data-reel="Honours" data-year="2026">
+    <div class="eyebrow">Honours</div>
+    <ul class="hlist">
+      <li><span class="y">GUINNESS</span><b>Guinness World Records title</b><span>Kanz AI Hackathon, largest online AI lesson</span></li>
+      <li><span class="y">2025</span><b>2nd runner-up, Hack2Hire 2.0</b><span>HCLTech programming competition</span></li>
+      <li><span class="y">2018</span><b>BSc Computer Science</b><span>COMSATS Institute of Information Technology</span></li>
+    </ul>
+  </section>
+
+  <section class="credits" id="credits" data-reel="Credits" data-year="2026">
+    <canvas id="fil2" aria-hidden="true"></canvas>
+    <div class="wrap credits-in">
+      <div class="eyebrow">Roll credits</div>
+      <h2>Your move<span class="serif">let's build the next reel together</span></h2>
+      <div class="mail">
+        <a class="addr" id="addr" href="mailto:hi@mmd-rehan.com">hi@mmd-rehan.com</a>
+        <button class="btn" id="copy" type="button">Copy email</button>
+      </div>
+      <div class="links">
+        <a class="btn solid" href="https://linkedin.com/in/mmd-rehan" target="_blank" rel="noopener">LinkedIn ↗</a>
+        <a class="btn" href="https://medium.com/@mrrehan" target="_blank" rel="noopener">Medium ↗</a>
+      </div>
+      <dl class="roll">
+        <dt>Directed by</dt><dd>Muhammad Rehan</dd>
+        <dt>Shot on</dt><dd>Angular, React, Node.js</dd>
+        <dt>Location</dt><dd>Dubai, United Arab Emirates</dd>
+        <dt>Running time</dt><dd>7+ years and counting</dd>
+      </dl>
+    </div>
+  </section>
+  <div class="wrap foot"><span>© 2026 Muhammad Rehan</span><span>mmd-rehan.com</span></div>
+</main>
+
+<div class="hud">
+  <button class="play" id="play" type="button" aria-pressed="false">
+    <svg class="ico-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5v13l11-6.5z"/></svg>
+    <svg class="ico-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5h3.5v13H3zM9.5 1.5H13v13H9.5z"/></svg>
+    <span id="playLbl">Play film</span>
+  </button>
+  <div class="reel" aria-hidden="true">
+    <div class="reel-row"><b id="reelName">Title sequence</b><span class="yr" id="reelYear">2026</span></div>
+    <div class="track"><i id="prog"></i></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const clamp = (v, a=0, b=1) => Math.min(b, Math.max(a, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = t => t<.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+
+  /* ---------- intro slate ---------- */
+  const start = () => document.body.classList.add('rolling');
+  if (RM) start();
+  else {
+    let n = 0; const el = $('#slateN');
+    const t = setInterval(() => { n = Math.min(100, n + 7 + Math.random()*9|0); el.textContent = String(n).padStart(2,'0'); if (n >= 100) { clearInterval(t); setTimeout(start, 120); } }, 55);
+    setTimeout(start, 2200); // never hold the page hostage
+  }
+
+  /* ---------- eclipse halo (hero + credits): calm stage light, no particles, no flicker ---------- */
+  function Halo(canvas, opts) {
+    const ctx = canvas.getContext('2d');
+    const conic = typeof ctx.createConicGradient === 'function';
+    let W=0, H=0, dpr=1, progress=0, visible=true, raf=0;
+    const t0 = performance.now();
+    const size = () => { dpr = Math.min(2, devicePixelRatio || 1); W = canvas.clientWidth; H = canvas.clientHeight; canvas.width = W*dpr; canvas.height = H*dpr; };
+    size(); addEventListener('resize', size);
+    function ring(cx, cy, r, rot, alpha, width, glow) {
+      let stroke = `rgba(255,170,90,${alpha})`;
+      if (conic) {
+        const g = ctx.createConicGradient(rot, cx, cy);
+        g.addColorStop(0,    `rgba(127,208,255,${alpha*.15})`);
+        g.addColorStop(.18,  `rgba(127,208,255,${alpha*.7})`);
+        g.addColorStop(.42,  `rgba(255,194,74,${alpha})`);
+        g.addColorStop(.62,  `rgba(255,106,26,${alpha*.9})`);
+        g.addColorStop(.85,  `rgba(255,106,26,${alpha*.08})`);
+        g.addColorStop(1,    `rgba(127,208,255,${alpha*.15})`);
+        stroke = g;
+      }
+      ctx.strokeStyle = stroke; ctx.lineWidth = width;
+      ctx.shadowColor = `rgba(255,120,40,${alpha*.9})`; ctx.shadowBlur = glow;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    function draw(now) {
+      const t = (now - t0) / 1000;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.clearRect(0,0,W,H);
+      const p = ease(clamp(progress));
+      const [cx, cy, base] = opts.center(W, H);
+      // projector beam from above, barely there
+      const beam = ctx.createLinearGradient(0, 0, 0, H);
+      beam.addColorStop(0, `rgba(170,200,230,${opts.beam ?? .06})`);
+      beam.addColorStop(.7, 'rgba(170,200,230,0)');
+      ctx.fillStyle = beam;
+      ctx.beginPath(); ctx.moveTo(cx - W*.06, 0); ctx.lineTo(cx + W*.06, 0); ctx.lineTo(cx + W*.42, H); ctx.lineTo(cx - W*.42, H); ctx.closePath(); ctx.fill();
+      // warm backlight behind the subject, swells with scroll
+      const R = base * lerp(1.6, 3.2, p);
+      const bl = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
+      bl.addColorStop(0, `rgba(255,120,40,${lerp(.16, .26, p)})`);
+      bl.addColorStop(.45, `rgba(255,106,26,${lerp(.05, .1, p)})`);
+      bl.addColorStop(1, 'rgba(255,106,26,0)');
+      ctx.fillStyle = bl; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2); ctx.fill();
+      // eclipse rings: slow, steady rotation of the light around the ring
+      const spin = RM ? 0 : t * (opts.spin ?? .12);
+      const r1 = base * lerp(1.05, 2.1, p);
+      ring(cx, cy, r1, spin, .9, 1.6, 22);
+      ring(cx, cy, r1 * 1.32, -spin*.7 + 2, .32, 1, 10);
+      ring(cx, cy, r1 * 1.75, spin*.45 + 4, .14, 1, 0);
+    }
+    const loop = now => { draw(now); raf = (visible && !RM) ? requestAnimationFrame(loop) : 0; };
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible && !raf) raf = requestAnimationFrame(loop); }).observe(canvas);
+    raf = requestAnimationFrame(loop);
+    return { set(p){ progress = p; if (RM) draw(performance.now()); } };
+  }
+  const portraitEl = document.getElementById('portrait');
+  const heroF = Halo($('#fil'), {
+    // centre the halo on the head, wherever the portrait sits at this screen size
+    center: (W, H) => {
+      const r = portraitEl.getBoundingClientRect(), c = portraitEl.parentElement.getBoundingClientRect();
+      return [W/2, r.top - c.top + r.height*.3, r.width*.26];
+    }
+  });
+  const endF = Halo($('#fil2'), { center: (W, H) => [W/2, H*.46, Math.min(W, H)*.2], spin:.08, beam:.04 });
+  endF.set(.55);
+
+  /* ---------- title-sequence choreography ---------- */
+  const seq = $('#title'), portrait = $('#portrait'), name = $('#name'), byline = $('#byline'), cue = $('.cue');
+  const overlays = $$('.overlay p');
+  function title(p) {
+    heroF.set(clamp(p*1.2));
+    // portrait recedes into the bloom
+    const s = lerp(1, .78, ease(clamp(p/.6)));
+    portrait.style.transform = `translateX(-50%) translateY(${lerp(0, 8, p)}%) scale(${s})`;
+    portrait.style.opacity = lerp(1, .18, ease(clamp((p-.1)/.5)));
+    portrait.style.filter = `blur(${lerp(0, 6, clamp((p-.2)/.5))}px) saturate(${lerp(1.05,.6,p)})`;
+    // name spreads and fades
+    name.style.transform = `scale(${lerp(1, 1.35, ease(clamp(p/.35)))})`;
+    name.style.opacity = 1 - ease(clamp(p/.22));
+    byline.style.opacity = cue.style.opacity = 1 - clamp(p/.12);
+    // three overlays, each owning a third of the remaining scroll
+    overlays.forEach((o, i) => {
+      const a = .2 + i*.26, mid = a + .13, b = a + .26;
+      let v = p < mid ? clamp((p - a)/.08) : 1 - clamp((p - (b - .07))/.07);
+      if (i === overlays.length - 1 && p > mid) v = 1 - clamp((p - .96)/.04);
+      o.style.opacity = v;
+      o.style.transform = `translateY(${(1-v)*24}px)`;
+      o.style.filter = `blur(${(1-v)*8}px)`;
+      o.style.position = i ? 'absolute' : 'relative';
+      if (i) { o.style.left = 0; o.style.right = 0; o.style.top = '50%'; o.style.transform = `translateY(calc(-50% + ${(1-v)*24}px))`; }
+    });
+  }
+
+  /* ---------- stacked scenes ---------- */
+  const scenes = $$('.scene');
+  function scenesTick(vh) {
+    scenes.forEach((sc, i) => {
+      const r = sc.getBoundingClientRect();
+      // ghost word drifts with the scene's travel through the viewport
+      const travel = clamp((vh - r.top) / (vh + r.height));
+      sc.querySelector('.ghost').style.transform = `translate(${lerp(10, -45, travel)}%, -50%)`;
+      // when the next scene slides over, push this one back
+      const next = scenes[i+1];
+      if (next) {
+        const nr = next.getBoundingClientRect();
+        const k = clamp(1 - nr.top / vh);
+        sc.style.transform = `scale(${1 - k*.06})`;
+        sc.querySelector('.shade').style.opacity = k * .55;
+      }
+    });
+  }
+
+  /* ---------- HUD ---------- */
+  const reels = $$('[data-reel]'), reelName = $('#reelName'), reelYear = $('#reelYear'), prog = $('#prog');
+  let lastReel = '';
+  function hud(vh) {
+    const max = document.documentElement.scrollHeight - vh;
+    prog.style.transform = `scaleX(${clamp(scrollY / max)})`;
+    let cur = reels[0];
+    for (const r of reels) if (r.getBoundingClientRect().top < vh*.5) cur = r;
+    if (cur.dataset.reel !== lastReel) { lastReel = cur.dataset.reel; reelName.textContent = lastReel; reelYear.textContent = cur.dataset.year; }
+  }
+
+  let ticking = false;
+  function frame() {
+    ticking = false;
+    const vh = innerHeight;
+    const r = seq.getBoundingClientRect();
+    title(clamp(-r.top / (r.height - vh)));
+    scenesTick(vh);
+    hud(vh);
+  }
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, { passive:true });
+  addEventListener('resize', frame);
+  frame();
+
+  /* ---------- counters ---------- */
+  const counted = new WeakSet();
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting || counted.has(e.target)) return;
+    counted.add(e.target);
+    const el = e.target, to = +el.dataset.count, suf = el.dataset.suffix || '';
+    if (RM) return;
+    const t0 = performance.now(), d = 1400;
+    const step = now => { const k = ease(clamp((now - t0)/d)); el.textContent = Math.round(to*k) + suf; if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }), { threshold:.6 });
+  $$('[data-count]').forEach(el => io.observe(el));
+
+  /* ---------- marquee ---------- */
+  const stack = ['Angular','React','TypeScript','Node.js','NgRx','Flutter','React Native','Docker','AWS','Azure DevOps','Kafka','RabbitMQ','Nginx','MediaMTX','HL7','PostgreSQL','MongoDB','Spring Boot'];
+  $('#mq').innerHTML = [...stack, ...stack].map(s => `<span>${s}</span>`).join('');
+
+  /* ---------- voices ---------- */
+  const voices = $$('.voice'), dots = $('#dots'); let vi = 0, vt;
+  voices.forEach((_, i) => { const b = document.createElement('button'); b.type='button'; b.setAttribute('aria-label', `Quote ${i+1}`); b.innerHTML = '<i></i>'; b.onclick = () => showVoice(i, true); dots.appendChild(b); });
+  function showVoice(i, user) {
+    vi = i; voices.forEach((v, k) => v.classList.toggle('on', k === i));
+    [...dots.children].forEach((d, k) => { d.classList.remove('on'); if (k === i) { void d.offsetWidth; d.classList.add('on'); } });
+    clearTimeout(vt); if (!RM) vt = setTimeout(() => showVoice((vi+1) % voices.length), 6000);
+  }
+  showVoice(0);
+
+  /* ---------- copy email ---------- */
+  $('#copy').addEventListener('click', e => {
+    const btn = e.currentTarget, addr = 'hi@mmd-rehan.com';
+    const done = ok => { btn.textContent = ok ? 'Copied' : 'Select and copy'; setTimeout(() => btn.textContent = 'Copy email', 1800); };
+    try { navigator.clipboard.writeText(addr).then(() => done(true), () => { selectAddr(); done(false); }); }
+    catch { selectAddr(); done(false); }
+  });
+  function selectAddr(){ const r = document.createRange(); r.selectNodeContents($('#addr')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+
+  /* ---------- play the film: hands-free tour ---------- */
+  const play = $('#play'), lbl = $('#playLbl'); let touring = false, last = 0, carry = 0;
+  function stopTour() { if (!touring) return; touring = false; document.body.classList.remove('touring'); play.setAttribute('aria-pressed','false'); lbl.textContent = 'Play film'; }
+  function tour(now) {
+    if (!touring) return;
+    const dt = Math.min(50, now - (last || now)); last = now;
+    // slow down inside the title sequence so each line lands, cruise elsewhere
+    const inTitle = scrollY < seq.offsetHeight - innerHeight;
+    const speed = (inTitle ? .32 : .55) * innerHeight / 1000;
+    carry += speed * dt;
+    const whole = Math.floor(carry); carry -= whole;
+    if (whole) scrollBy(0, whole);
+    if (scrollY + innerHeight >= document.documentElement.scrollHeight - 2) { stopTour(); return; }
+    requestAnimationFrame(tour);
+  }
+  play.addEventListener('click', () => {
+    if (touring) return stopTour();
+    if (scrollY + innerHeight >= document.documentElement.scrollHeight - 4) scrollTo(0, 0);
+    touring = true; last = 0; carry = 0; document.body.classList.add('touring'); play.setAttribute('aria-pressed','true'); lbl.textContent = 'Pause';
+    requestAnimationFrame(tour);
+  });
+  ['wheel','touchstart','keydown'].forEach(ev => addEventListener(ev, e => { if (e.target.closest && e.target.closest('#play')) return; stopTour(); }, { passive:true }));
+})();
+</script>
   </body>
 </html>
