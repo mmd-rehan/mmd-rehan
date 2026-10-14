@@ -23,6 +23,11 @@
 - **Winsoft Solutions** (2019–2021) — Unified Medical File EMR, monolith to
   microservices migration, HL7 prescription and insurance integrations.
 
+## Recognition
+
+- Guinness World Records title as a participant in the Kanz AI Hackathon.
+- 2nd runner-up, Hack2Hire 2.0 (HCLTech), 2025.
+
 ## Independent projects
 
 - [FixCors](https://fixcors.com): CORS proxy utility for developers.
