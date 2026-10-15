@@ -930,8 +930,10 @@ body.rolling .name h1 span span{transform:none;opacity:1}
   if (DBG.size) window.__turn = TURN;
   if (DBG.has('hud')) { dbgHud = document.body.appendChild(document.createElement('div')); dbgHud.style.cssText = 'position:fixed;left:8px;top:70px;z-index:99;font:12px ui-monospace,monospace;color:#ff0;background:#000a;padding:4px 6px;pointer-events:none'; }
   function sizeTurn() {
-    const r = portrait.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
-    turnCv.width = Math.max(1, Math.round(r.width * dpr)); turnCv.height = Math.max(1, Math.round(r.height * dpr));
+    // layout size, not getBoundingClientRect: the portrait is scaled on scroll, and a scaled size would
+    // rebuild the canvas mid-scroll whenever a phone's address bar fires a resize
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    turnCv.width = Math.max(1, Math.round(portrait.offsetWidth * dpr)); turnCv.height = Math.max(1, Math.round(portrait.offsetHeight * dpr));
     // resizing wipes the canvas to opaque black, so hand back to the poster until a frame is drawn
     turnCv.style.visibility = ''; TURN.key = ''; paintTurn();
   }
@@ -1001,9 +1003,9 @@ body.rolling .name h1 span span{transform:none;opacity:1}
     for (let c = 0; c < 6; c++) pump();
   }
   let turnW = 0;
-  addEventListener('resize', () => { const w = portrait.getBoundingClientRect().width; if (Math.abs(w - turnW) > 1) { turnW = w; sizeTurn(); } });
-  if (document.readyState === 'complete') { turnW = portrait.getBoundingClientRect().width; sizeTurn(); loadTurn(); }
-  else addEventListener('load', () => { turnW = portrait.getBoundingClientRect().width; sizeTurn(); loadTurn(); });
+  addEventListener('resize', () => { if (portrait.offsetWidth !== turnW) { turnW = portrait.offsetWidth; sizeTurn(); } });
+  if (document.readyState === 'complete') { turnW = portrait.offsetWidth; sizeTurn(); loadTurn(); }
+  else addEventListener('load', () => { turnW = portrait.offsetWidth; sizeTurn(); loadTurn(); });
 
   function title(p) {
     heroF.set(clamp(p*1.2));
