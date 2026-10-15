@@ -47,10 +47,17 @@ To start a project, email hi@mmd-rehan.com.
 - Guinness World Records title as a participant in the Kanz AI Hackathon.
 - 2nd runner-up, Hack2Hire 2.0 (HCLTech), 2025.
 
+## Certificates
+
+- Learning Docker, LinkedIn Learning, 2026.
+
 ## Independent projects
 
 - [FixCors](https://fixcors.com): CORS proxy utility for developers.
 - [NoBoxTV](https://noboxtv.com): browser-based IPTV player, NestJS + HLS.
+- [Prescriptionly](https://github.com/Prescriptionly/app): open-source personal
+  medical wallet to store prescriptions, track medication taken and share
+  medication history (React, Node.js, Prisma, MySQL).
 - [Textile POS](https://github.com/mmd-rehan/textile-pos): open-source POS and
   inventory for fabric retail.
 
