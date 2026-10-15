@@ -863,7 +863,7 @@ body.rolling .name h1 span span{transform:none;opacity:1}
         stroke = g;
       }
       ctx.strokeStyle = stroke; ctx.lineWidth = width;
-      ctx.shadowColor = `rgba(255,120,40,${alpha*.9})`; ctx.shadowBlur = glow;
+      ctx.shadowColor = `rgba(255,120,40,${alpha*.9})`; ctx.shadowBlur = innerWidth < 700 ? glow * .4 : glow;
       ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
       ctx.shadowBlur = 0;
     }
@@ -912,36 +912,71 @@ body.rolling .name h1 span span{transform:none;opacity:1}
   /* ---------- title-sequence choreography ---------- */
   const seq = $('#title'), portrait = $('#portrait'), name = $('#name'), byline = $('#byline'), cue = $('.cue');
   const overlays = $$('.overlay p');
-  /* ---------- the turn: scroll scrubs a frame sequence from side view to facing the camera ---------- */
-  const turnCv = $('#turn'), turnCtx = turnCv.getContext('2d');
-  const small = matchMedia('(max-width: 699px)').matches || (navigator.connection && navigator.connection.saveData);
-  const TURN = { dir: small ? 'm' : 'd', n: small ? 43 : 84, imgs: [], ready: [], want: 0, shown: -1 };
+  /* ---------- the turn: scroll scrubs a frame sequence from side view to facing the camera ----------
+     Smoothness comes from three things: frames are decoded ahead of time into bitmaps, the shown
+     position glides toward the scroll position instead of jumping, and the two neighbouring frames
+     are cross-faded so motion between frames is continuous. */
+  const turnCv = $('#turn'), turnCtx = turnCv.getContext('2d', { alpha: false });
+  const small = matchMedia('(max-width: 699px)').matches || !!(navigator.connection && navigator.connection.saveData);
+  const TURN = { dir: small ? 'm' : 'd', n: small ? 106 : 211, frames: [], target: 0, pos: 0, raf: 0, last: 0, key: '' };
   function sizeTurn() {
     const r = portrait.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
-    turnCv.width = Math.round(r.width * dpr); turnCv.height = Math.round(r.height * dpr); TURN.shown = -1; drawTurn();
+    turnCv.width = Math.max(1, Math.round(r.width * dpr)); turnCv.height = Math.max(1, Math.round(r.height * dpr));
+    turnCtx.fillStyle = '#020d17'; turnCtx.fillRect(0, 0, turnCv.width, turnCv.height);
+    TURN.key = ''; paintTurn();
   }
-  function drawTurn() {
-    // nearest frame that has loaded, so a slow connection degrades to fewer steps, never a blank
-    let i = TURN.want, k = 0;
-    while (!TURN.ready[i] && k < TURN.n) { k++; const a = TURN.want - k, b = TURN.want + k; if (a >= 0 && TURN.ready[a]) { i = a; break; } if (b < TURN.n && TURN.ready[b]) { i = b; break; } }
-    if (!TURN.ready[i] || i === TURN.shown) return;
-    TURN.shown = i;
-    turnCtx.drawImage(TURN.imgs[i], 0, 0, turnCv.width, turnCv.height);
+  function nearestFrame(i) {
+    if (TURN.frames[i]) return i;
+    for (let k = 1; k < TURN.n; k++) {
+      if (i - k >= 0 && TURN.frames[i - k]) return i - k;
+      if (i + k < TURN.n && TURN.frames[i + k]) return i + k;
+    }
+    return -1;
+  }
+  function paintTurn() {
+    const f = Math.max(0, Math.min(TURN.n - 1, TURN.pos));
+    const i0 = Math.floor(f), t = f - i0;
+    const a = nearestFrame(i0), b = nearestFrame(Math.min(TURN.n - 1, i0 + 1));
+    if (a < 0) return;
+    const key = a + ':' + b + ':' + Math.round(t * 24);
+    if (key === TURN.key) return;
+    TURN.key = key;
+    const w = turnCv.width, h = turnCv.height;
+    turnCtx.globalAlpha = 1;
+    turnCtx.drawImage(TURN.frames[a], 0, 0, w, h);
+    if (b !== a && t > .04) { turnCtx.globalAlpha = t; turnCtx.drawImage(TURN.frames[b], 0, 0, w, h); turnCtx.globalAlpha = 1; }
+  }
+  function tickTurn(now) {
+    const dt = Math.min(64, now - (TURN.last || now)); TURN.last = now;
+    TURN.pos += (TURN.target - TURN.pos) * (1 - Math.exp(-dt / 85));
+    if (Math.abs(TURN.target - TURN.pos) < .02) TURN.pos = TURN.target;
+    paintTurn();
+    if (TURN.pos !== TURN.target) TURN.raf = requestAnimationFrame(tickTurn);
+    else { TURN.raf = 0; TURN.last = 0; }
+  }
+  function setTurn(x) {
+    TURN.target = x;
+    if (RM) { TURN.pos = x; paintTurn(); return; }
+    if (!TURN.raf) TURN.raf = requestAnimationFrame(tickTurn);
+  }
+  function decodeFrame(url) {
+    const viaImg = () => new Promise((res, rej) => { const im = new Image(); im.onload = () => (im.decode ? im.decode().then(() => res(im), () => res(im)) : res(im)); im.onerror = rej; im.src = url; });
+    if (window.createImageBitmap && window.fetch) {
+      return fetch(url).then(r => { if (!r.ok) throw 0; return r.blob(); }).then(b => createImageBitmap(b)).catch(viaImg);
+    }
+    return viaImg();
   }
   function loadTurn() {
-    const order = [];
-    // coarse pass first (every 6th frame), then fill in, so the whole turn works early
-    for (let step of [6, 3, 1]) for (let i = 0; i < TURN.n; i += step) if (!order.includes(i)) order.push(i);
-    if (!order.includes(TURN.n - 1)) order.splice(1, 0, TURN.n - 1);
+    // coarse pass first, then fill in, so the whole turn is usable within moments
+    const order = [0, TURN.n - 1], seen = new Set(order);
+    for (const step of [24, 12, 6, 3, 2, 1]) for (let i = 0; i < TURN.n; i += step) if (!seen.has(i)) { seen.add(i); order.push(i); }
     let next = 0;
     const pump = () => {
       if (next >= order.length) return;
-      const i = order[next++], im = new Image();
-      im.decoding = 'async';
-      im.onload = () => { TURN.ready[i] = true; drawTurn(); pump(); };
-      im.onerror = pump;
-      im.src = `frames/turn/${TURN.dir}/${String(i).padStart(3, '0')}.webp`;
-      TURN.imgs[i] = im;
+      const i = order[next++];
+      decodeFrame(`frames/turn/${TURN.dir}/${String(i).padStart(3, '0')}.webp`)
+        .then(img => { TURN.frames[i] = img; TURN.key = ''; paintTurn(); }, () => {})
+        .then(pump);
     };
     for (let c = 0; c < 6; c++) pump();
   }
@@ -954,15 +989,15 @@ body.rolling .name h1 span span{transform:none;opacity:1}
     // first half of the scroll: the head turns to face the visitor
     const tp = RM ? 1 : clamp(p / .5);
     // the clip turns in its first half and only zooms in its second, so give the turn most of the scroll
-    const ft = tp < .78 ? (tp / .78) * .47 : .47 + ((tp - .78) / .22) * .53;
-    TURN.want = Math.round(ft * (TURN.n - 1));
-    drawTurn();
+    // ease-out at the start: the clip holds the side pose briefly, so move through that part quickly
+    const ft = tp < .78 ? .47 * (1 - Math.pow(1 - tp / .78, 1.7)) : .47 + ((tp - .78) / .22) * .53;
+    setTurn(ft * (TURN.n - 1));
     // then the portrait settles back into the halo while the lines play
     const back = ease(clamp((p - .55) / .35));
     const s = lerp(1, .97, tp) * lerp(1, .82, back);
     portrait.style.transform = `translateX(-50%) translateY(${lerp(0, 6, back)}%) scale(${s})`;
     portrait.style.opacity = lerp(1, .2, back);
-    portrait.style.filter = back > 0 ? `blur(${lerp(0, 6, back)}px) saturate(${lerp(1.05, .6, back)})` : 'none';
+    portrait.style.filter = back > 0 ? (small ? `saturate(${lerp(1.05, .6, back)})` : `blur(${lerp(0, 6, back)}px) saturate(${lerp(1.05, .6, back)})`) : 'none';
     // name spreads and fades as the turn begins
     name.style.transform = `scale(${lerp(1, 1.35, ease(clamp(p/.3)))})`;
     name.style.opacity = 1 - ease(clamp(p/.2));
