@@ -354,6 +354,7 @@ body.touring .play .ico-pause{display:block}
   -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 98%),radial-gradient(ellipse 70% 80% at 50% 45%,#000 50%,transparent 75%);
   -webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,#000 55%,transparent 98%),radial-gradient(ellipse 70% 80% at 50% 45%,#000 50%,transparent 75%);mask-composite:intersect}
 .portrait img,.portrait canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+#turn{visibility:hidden} /* an opaque canvas starts black: the poster shows until a frame is drawn */
 .name{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;pointer-events:none;z-index:2}
 .name h1{margin:0;font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.8;letter-spacing:-.01em;text-align:center;font-size:clamp(96px,26vw,340px)}
 .name h1 .l1{display:block;font-size:.56em;letter-spacing:.02em;color:transparent;-webkit-text-stroke:1.5px rgba(238,241,238,.55)}
@@ -931,8 +932,8 @@ body.rolling .name h1 span span{transform:none;opacity:1}
   function sizeTurn() {
     const r = portrait.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
     turnCv.width = Math.max(1, Math.round(r.width * dpr)); turnCv.height = Math.max(1, Math.round(r.height * dpr));
-    turnCtx.fillStyle = '#020d17'; turnCtx.fillRect(0, 0, turnCv.width, turnCv.height);
-    TURN.key = ''; paintTurn();
+    // resizing wipes the canvas to opaque black, so hand back to the poster until a frame is drawn
+    turnCv.style.visibility = ''; TURN.key = ''; paintTurn();
   }
   function nearestFrame(i) {
     if (TURN.frames[i]) return i;
@@ -951,7 +952,7 @@ body.rolling .name h1 span span{transform:none;opacity:1}
       const key = a + ':' + Math.round(t * 48); if (key === TURN.key) return; TURN.key = key;
       turnCtx.globalAlpha = 1; turnCtx.drawImage(TURN.frames[a], 0, 0, turnCv.width, turnCv.height);
       if (b > a && t > .01) { turnCtx.globalAlpha = t; turnCtx.drawImage(TURN.frames[b], 0, 0, turnCv.width, turnCv.height); turnCtx.globalAlpha = 1; }
-      return;
+      turnCv.style.visibility = 'visible'; return;
     }
     const i0 = Math.floor(DBG.has('nofade') ? Math.round(f) : f), t = DBG.has('nofade') ? 0 : f - i0;
     const a = nearestFrame(i0), b = nearestFrame(Math.min(TURN.n - 1, i0 + 1));
@@ -963,6 +964,7 @@ body.rolling .name h1 span span{transform:none;opacity:1}
     turnCtx.globalAlpha = 1;
     turnCtx.drawImage(TURN.frames[a], 0, 0, w, h);
     if (b === a + 1 && t > .04) { turnCtx.globalAlpha = t; turnCtx.drawImage(TURN.frames[b], 0, 0, w, h); turnCtx.globalAlpha = 1; }
+    if (!turnCv.style.visibility) turnCv.style.visibility = 'visible';
   }
   function tickTurn(now) {
     const dt = Math.min(64, now - (TURN.last || now)); TURN.last = now;
