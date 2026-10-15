@@ -27,6 +27,8 @@ for clients in Dubai, the UAE and beyond.
   fixing slow or fragile deployments.
 - Cloud and DevOps: Docker, AWS, Azure DevOps CI/CD, Nginx.
 
+Service page: [Web app development in Dubai](https://www.mmd-rehan.com/web-app-development-dubai)
+
 To start a project, email hi@mmd-rehan.com.
 
 ## Experience

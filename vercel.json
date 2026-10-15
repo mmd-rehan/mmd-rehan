@@ -57,5 +57,11 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/web-app-development-dubai",
+      "destination": "/web-app-development-dubai.html"
+    }
   ]
 }
