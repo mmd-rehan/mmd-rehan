@@ -23,7 +23,8 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800;900&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap"
     />
-    <link rel="preload" as="image" href="/rehan.webp" fetchpriority="high" />
+    <link rel="preload" as="image" href="/frames/turn/d/000.webp" fetchpriority="high" media="(min-width: 700px)" />
+    <link rel="preload" as="image" href="/frames/turn/m/000.webp" fetchpriority="high" media="(max-width: 699px)" />
 
     <meta property="og:type" content="profile" />
     <meta property="og:site_name" content="Muhammad Rehan" />
@@ -346,13 +347,13 @@ body.touring .play .ico-pause{display:block}
 .track i{display:block;height:100%;width:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--ice),var(--flare),var(--ember))}
 
 /* ---------- REEL 1: title sequence ---------- */
-.title-seq{position:relative;height:320vh}
+.title-seq{position:relative;height:420vh}
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:grid;place-items:center}
 #fil{position:absolute;inset:0;width:100%;height:100%}
-.portrait{position:absolute;left:50%;bottom:0;width:min(78vw,520px);aspect-ratio:864/1040;transform:translateX(-50%);will-change:transform,opacity,filter;
+.portrait{position:absolute;left:50%;bottom:0;width:min(78vw,520px);aspect-ratio:600/720;transform:translateX(-50%);will-change:transform,opacity,filter;
   -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 98%),radial-gradient(ellipse 70% 80% at 50% 45%,#000 50%,transparent 75%);
   -webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,#000 55%,transparent 98%),radial-gradient(ellipse 70% 80% at 50% 45%,#000 50%,transparent 75%);mask-composite:intersect}
-.portrait img{width:100%;height:100%;object-fit:cover;display:block}
+.portrait img,.portrait canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .name{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;pointer-events:none;z-index:2}
 .name h1{margin:0;font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.8;letter-spacing:-.01em;text-align:center;font-size:clamp(96px,26vw,340px)}
 .name h1 .l1{display:block;font-size:.56em;letter-spacing:.02em;color:transparent;-webkit-text-stroke:1.5px rgba(238,241,238,.55)}
@@ -543,7 +544,7 @@ body.rolling .name h1 span span{transform:none;opacity:1}
   <section class="title-seq" id="title" data-reel="Title sequence" data-year="2026">
     <div class="stage">
       <canvas id="fil" aria-hidden="true"></canvas>
-      <div class="portrait" id="portrait"><img src="/rehan.webp" alt="Muhammad Rehan in an orange t-shirt and dark glasses, lit against a deep navy backdrop" fetchpriority="high"></div>
+      <div class="portrait" id="portrait"><picture><source media="(max-width: 699px)" srcset="frames/turn/m/000.webp"><img id="turnPoster" src="frames/turn/d/000.webp" width="600" height="720" alt="Muhammad Rehan in an orange t-shirt and dark glasses, turning to face the camera" fetchpriority="high"></picture><canvas id="turn" aria-hidden="true"></canvas></div>
       <div class="name" id="name">
         <h1 aria-label="Muhammad Rehan">
           <span class="l1" aria-hidden="true"><span>Muhammad</span></span>
@@ -911,22 +912,66 @@ body.rolling .name h1 span span{transform:none;opacity:1}
   /* ---------- title-sequence choreography ---------- */
   const seq = $('#title'), portrait = $('#portrait'), name = $('#name'), byline = $('#byline'), cue = $('.cue');
   const overlays = $$('.overlay p');
+  /* ---------- the turn: scroll scrubs a frame sequence from side view to facing the camera ---------- */
+  const turnCv = $('#turn'), turnCtx = turnCv.getContext('2d');
+  const small = matchMedia('(max-width: 699px)').matches || (navigator.connection && navigator.connection.saveData);
+  const TURN = { dir: small ? 'm' : 'd', n: small ? 43 : 84, imgs: [], ready: [], want: 0, shown: -1 };
+  function sizeTurn() {
+    const r = portrait.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+    turnCv.width = Math.round(r.width * dpr); turnCv.height = Math.round(r.height * dpr); TURN.shown = -1; drawTurn();
+  }
+  function drawTurn() {
+    // nearest frame that has loaded, so a slow connection degrades to fewer steps, never a blank
+    let i = TURN.want, k = 0;
+    while (!TURN.ready[i] && k < TURN.n) { k++; const a = TURN.want - k, b = TURN.want + k; if (a >= 0 && TURN.ready[a]) { i = a; break; } if (b < TURN.n && TURN.ready[b]) { i = b; break; } }
+    if (!TURN.ready[i] || i === TURN.shown) return;
+    TURN.shown = i;
+    turnCtx.drawImage(TURN.imgs[i], 0, 0, turnCv.width, turnCv.height);
+  }
+  function loadTurn() {
+    const order = [];
+    // coarse pass first (every 6th frame), then fill in, so the whole turn works early
+    for (let step of [6, 3, 1]) for (let i = 0; i < TURN.n; i += step) if (!order.includes(i)) order.push(i);
+    if (!order.includes(TURN.n - 1)) order.splice(1, 0, TURN.n - 1);
+    let next = 0;
+    const pump = () => {
+      if (next >= order.length) return;
+      const i = order[next++], im = new Image();
+      im.decoding = 'async';
+      im.onload = () => { TURN.ready[i] = true; drawTurn(); pump(); };
+      im.onerror = pump;
+      im.src = `frames/turn/${TURN.dir}/${String(i).padStart(3, '0')}.webp`;
+      TURN.imgs[i] = im;
+    };
+    for (let c = 0; c < 6; c++) pump();
+  }
+  addEventListener('resize', sizeTurn);
+  if (document.readyState === 'complete') { sizeTurn(); loadTurn(); }
+  else addEventListener('load', () => { sizeTurn(); loadTurn(); });
+
   function title(p) {
     heroF.set(clamp(p*1.2));
-    // portrait recedes into the bloom
-    const s = lerp(1, .78, ease(clamp(p/.6)));
-    portrait.style.transform = `translateX(-50%) translateY(${lerp(0, 8, p)}%) scale(${s})`;
-    portrait.style.opacity = lerp(1, .18, ease(clamp((p-.1)/.5)));
-    portrait.style.filter = `blur(${lerp(0, 6, clamp((p-.2)/.5))}px) saturate(${lerp(1.05,.6,p)})`;
-    // name spreads and fades
-    name.style.transform = `scale(${lerp(1, 1.35, ease(clamp(p/.35)))})`;
-    name.style.opacity = 1 - ease(clamp(p/.22));
-    byline.style.opacity = cue.style.opacity = 1 - clamp(p/.12);
-    // three overlays, each owning a third of the remaining scroll
+    // first half of the scroll: the head turns to face the visitor
+    const tp = RM ? 1 : clamp(p / .5);
+    // the clip turns in its first half and only zooms in its second, so give the turn most of the scroll
+    const ft = tp < .78 ? (tp / .78) * .47 : .47 + ((tp - .78) / .22) * .53;
+    TURN.want = Math.round(ft * (TURN.n - 1));
+    drawTurn();
+    // then the portrait settles back into the halo while the lines play
+    const back = ease(clamp((p - .55) / .35));
+    const s = lerp(1, .97, tp) * lerp(1, .82, back);
+    portrait.style.transform = `translateX(-50%) translateY(${lerp(0, 6, back)}%) scale(${s})`;
+    portrait.style.opacity = lerp(1, .2, back);
+    portrait.style.filter = back > 0 ? `blur(${lerp(0, 6, back)}px) saturate(${lerp(1.05, .6, back)})` : 'none';
+    // name spreads and fades as the turn begins
+    name.style.transform = `scale(${lerp(1, 1.35, ease(clamp(p/.3)))})`;
+    name.style.opacity = 1 - ease(clamp(p/.2));
+    byline.style.opacity = cue.style.opacity = 1 - clamp(p/.1);
+    // three lines after the turn, each owning a slice of the remaining scroll
     overlays.forEach((o, i) => {
-      const a = .2 + i*.26, mid = a + .13, b = a + .26;
-      let v = p < mid ? clamp((p - a)/.08) : 1 - clamp((p - (b - .07))/.07);
-      if (i === overlays.length - 1 && p > mid) v = 1 - clamp((p - .96)/.04);
+      const a = .52 + i*.15, mid = a + .075, b = a + .15;
+      let v = p < mid ? clamp((p - a)/.05) : 1 - clamp((p - (b - .04))/.04);
+      if (i === overlays.length - 1 && p > mid) v = 1 - clamp((p - .97)/.03);
       o.style.opacity = v;
       o.style.transform = `translateY(${(1-v)*24}px)`;
       o.style.filter = `blur(${(1-v)*8}px)`;
