@@ -4,9 +4,12 @@
 
 Needs ffmpeg and cwebp on the PATH, and numpy + opencv-python-headless.
 
-The turn is source frames 44 to 84 of the 24 fps video (1.83 s to 3.50 s), cropped 600x720 at x=330
-and played in reverse: 41 true frames, side view first. The 101 frames of the sequence put the
-in-betweens at exactly even times (frame k is at source position 0.4 k), so the head turns at an even
+The turn is source frames 40 to 72 of the 24 fps video (1.67 s to 3.00 s), cropped 600x720 at x=330
+and played in reverse: 33 true frames, side view first. Those are the frames where the head turns
+from facing the camera to side-on and nothing else: every step turns the same way. Right after 72
+the head stops, then drifts back toward the camera as the hand comes up to the glasses, so frames
+past it make the head turn the wrong way before the real turn starts. The 101 frames of the sequence put the
+in-betweens at exactly even times (frame k is at source position 0.32 k), so the head turns at an even
 pace, and every in-between is made the same way: dense optical flow both ways between the two true
 frames around it, both warped to that moment and blended. A motion-compensated average over five
 frames then evens out what is left, so no frame is crisper or softer than its neighbours.
@@ -21,7 +24,7 @@ import numpy as np, cv2
 
 VIDEO = sys.argv[1] if len(sys.argv) > 1 else '../media/gemini_generated_video_eb916fe2.mp4'
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public', 'frames', 'turn')
-FIRST, LAST, X0, W, H, N = 44, 84, 330, 600, 720, 101
+FIRST, LAST, X0, W, H, N = 40, 72, 330, 600, 720, 101
 SIZES = {'d': (600, 720), 'm': (420, 504)}
 QUALITY = 80
 INK = np.array([0x02, 0x0d, 0x17], np.float32) / 255
@@ -77,7 +80,7 @@ with tempfile.TemporaryDirectory() as tmp:
         near = np.clip((np.abs(a - b).max(2, keepdims=True) - .06) / .12, 0, 1)
         wa = (1 - near) * (1 - t) + near * (1.0 if t < .5 else 0.0)
         frames.append(np.clip(wa * a + (1 - wa) * b, 0, 1))
-    frames = average_along_motion(frames, 2, 9.0)  # any five in a row hold exactly one untouched true frame
+    frames = average_along_motion(frames, 2, 9.0)  # evens out how crisp each frame is, true or in-between
 
     mask = fade_mask()
     for name, size in SIZES.items():
