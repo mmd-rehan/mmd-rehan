@@ -925,7 +925,7 @@ body.rolling .name h1 span span{transform:none;opacity:1}
      are cross-faded so motion between frames is continuous. */
   const turnCv = $('#turn'), turnCtx = turnCv.getContext('2d', { alpha: false });
   const small = matchMedia('(max-width: 699px)').matches || !!(navigator.connection && navigator.connection.saveData);
-  const TURN = { dir: small ? 'm' : 'd', n: 101, frames: [], target: 0, pos: 0, raf: 0, last: 0, key: '' };
+  const TURN = { dir: small ? 'm' : 'd', n: 101, frames: [], target: 0, pos: 0, raf: 0, last: 0, key: '', shown: 0 };
   let dbgHud = null;
   if (DBG.size) window.__turn = TURN;
   if (DBG.has('hud')) { dbgHud = document.body.appendChild(document.createElement('div')); dbgHud.style.cssText = 'position:fixed;left:8px;top:70px;z-index:99;font:12px ui-monospace,monospace;color:#ff0;background:#000a;padding:4px 6px;pointer-events:none'; }
@@ -937,13 +937,14 @@ body.rolling .name h1 span span{transform:none;opacity:1}
     // resizing wipes the canvas to opaque black, so hand back to the poster until a frame is drawn
     turnCv.style.visibility = ''; TURN.key = ''; paintTurn();
   }
-  function nearestFrame(i) {
-    if (TURN.frames[i]) return i;
-    for (let k = 1; k < TURN.n; k++) {
-      if (i - k >= 0 && TURN.frames[i - k]) return i - k;
-      if (i + k < TURN.n && TURN.frames[i + k]) return i + k;
-    }
-    return -1;
+  // While frames are still loading, a missing one is stood in for by the closest loaded frame between
+  // the one on screen and the one wanted, so the head only ever moves toward the scroll position.
+  // (Nearest in either direction could overshoot to a far frame, then swing back as finer ones arrived.)
+  function standIn(f) {
+    const lo = Math.min(TURN.shown, f), hi = Math.max(TURN.shown, f);
+    let best = -1;
+    for (let i = Math.ceil(lo); i <= hi; i++) if (TURN.frames[i] && (best < 0 || Math.abs(i - f) < Math.abs(best - f))) best = i;
+    return best;
   }
   function paintTurn() {
     const f = Math.max(0, Math.min(TURN.n - 1, TURN.pos));
@@ -957,15 +958,17 @@ body.rolling .name h1 span span{transform:none;opacity:1}
       turnCv.style.visibility = 'visible'; return;
     }
     const i0 = Math.floor(DBG.has('nofade') ? Math.round(f) : f), t = DBG.has('nofade') ? 0 : f - i0;
-    const a = nearestFrame(i0), b = nearestFrame(Math.min(TURN.n - 1, i0 + 1));
+    const a = TURN.frames[i0] ? i0 : standIn(f);
     if (a < 0) return;
-    const key = a + ':' + (b === a + 1 ? b + ':' + Math.round(t * 24) : '');
+    // cross-fade into the next frame only when both true neighbours are here, in 1/24 steps
+    const fade = a === i0 && TURN.frames[i0 + 1] ? Math.round(t * 24) / 24 : 0;
+    const key = a + ':' + fade;
     if (key === TURN.key) return;
-    TURN.key = key;
+    TURN.key = key; TURN.shown = a + fade;
     const w = turnCv.width, h = turnCv.height;
     turnCtx.globalAlpha = 1;
     turnCtx.drawImage(TURN.frames[a], 0, 0, w, h);
-    if (b === a + 1 && t > .04) { turnCtx.globalAlpha = t; turnCtx.drawImage(TURN.frames[b], 0, 0, w, h); turnCtx.globalAlpha = 1; }
+    if (fade) { turnCtx.globalAlpha = fade; turnCtx.drawImage(TURN.frames[i0 + 1], 0, 0, w, h); turnCtx.globalAlpha = 1; }
     if (!turnCv.style.visibility) turnCv.style.visibility = 'visible';
   }
   function tickTurn(now) {
