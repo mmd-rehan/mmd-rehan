@@ -12,6 +12,23 @@
 - **Delivery**: Docker, Kubernetes, AWS, CI/CD, Nginx
 - **Education**: BSc Computer Science, COMSATS (2018)
 
+## Services (available for projects)
+
+Muhammad Rehan builds web applications, websites and custom software systems
+for clients in Dubai, the UAE and beyond.
+
+- Web applications: dashboards, portals, booking flows and admin tools
+  (Angular, React, TypeScript, Node.js).
+- Websites: fast, search-ready sites that work well on phones.
+- Custom systems and integrations: APIs, microservices, payments, HL7
+  healthcare data, POS and inventory, Kafka and RabbitMQ.
+- Mobile apps: Flutter and React Native.
+- Upgrades and rescues: monolith to microservices, live database migrations,
+  fixing slow or fragile deployments.
+- Cloud and DevOps: Docker, AWS, Azure DevOps CI/CD, Nginx.
+
+To start a project, email hi@mmd-rehan.com.
+
 ## Experience
 
 - **Gulf Agency Company** (2024–present) — React and Angular applications for
