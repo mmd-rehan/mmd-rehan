@@ -833,11 +833,6 @@ body.rolling .name h1 span span{transform:none;opacity:1}
   const clamp = (v, a=0, b=1) => Math.min(b, Math.max(a, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const ease = t => t<.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
-  // TEMP debug switches, e.g. ?debug=nograin,nohalo,nomask,nofx,nofade,noease,real,hud
-  const DBG = new Set((new URLSearchParams(location.search).get('debug') || '').split(',').filter(Boolean));
-  if (DBG.has('nograin')) document.querySelector('.grain').style.display = 'none';
-  if (DBG.has('stillgrain')) document.querySelector('.grain').style.animation = 'none';
-  if (DBG.has('nomask')) { const p = document.getElementById('portrait'); p.style.webkitMaskImage = p.style.maskImage = 'none'; }
 
   /* ---------- intro slate ---------- */
   const start = () => document.body.classList.add('rolling');
@@ -900,7 +895,6 @@ body.rolling .name h1 span span{transform:none;opacity:1}
       ring(cx, cy, r1 * 1.75, spin*.45 + 4, .14, 1, 0);
     }
     const loop = now => { draw(now); raf = (visible && !RM) ? requestAnimationFrame(loop) : 0; };
-    if (DBG.has('nohalo')) { canvas.style.display = 'none'; return { set(){} }; }
     new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible && !raf) raf = requestAnimationFrame(loop); }).observe(canvas);
     raf = requestAnimationFrame(loop);
     return { set(p){ progress = p; if (RM) draw(performance.now()); } };
@@ -926,9 +920,6 @@ body.rolling .name h1 span span{transform:none;opacity:1}
   const turnCv = $('#turn'), turnCtx = turnCv.getContext('2d', { alpha: false });
   const small = matchMedia('(max-width: 699px)').matches || !!(navigator.connection && navigator.connection.saveData);
   const TURN = { dir: small ? 'm' : 'd', n: 101, frames: [], target: 0, pos: 0, raf: 0, last: 0, key: '', shown: 0 };
-  let dbgHud = null;
-  if (DBG.size) window.__turn = TURN;
-  if (DBG.has('hud')) { dbgHud = document.body.appendChild(document.createElement('div')); dbgHud.style.cssText = 'position:fixed;left:8px;top:70px;z-index:99;font:12px ui-monospace,monospace;color:#ff0;background:#000a;padding:4px 6px;pointer-events:none'; }
   function sizeTurn() {
     // layout size, not getBoundingClientRect: the portrait is scaled on scroll, and a scaled size would
     // rebuild the canvas mid-scroll whenever a phone's address bar fires a resize
@@ -948,16 +939,7 @@ body.rolling .name h1 span span{transform:none;opacity:1}
   }
   function paintTurn() {
     const f = Math.max(0, Math.min(TURN.n - 1, TURN.pos));
-    if (dbgHud) dbgHud.textContent = `pos ${TURN.pos.toFixed(2)}  target ${TURN.target.toFixed(2)}`;
-    if (DBG.has('real')) { // only the true video frames (every 5th), cross-faded
-      const a = Math.floor(f / 5) * 5, b = Math.min(TURN.n - 1, a + 5), t = (f - a) / 5;
-      if (!TURN.frames[a] || !TURN.frames[b]) return;
-      const key = a + ':' + Math.round(t * 48); if (key === TURN.key) return; TURN.key = key;
-      turnCtx.globalAlpha = 1; turnCtx.drawImage(TURN.frames[a], 0, 0, turnCv.width, turnCv.height);
-      if (b > a && t > .01) { turnCtx.globalAlpha = t; turnCtx.drawImage(TURN.frames[b], 0, 0, turnCv.width, turnCv.height); turnCtx.globalAlpha = 1; }
-      turnCv.style.visibility = 'visible'; return;
-    }
-    const i0 = Math.floor(DBG.has('nofade') ? Math.round(f) : f), t = DBG.has('nofade') ? 0 : f - i0;
+    const i0 = Math.floor(f), t = f - i0;
     const a = TURN.frames[i0] ? i0 : standIn(f);
     if (a < 0) return;
     // cross-fade into the next frame only when both true neighbours are here, in 1/24 steps
@@ -981,7 +963,7 @@ body.rolling .name h1 span span{transform:none;opacity:1}
   }
   function setTurn(x) {
     TURN.target = x;
-    if (RM || DBG.has('noease')) { TURN.pos = x; paintTurn(); return; }
+    if (RM) { TURN.pos = x; paintTurn(); return; }
     if (!TURN.raf) TURN.raf = requestAnimationFrame(tickTurn);
   }
   function decodeFrame(url) {
@@ -1019,11 +1001,9 @@ body.rolling .name h1 span span{transform:none;opacity:1}
     // then the portrait settles back into the halo while the lines play
     const back = ease(clamp((p - .55) / .35));
     const s = lerp(1, .97, tp) * lerp(1, .82, back);
-    if (!DBG.has('nofx')) {
     portrait.style.transform = `translateX(-50%) translateY(${lerp(0, 6, back)}%) scale(${s})`;
     portrait.style.opacity = lerp(1, .2, back);
-    portrait.style.filter = back > 0 ? (small || DBG.has('noblur') ? `saturate(${lerp(1.05, .6, back)})` : `blur(${lerp(0, 6, back)}px) saturate(${lerp(1.05, .6, back)})`) : 'none';
-    }
+    portrait.style.filter = back > 0 ? (small ? `saturate(${lerp(1.05, .6, back)})` : `blur(${lerp(0, 6, back)}px) saturate(${lerp(1.05, .6, back)})`) : 'none';
     // name spreads and fades as the turn begins
     name.style.transform = `scale(${lerp(1, 1.35, ease(clamp(p/.3)))})`;
     name.style.opacity = 1 - ease(clamp(p/.2));
