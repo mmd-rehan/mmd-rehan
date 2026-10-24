@@ -351,6 +351,13 @@ export const REPOS: Repo[] = [
     meta: '27 stars · 16 forks',
   },
   {
+    name: 'BulkGen',
+    href: 'https://bulkgen.mmd-rehan.com',
+    blurb:
+      'A Chrome extension that runs bulk AI video generation in Google Flow. It keeps the render queue full, checks a credit cap before each send, and saves every clip in prompt order.',
+    tags: ['Chrome extension', 'Automation', 'Open source'],
+  },
+  {
     name: 'Prescriptionly',
     href: 'https://github.com/Prescriptionly/app',
     blurb:

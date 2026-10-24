@@ -434,6 +434,7 @@ body.rolling .name h1 span span{transform:none;opacity:1}
 .side-head h2{margin:10px 0 0;font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:clamp(44px,8vw,110px);line-height:.9}
 .side-head p{margin:0;max-width:40ch;color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.cards>.card:last-child:nth-child(odd){grid-column:1/-1;min-height:230px}
 .card{position:relative;display:flex;flex-direction:column;gap:14px;padding:24px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,var(--ink-3),var(--ink-2));text-decoration:none;overflow:hidden;min-height:300px;transition:border-color .3s,transform .5s cubic-bezier(.2,.8,.2,1)}
 .card:hover{border-color:var(--ember);transform:translateY(-4px)}
 .card .glow{position:absolute;width:280px;height:280px;border-radius:50%;right:-90px;top:-110px;background:radial-gradient(circle,var(--c,var(--ember)) 0%,transparent 65%);opacity:.35;filter:blur(10px);transition:opacity .4s}
@@ -745,6 +746,13 @@ body.rolling .name h1 span span{transform:none;opacity:1}
         <h3>NoBoxTV</h3>
         <p>Free TV in the browser. A Node.js control plane signs every stream, while Nginx and MediaMTX relay HLS and hide the source.</p>
         <span class="go">noboxtv.com ↗</span>
+      </a>
+      <a class="card" href="https://bulkgen.mmd-rehan.com" target="_blank" rel="noopener" style="--c:#b48cff">
+        <div class="glow"></div>
+        <span class="eyebrow">Chrome extension · Open source</span>
+        <h3>BulkGen</h3>
+        <p>Bulk AI video for Google Flow. Paste your prompts once, and it keeps the render queue full, stays under a credit cap, retries failed downloads and saves every clip in order.</p>
+        <span class="go">bulkgen.mmd-rehan.com ↗</span>
       </a>
       <a class="card" href="https://github.com/Prescriptionly/app" target="_blank" rel="noopener" style="--c:#6fe3d2">
         <div class="glow"></div>

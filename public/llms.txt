@@ -55,6 +55,9 @@ To start a project, email hi@mmd-rehan.com.
 
 - [FixCors](https://fixcors.com): CORS proxy utility for developers.
 - [NoBoxTV](https://noboxtv.com): browser-based IPTV player, NestJS + HLS.
+- [BulkGen](https://bulkgen.mmd-rehan.com): free, open-source (MIT) Chrome
+  extension that runs bulk AI video generation in Google Flow, with a managed
+  render queue, credit cap, retries, resume after reload and ordered downloads.
 - [Prescriptionly](https://github.com/Prescriptionly/app): open-source personal
   medical wallet to store prescriptions, track medication taken and share
   medication history (React, Node.js, Prisma, MySQL).
